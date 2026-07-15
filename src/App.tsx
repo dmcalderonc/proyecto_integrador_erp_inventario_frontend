@@ -3,10 +3,15 @@ import { ProtectedRoute } from './guards/ProtectedRoute'
 import { Login } from './pages/login/login'
 import UsersPage from './pages/users/UsersPage'
 import ProveedoresPage from './pages/proveedores/ProveedoresPage'
+import CategoriasPage from './pages/categorias/CategoriasPage'
+import BodegasPage from './pages/bodegas/BodegasPage'
+
 
 const navLinks = [
   { to: '/users', label: 'Usuarios' },
   { to: '/proveedores', label: 'Proveedores' },
+  { to: '/categorias', label: 'Categorías' },
+  { to: '/bodegas', label: 'Bodegas' },
 ]
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -38,8 +43,13 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route element={<ProtectedRoute />}>
+        {/* Rutas envueltas en el Layout para que tengan el menú superior */}
         <Route path="/users" element={<Layout><UsersPage /></Layout>} />
         <Route path="/proveedores" element={<Layout><ProveedoresPage /></Layout>} />
+        <Route path="/categorias" element={<Layout><CategoriasPage /></Layout>} />
+        <Route path="/bodegas" element={<Layout><BodegasPage /></Layout>} />
+        
+       
         <Route path="/" element={<Navigate to="/users" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
