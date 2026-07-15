@@ -27,13 +27,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const login = async (credentials: LoginRequest) => {
         const { data } = await api.post<LoginResponse>('/auth/login', credentials);
 
-        // Guardar en estado
         setToken(data.data.access_token);
-        // Mapeo temporal hasta tener la data completa del usuario en el response
+
         const userData = data.data.user as unknown as User;
         setUser(userData);
 
-        // Guardar en persistencia (localStorage)
         localStorage.setItem('token', data.data.access_token);
         localStorage.setItem('user', JSON.stringify(userData));
     };
