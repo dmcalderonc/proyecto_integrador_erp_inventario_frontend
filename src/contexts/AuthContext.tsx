@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, LoginRequest, LoginResponse, UserRole } from '../types/index';
+import { createContext, useContext, useState } from 'react';
+import type { ReactNode } from 'react';
+import type { User, LoginRequest, LoginResponse, UserRole } from '../types/index';
 import api from '../api/client';
 
 interface AuthContextType {
@@ -26,13 +27,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const login = async (credentials: LoginRequest) => {
         const { data } = await api.post<LoginResponse>('/auth/login', credentials);
 
-        // Guardar en estado
         setToken(data.data.access_token);
-        // Mapeo temporal hasta tener la data completa del usuario en el response
-        const userData = data.data.user as User;
+
+        const userData = data.data.user as unknown as User;
         setUser(userData);
 
-        // Guardar en persistencia (localStorage)
         localStorage.setItem('token', data.data.access_token);
         localStorage.setItem('user', JSON.stringify(userData));
     };
