@@ -47,13 +47,10 @@ jobs:
           script: |
             set -e
 
-            mkdir -p /var/www/proyecto_integrador_erp_inventario_frontend
-
-            rm -rf /var/www/proyecto_integrador_erp_inventario_frontend/*
-
-            cp -r /tmp/frontend_build/dist/* /var/www/proyecto_integrador_erp_inventario_frontend/
+            sudo mkdir -p /var/www/proyecto_integrador_erp_inventario_frontend
+            sudo rm -rf /var/www/proyecto_integrador_erp_inventario_frontend/*
+            sudo cp -r /tmp/frontend_build/dist/* /var/www/proyecto_integrador_erp_inventario_frontend/
 
             sudo chown -R www-data:www-data /var/www/proyecto_integrador_erp_inventario_frontend
-
             sudo nginx -t
             sudo systemctl reload nginx
