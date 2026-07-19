@@ -5,9 +5,8 @@ import { z } from 'zod';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
-import { Button } from '../../components/Button';
+import { Button } from '../../components/ui/Button';
 
-// Esquema de validación estricto con Zod
 const loginSchema = z.object({
     email: z.string().email('Por favor ingresa un correo electrónico válido'),
     password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
@@ -21,7 +20,6 @@ export function Login() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Extraer la ruta de origen si el guard lo redirigió, por defecto al home
     const from = location.state?.from?.pathname || '/';
 
     const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>({

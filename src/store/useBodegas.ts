@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import api from '../api/client';
-import type { Bodega, CreateBodegaDto } from '../types';
+import { bodegasApi } from '../api/bodegas.api';
+import type { CreateBodegaDto } from '../types';
 
 export function useBodegas() {
   const queryClient = useQueryClient();
@@ -9,13 +9,13 @@ export function useBodegas() {
   const { data: bodegas = [], isLoading } = useQuery({
     queryKey: ['bodegas'],
     queryFn: async () => {
-      const res = await api.get<Bodega[]>('/bodegas');
+      const res = await bodegasApi.getAll();
       return res.data;
     },
   });
 
   const crear = useMutation({
-    mutationFn: (dto: CreateBodegaDto) => api.post('/bodegas', dto),
+    mutationFn: (dto: CreateBodegaDto) => bodegasApi.create(dto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bodegas'] });
       toast.success('Bodega creada exitosamente');
@@ -27,7 +27,7 @@ export function useBodegas() {
 
   const actualizar = useMutation({
     mutationFn: ({ id, dto }: { id: number; dto: Partial<CreateBodegaDto> }) =>
-      api.patch(`/bodegas/${id}`, dto),
+      bodegasApi.update(id, dto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bodegas'] });
       toast.success('Bodega actualizada exitosamente');
@@ -38,7 +38,7 @@ export function useBodegas() {
   });
 
   const eliminar = useMutation({
-    mutationFn: (id: number) => api.delete(`/bodegas/${id}`),
+    mutationFn: (id: number) => bodegasApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bodegas'] });
       toast.success('Bodega eliminada exitosamente');

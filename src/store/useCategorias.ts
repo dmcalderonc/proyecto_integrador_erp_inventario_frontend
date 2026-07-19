@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import api from '../api/client';
-import type { Categoria, CreateCategoriaDto } from '../types';
+import { categoriasApi } from '../api/categorias.api';
+import type { CreateCategoriaDto } from '../types';
 
 export function useCategorias() {
   const queryClient = useQueryClient();
@@ -9,13 +9,13 @@ export function useCategorias() {
   const { data: categorias = [], isLoading } = useQuery({
     queryKey: ['categorias'],
     queryFn: async () => {
-      const res = await api.get<Categoria[]>('/categorias');
+      const res = await categoriasApi.getAll();
       return res.data;
     },
   });
 
   const crear = useMutation({
-    mutationFn: (dto: CreateCategoriaDto) => api.post('/categorias', dto),
+    mutationFn: (dto: CreateCategoriaDto) => categoriasApi.create(dto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] });
       toast.success('Categoría creada exitosamente');
@@ -27,7 +27,7 @@ export function useCategorias() {
 
   const actualizar = useMutation({
     mutationFn: ({ id, dto }: { id: number; dto: Partial<CreateCategoriaDto> }) =>
-      api.put(`/categorias/${id}`, dto),
+      categoriasApi.update(id, dto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] });
       toast.success('Categoría actualizada exitosamente');
@@ -38,7 +38,7 @@ export function useCategorias() {
   });
 
   const eliminar = useMutation({
-    mutationFn: (id: number) => api.delete(`/categorias/${id}`),
+    mutationFn: (id: number) => categoriasApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] });
       toast.success('Categoría eliminada exitosamente');

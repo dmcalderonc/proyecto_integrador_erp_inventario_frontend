@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
-import type { User, LoginRequest, LoginResponse, UserRole } from '../types/index';
-import api from '../api/client';
+import type { User, LoginRequest, LoginResponse, UserRole } from '../types';
+import { authApi } from '../api/auth.api';
 
 interface AuthContextType {
     user: User | null;
@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     const login = async (credentials: LoginRequest) => {
-        const { data } = await api.post<LoginResponse>('/auth/login', credentials);
+        const { data } = await authApi.login(credentials) as { data: LoginResponse };
 
         setToken(data.data.access_token);
 

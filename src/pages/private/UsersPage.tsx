@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useUsers } from '../../store/useUsers';
 import type { User, UserRole } from '../../types';
-import { DataTable } from '../../components/DataTable';
-import { Modal } from '../../components/Modal';
-import { Button } from '../../components/Button';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { DataTable } from '../../components/ui/DataTable';
+import { Modal } from '../../components/ui/Modal';
+import { Button } from '../../components/ui/Button';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Plus } from 'lucide-react';
 
 const ROLES = ['ADMIN', 'SOLICITANTE', 'BODEGUERO', 'COMPRADOR'] as const;
@@ -134,12 +134,12 @@ export default function UsersPage() {
         </form>
       </Modal>
 
-      <ConfirmDialog 
-      open={confirmOpen} 
-      onClose={() => setConfirmOpen(false)} 
-      onConfirm={handleDelete}
+      <ConfirmDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
         title="Eliminar usuario"
-       message={`¿Estás seguro de eliminar al usuario "${deleting?.nombre}"? Esta acción no se puede deshacer.`}
+        message={`¿Estás seguro de eliminar al usuario "${deleting?.nombre}"? Esta acción no se puede deshacer.`}
         loading={eliminar.isPending} />
     </div>
   );

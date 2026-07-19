@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useProveedores } from '../../store/useProveedores';
 import type { Proveedor } from '../../types';
-import { DataTable } from '../../components/DataTable';
-import { Modal } from '../../components/Modal';
-import { Button } from '../../components/Button';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { DataTable } from '../../components/ui/DataTable';
+import { Modal } from '../../components/ui/Modal';
+import { Button } from '../../components/ui/Button';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Plus } from 'lucide-react';
 
 const emptyForm = { ruc: '', razon_social: '', email: '', telefono: '', direccion: '' };
@@ -101,10 +101,10 @@ export default function ProveedoresPage() {
         </form>
       </Modal>
 
-      <ConfirmDialog 
-      open={confirmOpen} 
-      onClose={() => setConfirmOpen(false)} 
-      onConfirm={handleDelete}
+      <ConfirmDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
         title="Eliminar proveedor"
         message={`¿Estás seguro de eliminar al proveedor "${deleting?.razon_social}"? Esta acción no se puede deshacer.`}
         loading={eliminar.isPending} />
