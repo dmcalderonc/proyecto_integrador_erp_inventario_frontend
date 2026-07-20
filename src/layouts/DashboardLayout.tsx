@@ -53,7 +53,7 @@ export function DashboardLayout() {
       <aside className="w-64 bg-white border-r shadow-sm fixed inset-y-0 left-0 flex flex-col z-10">
         <div className="h-16 flex items-center px-6 border-b shrink-0">
           <Link to="/dashboard" className="font-bold text-xl text-blue-600">
-            ERP Inventario
+            StockLy
           </Link>
         </div>
 
