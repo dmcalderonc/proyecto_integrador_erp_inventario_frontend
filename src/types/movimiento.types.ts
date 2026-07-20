@@ -1,7 +1,7 @@
 export type TipoMovimiento = 'INGRESO' | 'EGRESO' | 'TRANSFERENCIA';
 
 export interface MovimientoDetalle {
-  materialId: string;
+  materialId: number | string;
   cantidad: number;
 }
 
