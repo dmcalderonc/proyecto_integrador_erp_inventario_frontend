@@ -1,4 +1,3 @@
-import { Navigate } from 'react-router-dom';
 import UsersPage from '../pages/private/UsersPage';
 import ProveedoresPage from '../pages/private/ProveedoresPage';
 import CategoriasPage from '../pages/private/CategoriasPage';
@@ -40,6 +39,4 @@ export const privateRoutes = [
   { path: '/cotizaciones', element: <CotizacionesPage /> },
   { path: '/solicitudes', element: <SolicitudesPage /> },
   { path: '/proyectos', element: <PlaceholderPage title="Proyectos" /> },
-
-  { path: '/', element: <Navigate to="/dashboard" replace /> },
 ];
