@@ -81,8 +81,8 @@ function DashboardMockup() {
             ))}
           </div>
           <div className="flex justify-between mt-2">
-            {['E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'].map((m) => (
-              <span key={m} className="text-teal-300 text-[9px] flex-1 text-center">{m}</span>
+            {['E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'].map((m, i) => (
+              <span key={i} className="text-teal-300 text-[9px] flex-1 text-center">{m}</span>
             ))}
           </div>
         </div>
