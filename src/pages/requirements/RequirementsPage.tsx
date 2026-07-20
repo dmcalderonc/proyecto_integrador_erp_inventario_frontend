@@ -34,7 +34,10 @@ export default function RequirementsPage() {
   const { requirements, isLoading, crear, actualizarEstado, eliminar } = useRequirements();
   const { proyectos } = useProyectos();
   const { hasRole } = useAuth();
-  const canManage = hasRole(['ADMIN', 'BODEGUERO']);
+  
+  // Lógica de roles corregida
+  const canChangeStatus = hasRole(['ADMIN', 'BODEGUERO']);
+  const canCreate = hasRole(['ADMIN', 'BODEGUERO', 'SOLICITANTE']);
   const isAdmin = hasRole(['ADMIN']);
 
   // GET /materiales es público, se usa solo para poblar el select del formulario
@@ -123,7 +126,7 @@ export default function RequirementsPage() {
       key: 'acciones', header: 'Acciones',
       render: (item: Requirement) => (
         <div className="flex justify-end gap-2">
-          {canManage && item.estado === 'PENDIENTE' && (
+          {canChangeStatus && item.estado === 'PENDIENTE' && (
             <button
               onClick={() => setStatusAction({ requirement: item, estado: 'APROBADO', label: 'aprobar' })}
               className="text-blue-600 hover:underline text-xs font-medium"
@@ -131,7 +134,7 @@ export default function RequirementsPage() {
               Aprobar
             </button>
           )}
-          {canManage && item.estado === 'APROBADO' && (
+          {canChangeStatus && item.estado === 'APROBADO' && (
             <button
               onClick={() => setStatusAction({ requirement: item, estado: 'ATENDIDO', label: 'marcar como atendido' })}
               className="text-green-600 hover:underline text-xs font-medium"
@@ -139,7 +142,7 @@ export default function RequirementsPage() {
               Marcar Atendido
             </button>
           )}
-          {canManage && item.estado !== 'RECHAZADO' && item.estado !== 'ATENDIDO' && (
+          {canChangeStatus && item.estado !== 'RECHAZADO' && item.estado !== 'ATENDIDO' && (
             <button
               onClick={() => setStatusAction({ requirement: item, estado: 'RECHAZADO', label: 'rechazar' })}
               className="text-red-600 hover:underline text-xs font-medium"
@@ -164,7 +167,7 @@ export default function RequirementsPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Requerimientos</h1>
-        {canManage && (
+        {canCreate && (
           <Button onClick={openCreate}>
             <Plus size={16} className="inline mr-1" /> Nuevo
           </Button>

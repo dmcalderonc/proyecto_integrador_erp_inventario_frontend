@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import api from '../api/http';
-import { proyectosApi } from '../api/proyectos.api';
+import { proyectosApi } from '../api/proyectos.api'; 
 import type { Proyecto, CreateProyectoDto } from '../types';
 
 export function useProyectos() {
@@ -10,7 +9,8 @@ export function useProyectos() {
   const { data: proyectos = [], isLoading } = useQuery({
     queryKey: ['proyectos'],
     queryFn: async () => {
-      const res = await api.get<Proyecto[]>('/proyectos');
+      // Usamos el método getAll() del api module
+      const res = await proyectosApi.getAll(); 
       return res.data;
     },
   });
