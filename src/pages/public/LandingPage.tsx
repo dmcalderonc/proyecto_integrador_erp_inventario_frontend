@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 
-function FloatingShape({ className }: { className: string }) {
-  return <div className={`absolute rounded-full opacity-20 blur-sm animate-pulse ${className}`} />;
+function FloatingShape({ className, style }: { className: string; style?: React.CSSProperties }) {
+  return <div className={`absolute rounded-full opacity-20 blur-sm animate-pulse ${className}`} style={style} />;
 }
 
 function FeatureCard({
