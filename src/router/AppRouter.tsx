@@ -14,7 +14,13 @@ export function AppRouter() {
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           {privateRoutes.map(route => (
-            <Route key={route.path} path={route.path} element={route.element} />
+            <Route
+              key={route.path}
+              path={route.path}
+              element={<ProtectedRoute allowedRoles={route.allowedRoles} />}
+            >
+              <Route index element={route.element} />
+            </Route>
           ))}
         </Route>
       </Route>
