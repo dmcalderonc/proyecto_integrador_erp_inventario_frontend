@@ -1,4 +1,3 @@
-import { Navigate } from 'react-router-dom';
 import type { UserRole } from '../types';
 import UsersPage from '../pages/private/UsersPage';
 import ProveedoresPage from '../pages/private/ProveedoresPage';
@@ -49,6 +48,4 @@ export const privateRoutes: PrivateRoute[] = [
   { path: '/solicitudes', element: <SolicitudesPage />, allowedRoles: ['ADMIN', 'BODEGUERO', 'COMPRADOR', 'SOLICITANTE'] },
   { path: '/proyectos', element: <ProyectosPage />, allowedRoles: ['ADMIN', 'SOLICITANTE'] },
   { path: '/despachos', element: <PlaceholderPage title="Despachos" />, allowedRoles: ['ADMIN', 'BODEGUERO'] },
-
-  { path: '/', element: <Navigate to="/dashboard" replace /> },
 ];

@@ -90,7 +90,7 @@ export function DashboardLayout() {
 
         <div className="p-4 border-t shrink-0">
           <button
-            onClick={logout}
+            onClick={() => { logout(); window.location.replace('/'); }}
             className="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
           >
             <LogOut size={18} />
