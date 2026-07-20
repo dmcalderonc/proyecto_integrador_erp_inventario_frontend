@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
@@ -17,10 +17,9 @@ type LoginFormInputs = z.infer<typeof loginSchema>;
 export function Login() {
     const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
-    const navigate = useNavigate();
     const location = useLocation();
 
-    const from = location.state?.from?.pathname || '/';
+    const from = location.state?.from?.pathname || '/dashboard';
 
     const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>({
         resolver: zodResolver(loginSchema),
@@ -31,7 +30,7 @@ export function Login() {
         try {
             await login({ email: data.email, password: data.password });
             toast.success('¡Bienvenido al sistema ERP!');
-            navigate(from, { replace: true });
+            window.location.replace(from);
         } catch (error: any) {
             toast.error(
                 error.response?.data?.message || 'Error al iniciar sesión. Verifica tus credenciales.'
