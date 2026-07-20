@@ -12,3 +12,4 @@ export type { OrdenCompra, CreateCompraDto, CrearCompraDto, DetalleCompra, Estad
 export type { DetalleAjuste, CreateAjusteDto } from './ajuste.types';
 export type { SolicitudCompra, DetalleSolicitud, UpdateSolicitudDto, EstadoSolicitud, NivelPrioridad } from './solicitud.types';
 export type { Cotizacion, CreateCotizacionDto, EstadoCotizacion } from './cotizacion.types';
+export type { DetalleDespacho, CreateEntregaDirectaDto, DespachoResponse } from './despacho.types';
