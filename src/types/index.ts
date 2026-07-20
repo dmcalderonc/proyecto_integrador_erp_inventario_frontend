@@ -10,3 +10,5 @@ export type { Movimiento, CreateMovimientoDto, CrearMovimientoDto, MovimientoDet
 export type { Requirement, CreateRequirementDto, RequirementDetalle, RequirementStatus } from './requirement.types';
 export type { OrdenCompra, CreateCompraDto, CrearCompraDto, DetalleCompra, EstadoOrden } from './compra.types';
 export type { DetalleAjuste, CreateAjusteDto } from './ajuste.types';
+export type { SolicitudCompra, DetalleSolicitud, UpdateSolicitudDto, EstadoSolicitud, NivelPrioridad } from './solicitud.types';
+export type { Cotizacion, CreateCotizacionDto, EstadoCotizacion } from './cotizacion.types';

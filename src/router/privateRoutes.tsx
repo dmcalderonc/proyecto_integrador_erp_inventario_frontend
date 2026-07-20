@@ -6,6 +6,8 @@ import BodegasPage from '../pages/private/BodegasPage';
 import ComprasPage from '../pages/private/ComprasPage';
 import MovimientosPage from '../pages/private/MovimientosPage';
 import AjustesPage from '../pages/private/AjustesPage';
+import CotizacionesPage from '../pages/cotizaciones/CotizacionesPage';
+import SolicitudesPage from '../pages/solicitudes/SolicitudesPage';
 import DashboardPage from '../pages/dashboard/DashboardPage';
 
 // Importaciones actualizadas para los nuevos módulos:
@@ -35,6 +37,8 @@ export const privateRoutes = [
   { path: '/compras', element: <ComprasPage /> },
   { path: '/movimientos', element: <MovimientosPage /> },
   { path: '/ajustes-inventario', element: <AjustesPage /> },
+  { path: '/cotizaciones', element: <CotizacionesPage /> },
+  { path: '/solicitudes', element: <SolicitudesPage /> },
   { path: '/proyectos', element: <PlaceholderPage title="Proyectos" /> },
 
   { path: '/', element: <Navigate to="/dashboard" replace /> },
