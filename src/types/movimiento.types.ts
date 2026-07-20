@@ -13,6 +13,8 @@ export interface CreateMovimientoDto {
   detalles: MovimientoDetalle[];
 }
 
+export type CrearMovimientoDto = CreateMovimientoDto;
+
 export interface Movimiento {
   id: string;
   tipo: TipoMovimiento;

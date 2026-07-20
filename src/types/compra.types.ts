@@ -17,6 +17,8 @@ export interface CreateCompraDto {
   detalles?: DetalleCompra[];
 }
 
+export type CrearCompraDto = CreateCompraDto;
+
 export interface OrdenCompra {
   id: number;
   codigo: string;
