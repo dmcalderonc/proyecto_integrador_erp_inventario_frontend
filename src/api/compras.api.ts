@@ -8,4 +8,13 @@ export const comprasApi = {
   update: (id: number, dto: Partial<CrearCompraDto>) => api.patch<OrdenCompra>(`/compras/${id}`, dto),
   delete: (id: number) => api.delete(`/compras/${id}`),
   recibir: (id: number) => api.patch(`/compras/${id}/recibir`),
+  downloadPdf: async (id: number) => {
+    const token = localStorage.getItem('token');
+    const base = import.meta.env.VITE_API_URL || '';
+    const res = await fetch(`${base}/compras/${id}/pdf`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error('Error al descargar PDF');
+    return res.blob();
+  },
 };

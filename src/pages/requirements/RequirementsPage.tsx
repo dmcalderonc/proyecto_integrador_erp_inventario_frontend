@@ -34,7 +34,7 @@ export default function RequirementsPage() {
   const { requirements, isLoading, crear, actualizarEstado, eliminar } = useRequirements();
   const { proyectos } = useProyectos();
   const { hasRole } = useAuth();
-  
+
   // Lógica de roles corregida
   const canChangeStatus = hasRole(['ADMIN', 'BODEGUERO']);
   const canCreate = hasRole(['ADMIN', 'BODEGUERO', 'SOLICITANTE']);
@@ -208,9 +208,10 @@ export default function RequirementsPage() {
                       <option key={m.id} value={m.id}>{m.nombre} ({m.sku})</option>
                     ))}
                   </select>
-                  <input type="number" min="0.1" step="0.01" placeholder="Cantidad"
+                  <input type="number" step="1" min="1" placeholder="Cantidad"
                     value={detalle.cantidadSolicitada}
                     onChange={e => updateDetalle(index, 'cantidadSolicitada', e.target.value)}
+                    onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
                     className="w-28 border rounded-lg px-3 py-2 text-sm" required />
                   <button type="button" onClick={() => removeDetalle(index)}
                     disabled={detalles.length === 1}

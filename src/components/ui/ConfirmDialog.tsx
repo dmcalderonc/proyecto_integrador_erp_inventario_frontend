@@ -10,9 +10,11 @@ interface ConfirmDialogProps {
   title: string;
   message: string;
   loading?: boolean;
+  confirmLabel?: string;
+  loadingLabel?: string;
 }
 
-export function ConfirmDialog({ open, onClose, onConfirm, title, message, loading }: ConfirmDialogProps) {
+export function ConfirmDialog({ open, onClose, onConfirm, title, message, loading, confirmLabel = 'Eliminar', loadingLabel = 'Eliminando...' }: ConfirmDialogProps) {
   return (
     <Transition show={open} as={Fragment}>
       <Dialog onClose={onClose} className="relative z-50">
@@ -51,7 +53,7 @@ export function ConfirmDialog({ open, onClose, onConfirm, title, message, loadin
                   Cancelar
                 </Button>
                 <Button variant="danger" onClick={onConfirm} disabled={loading}>
-                  {loading ? 'Eliminando...' : 'Eliminar'}
+                  {loading ? loadingLabel : confirmLabel}
                 </Button>
               </div>
             </DialogPanel>

@@ -129,8 +129,9 @@ export default function AjustesPage() {
                   <option value={0}>Seleccione material</option>
                   {materiales.map(m => <option key={m.id} value={m.id}>{m.nombre} ({m.sku})</option>)}
                 </select>
-                <input type="number" min="0" placeholder="Stock físico" value={det.stockFisico}
+                <input type="number" step="1" min="0" placeholder="Stock físico" value={det.stockFisico}
                   onChange={e => updateDetalle(i, 'stockFisico', Number(e.target.value))}
+                  onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
                   className="w-32 border rounded-lg px-3 py-2 text-sm" required />
                 <button type="button" onClick={() => removeDetalle(i)} className="text-red-500 hover:text-red-700 p-2">
                   <Trash2 size={16} />

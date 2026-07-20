@@ -32,9 +32,9 @@ export default function DespachosPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const addDetalle = () => setDetalles([...detalles, emptyDetalle()]);
-  
+
   const removeDetalle = (index: number) => setDetalles(detalles.filter((_, i) => i !== index));
-  
+
   const updateDetalle = (index: number, field: keyof DetalleForm, value: string) => {
     const next = [...detalles];
     next[index] = { ...next[index], [field]: value };
@@ -43,10 +43,10 @@ export default function DespachosPage() {
 
   const handlePreSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validación de detalles
     const detallesValidos = detalles.filter(d => d.materialId !== '' && Number(d.cantidad) > 0);
-    
+
     if (detallesValidos.length === 0) {
       toast.error('Agrega al menos un material con cantidad válida (mayor a 0)');
       return;
@@ -71,7 +71,7 @@ export default function DespachosPage() {
     };
 
     await ejecutar.mutateAsync(dto);
-    
+
     // Resetear formulario si es exitoso
     setConfirmOpen(false);
     setOrdenCompraId('');
@@ -97,10 +97,10 @@ export default function DespachosPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Orden de Compra *</label>
-              <select 
-                value={ordenCompraId} 
+              <select
+                value={ordenCompraId}
                 onChange={e => setOrdenCompraId(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" 
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 required
               >
                 <option value="">Selecciona una OC</option>
@@ -112,10 +112,10 @@ export default function DespachosPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Requerimiento Aprobado *</label>
-              <select 
-                value={requerimientoId} 
+              <select
+                value={requerimientoId}
                 onChange={e => setRequerimientoId(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" 
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 required
               >
                 <option value="">Selecciona un Requerimiento</option>
@@ -127,10 +127,10 @@ export default function DespachosPage() {
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Proyecto (Bodega Destino) *</label>
-              <select 
-                value={proyectoId} 
+              <select
+                value={proyectoId}
                 onChange={e => setProyectoId(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" 
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 required
               >
                 <option value="">Selecciona un Proyecto</option>
@@ -144,9 +144,9 @@ export default function DespachosPage() {
           <div className="border-t border-gray-100 pt-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-800">Detalles del Despacho</h3>
-              <button 
-                type="button" 
-                onClick={addDetalle} 
+              <button
+                type="button"
+                onClick={addDetalle}
                 className="text-blue-600 text-sm font-medium hover:underline flex items-center gap-1"
               >
                 <Plus size={16} /> Agregar material
@@ -156,10 +156,10 @@ export default function DespachosPage() {
             <div className="space-y-3">
               {detalles.map((detalle, index) => (
                 <div key={index} className="flex gap-3 items-start">
-                  <select 
+                  <select
                     value={detalle.materialId}
                     onChange={e => updateDetalle(index, 'materialId', e.target.value)}
-                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" 
+                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   >
                     <option value="">Material...</option>
@@ -167,18 +167,19 @@ export default function DespachosPage() {
                       <option key={m.id} value={m.id}>{m.nombre} ({m.sku})</option>
                     ))}
                   </select>
-                  <input 
-                    type="number" 
-                    min="0.1" 
-                    step="0.01" 
+                  <input
+                    type="number"
+                    step="1"
+                    min="1"
                     placeholder="Cantidad"
                     value={detalle.cantidad}
                     onChange={e => updateDetalle(index, 'cantidad', e.target.value)}
-                    className="w-32 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" 
-                    required 
+                    onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
+                    className="w-32 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    required
                   />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => removeDetalle(index)}
                     disabled={detalles.length === 1}
                     className="text-red-500 hover:text-red-700 disabled:opacity-30 p-2 transition-colors"
@@ -192,8 +193,8 @@ export default function DespachosPage() {
           </div>
 
           <div className="border-t border-gray-100 pt-6 flex justify-end">
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isExecuting}
               className="px-6 py-2.5 flex items-center"
             >

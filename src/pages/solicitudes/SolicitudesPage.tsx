@@ -232,8 +232,9 @@ export default function SolicitudesPage() {
                   <option value={0}>Seleccione material</option>
                   {materiales.map(m => <option key={m.id} value={m.id}>{m.nombre} ({m.sku})</option>)}
                 </select>
-                <input type="number" min="1" placeholder="Cantidad" value={det.cantidadRequerida}
+                <input type="number" step="1" min="1" placeholder="Cantidad" value={det.cantidadRequerida}
                   onChange={e => updateDetalle(i, 'cantidadRequerida', Number(e.target.value))}
+                  onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
                   className="w-24 border rounded-lg px-3 py-2 text-sm" required />
                 <button type="button" onClick={() => removeDetalle(i)} className="text-red-500 hover:text-red-700 p-2">
                   <Trash2 size={16} />

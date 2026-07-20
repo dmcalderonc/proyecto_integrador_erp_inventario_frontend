@@ -5,8 +5,11 @@ import type { OrdenCompra, CrearCompraDto, DetalleCompra } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, FileDown } from 'lucide-react';
 import { useProveedores } from '../../store/useProveedores';
+import { comprasApi } from '../../api/compras.api';
+import { triggerDownload } from '../../lib/download';
+import toast from 'react-hot-toast';
 
 const emptyForm: CrearCompraDto = {
   proveedorId: 0,
@@ -94,6 +97,15 @@ export default function ComprasPage() {
     await recibir.mutateAsync(id);
   };
 
+  const handleDownloadPdf = async (item: OrdenCompra) => {
+    try {
+      const blob = await comprasApi.downloadPdf(item.id);
+      triggerDownload(blob, `${item.codigo || 'OC'}_compra.pdf`);
+    } catch {
+      toast.error('Error al descargar el PDF');
+    }
+  };
+
   const columns = [
     { key: 'codigo', header: 'Código' },
     {
@@ -119,6 +131,9 @@ export default function ComprasPage() {
       key: 'acciones', header: '',
       render: (item: OrdenCompra) => (
         <div className="flex gap-1">
+          <Button className="!px-2 !py-1 !text-xs" onClick={() => handleDownloadPdf(item)}>
+            <FileDown size={14} className="inline mr-1" /> PDF
+          </Button>
           {(item.estado === 'BORRADOR' || item.estado === 'PENDIENTE') && (
             <>
               <Button className="!px-2 !py-1 !text-xs" onClick={() => openEdit(item)}>Editar</Button>
@@ -169,8 +184,9 @@ export default function ComprasPage() {
                   <option value={0}>Seleccione material</option>
                   {materiales.map(m => <option key={m.id} value={m.id}>{m.nombre} ({m.sku})</option>)}
                 </select>
-                <input type="number" min="1" placeholder="Cantidad" value={det.cantidad}
+                <input type="number" step="1" min="1" placeholder="Cantidad" value={det.cantidad}
                   onChange={e => updateDetalle(i, 'cantidad', Number(e.target.value))}
+                  onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
                   className="w-20 border rounded-lg px-3 py-2 text-sm" required />
                 <input type="number" min="0" step="0.01" placeholder="P. Unitario" value={det.precioUnitario}
                   onChange={e => updateDetalle(i, 'precioUnitario', Number(e.target.value))}

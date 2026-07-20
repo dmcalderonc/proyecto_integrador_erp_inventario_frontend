@@ -23,5 +23,7 @@ export interface Movimiento {
   estado: string;
   bodegaOrigenId?: number;
   bodegaDestinoId?: number;
+  bodegaOrigen?: { id: number; nombre: string };
+  bodegaDestino?: { id: number; nombre: string };
   usuarioId: string;
 }

@@ -6,7 +6,10 @@ import type { Movimiento, CrearMovimientoDto, MovimientoDetalle, TipoMovimiento 
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
-import { Plus, Trash2, ArrowDown, ArrowUp, ArrowLeftRight } from 'lucide-react';
+import { Plus, Trash2, ArrowDown, ArrowUp, ArrowLeftRight, FileDown } from 'lucide-react';
+import { movimientosApi } from '../../api/movimientos.api';
+import { triggerDownload } from '../../lib/download';
+import toast from 'react-hot-toast';
 
 const emptyForm: CrearMovimientoDto = {
   tipo: 'INGRESO',
@@ -60,6 +63,15 @@ export default function MovimientosPage() {
     setForm({ ...form, detalles: [...form.detalles, { materialId: 0, cantidad: 1 }] });
   };
 
+  const handleDownloadTicket = async (item: Movimiento) => {
+    try {
+      const blob = await movimientosApi.downloadTicket(String(item.id));
+      triggerDownload(blob, `TICKET-MOV-${String(item.id).substring(0, 8)}.pdf`);
+    } catch {
+      toast.error('Error al descargar el ticket');
+    }
+  };
+
   const removeDetalle = (index: number) => {
     setForm({ ...form, detalles: form.detalles.filter((_, i) => i !== index) });
   };
@@ -84,9 +96,17 @@ export default function MovimientosPage() {
       ),
     },
     { key: 'fecha', header: 'Fecha', render: (item: Movimiento) => new Date(item.fecha).toLocaleDateString() },
-    { key: 'bodegaOrigenId', header: 'Origen', render: (item: Movimiento) => item.bodegaOrigenId ?? '-' },
-    { key: 'bodegaDestinoId', header: 'Destino', render: (item: Movimiento) => item.bodegaDestinoId ?? '-' },
+    { key: 'bodegaOrigenId', header: 'Origen', render: (item: Movimiento) => item.bodegaOrigen?.nombre ?? '-' },
+    { key: 'bodegaDestinoId', header: 'Destino', render: (item: Movimiento) => item.bodegaDestino?.nombre ?? '-' },
     { key: 'estado', header: 'Estado' },
+    {
+      key: 'ticket', header: '',
+      render: (item: Movimiento) => (
+        <Button className="!px-2 !py-1 !text-xs" onClick={() => handleDownloadTicket(item)}>
+          <FileDown size={14} className="inline mr-1" /> Ticket
+        </Button>
+      ),
+    },
   ];
 
   return (
@@ -152,8 +172,9 @@ export default function MovimientosPage() {
                   <option value={0}>Seleccione material</option>
                   {materiales.map(m => <option key={m.id} value={m.id}>{m.nombre} ({m.sku})</option>)}
                 </select>
-                <input type="number" min="1" placeholder="Cantidad" value={det.cantidad}
+                <input type="number" step="1" min="1" placeholder="Cantidad" value={det.cantidad}
                   onChange={e => updateDetalle(i, 'cantidad', Number(e.target.value))}
+                  onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
                   className="w-24 border rounded-lg px-3 py-2 text-sm" required />
                 <button type="button" onClick={() => removeDetalle(i)} className="text-red-500 hover:text-red-700 p-2">
                   <Trash2 size={16} />
