@@ -14,6 +14,7 @@ import InventarioPage from '../pages/inventario/InventarioPage';
 import ProyectosPage from '../pages/proyectos/ProyectosPage';
 import RequirementsPage from '../pages/requirements/RequirementsPage';
 import type { JSX } from 'react/jsx-runtime';
+import DespachosPage from '../pages/despachos/DespachosPage'; 
 
 const PlaceholderPage = ({ title }: { title: string }) => (
   <div className="flex flex-col items-center justify-center h-[60vh] bg-white rounded-xl shadow-sm border border-gray-100">
@@ -47,5 +48,5 @@ export const privateRoutes: PrivateRoute[] = [
   { path: '/cotizaciones', element: <CotizacionesPage />, allowedRoles: ['ADMIN', 'COMPRADOR'] },
   { path: '/solicitudes', element: <SolicitudesPage />, allowedRoles: ['ADMIN', 'BODEGUERO', 'COMPRADOR', 'SOLICITANTE'] },
   { path: '/proyectos', element: <ProyectosPage />, allowedRoles: ['ADMIN', 'SOLICITANTE'] },
-  { path: '/despachos', element: <PlaceholderPage title="Despachos" />, allowedRoles: ['ADMIN', 'BODEGUERO'] },
+  { path: '/despachos', element: <DespachosPage />, allowedRoles: ['ADMIN', 'BODEGUERO'] },
 ];
