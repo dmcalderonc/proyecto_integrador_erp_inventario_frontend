@@ -12,6 +12,8 @@ import {
   ShoppingCart,
   SlidersHorizontal,
   FolderOpen,
+  FileText,
+  ClipboardCheck,
   LogOut
 } from 'lucide-react';
 import type { UserRole } from '../types';
@@ -33,6 +35,8 @@ const navLinks: NavItem[] = [
   { to: '/inventario', label: 'Inventario', icon: Box, roles: ['ADMIN', 'BODEGUERO'] },
   { to: '/requirements', label: 'Requerimientos', icon: ClipboardList, roles: ['ADMIN', 'SOLICITANTE', 'BODEGUERO'] },
   { to: '/compras', label: 'Compras', icon: ShoppingCart, roles: ['ADMIN', 'COMPRADOR'] },
+  { to: '/solicitudes', label: 'Solicitudes', icon: ClipboardCheck, roles: ['ADMIN', 'BODEGUERO', 'COMPRADOR', 'SOLICITANTE'] },
+  { to: '/cotizaciones', label: 'Cotizaciones', icon: FileText, roles: ['ADMIN', 'COMPRADOR'] },
   { to: '/ajustes-inventario', label: 'Ajustes de Inventario', icon: SlidersHorizontal, roles: ['ADMIN', 'BODEGUERO'] },
   { to: '/proyectos', label: 'Proyectos', icon: FolderOpen, roles: ['ADMIN', 'SOLICITANTE'] },
 ];
