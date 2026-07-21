@@ -13,11 +13,11 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Plus, Trash2 } from 'lucide-react';
 
 const badgeColors: Record<RequirementStatus, string> = {
-  PENDIENTE: 'bg-yellow-100 text-yellow-800',
-  APROBADO: 'bg-blue-100 text-blue-800',
-  PARCIALMENTE_ATENDIDO: 'bg-orange-100 text-orange-800',
-  ATENDIDO: 'bg-green-100 text-green-800',
-  RECHAZADO: 'bg-red-100 text-red-800',
+  PENDIENTE: 'bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30',
+  APROBADO: 'bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/30',
+  PARCIALMENTE_ATENDIDO: 'bg-[#F97316]/10 text-[#F97316] border border-[#F97316]/30',
+  ATENDIDO: 'bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/30',
+  RECHAZADO: 'bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/30',
 };
 
 type DetalleForm = { materialId: string; cantidadSolicitada: string };
@@ -108,30 +108,34 @@ export default function RequirementsPage() {
       key: 'id', header: 'ID',
       sortable: true,
       sortValue: (item: Requirement) => item.id,
-      render: (item: Requirement) => `REQ-${item.id}`,
+      render: (item: Requirement) => (
+        <span className="font-mono text-xs bg-[#111D4A] text-[#94A3B8] px-2.5 py-1 rounded-md border border-[#334155] font-semibold">
+          REQ-{item.id}
+        </span>
+      ),
     },
     {
       key: 'proyecto', header: 'Proyecto',
       sortable: true,
       sortValue: (item: Requirement) => item.proyecto?.nombre ?? '',
-      render: (item: Requirement) => item.proyecto?.nombre ?? '-',
+      render: (item: Requirement) => <span className="text-[#FFFFFF] font-bold">{item.proyecto?.nombre ?? '-'}</span>,
     },
     {
       key: 'usuarioSolicitante', header: 'Solicitante',
       sortable: true,
       sortValue: (item: Requirement) => item.usuarioSolicitante?.nombre ?? '',
-      render: (item: Requirement) => item.usuarioSolicitante?.nombre ?? '-',
+      render: (item: Requirement) => <span className="text-[#94A3B8]">{item.usuarioSolicitante?.nombre ?? '-'}</span>,
     },
     {
       key: 'fechaSolicitud', header: 'Fecha',
       sortable: true,
       sortValue: (item: Requirement) => item.fechaSolicitud ?? '',
-      render: (item: Requirement) => item.fechaSolicitud ? new Date(item.fechaSolicitud).toLocaleDateString() : '-',
+      render: (item: Requirement) => <span className="text-[#94A3B8]">{item.fechaSolicitud ? new Date(item.fechaSolicitud).toLocaleDateString() : '-'}</span>,
     },
     {
       key: 'estado', header: 'Estado',
       render: (item: Requirement) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${badgeColors[item.estado]}`}>
+        <span className={`inline-block px-3 py-1 rounded-xl text-xs font-semibold border ${badgeColors[item.estado]}`}>
           {item.estado}
         </span>
       ),
@@ -143,7 +147,7 @@ export default function RequirementsPage() {
           {canChangeStatus && item.estado === 'PENDIENTE' && (
             <button
               onClick={() => setStatusAction({ requirement: item, estado: 'APROBADO', label: 'aprobar' })}
-              className="text-blue-600 hover:underline text-xs font-medium"
+              className="text-[#3B82F6] hover:text-[#3B82F6]/80 text-xs font-medium cursor-pointer"
             >
               Aprobar
             </button>
@@ -151,7 +155,7 @@ export default function RequirementsPage() {
           {canChangeStatus && item.estado === 'APROBADO' && (
             <button
               onClick={() => setStatusAction({ requirement: item, estado: 'ATENDIDO', label: 'marcar como atendido' })}
-              className="text-green-600 hover:underline text-xs font-medium"
+              className="text-[#10B981] hover:text-[#10B981]/80 text-xs font-medium cursor-pointer"
             >
               Marcar Atendido
             </button>
@@ -159,7 +163,7 @@ export default function RequirementsPage() {
           {canChangeStatus && item.estado !== 'RECHAZADO' && item.estado !== 'ATENDIDO' && (
             <button
               onClick={() => setStatusAction({ requirement: item, estado: 'RECHAZADO', label: 'rechazar' })}
-              className="text-red-600 hover:underline text-xs font-medium"
+              className="text-[#EF4444] hover:text-[#EF4444]/80 text-xs font-medium cursor-pointer"
             >
               Rechazar
             </button>
@@ -167,7 +171,7 @@ export default function RequirementsPage() {
           {isAdmin && (
             <button
               onClick={() => setDeleting(item)}
-              className="text-gray-500 hover:underline text-xs font-medium"
+              className="text-[#94A3B8] hover:text-[#FFFFFF] text-xs font-medium cursor-pointer"
             >
               Eliminar
             </button>
@@ -178,69 +182,74 @@ export default function RequirementsPage() {
   ];
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
-        <h1 className="text-2xl font-bold">Requerimientos</h1>
+    <div className="space-y-8 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-[#FFFFFF]">Requerimientos</h1>
+          <p className="text-[#94A3B8] mt-1 text-sm">Gestioná las solicitudes de materiales para tus proyectos.</p>
+        </div>
         {canCreate && (
-          <Button onClick={openCreate}>
-            <Plus size={16} className="inline mr-1" /> Nuevo
+          <Button onClick={openCreate} className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold px-6 py-2 rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 hover:scale-105 active:scale-95 cursor-pointer flex items-center">
+            <Plus size={18} className="mr-1.5" /> Nuevo Requerimiento
           </Button>
         )}
       </div>
 
-      <DataTable columns={columns} data={requirements} loading={isLoading} searchable searchKeys={["codigo", "estado"]} />
+      <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl overflow-hidden">
+        <DataTable columns={columns} data={requirements} loading={isLoading} searchable searchKeys={["codigo", "estado"]} />
+      </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo Requerimiento">
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5 text-[#94A3B8] p-1">
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Proyecto</label>
+            <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Proyecto</label>
             <select value={proyectoId} onChange={e => setProyectoId(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 text-sm" required>
-              <option value="">Seleccioná un proyecto</option>
+              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer" required>
+              <option value="" className="bg-[#0A1128]">Seleccioná un proyecto</option>
               {proyectos.map(p => (
-                <option key={p.id} value={p.id}>{p.codigoProyecto} - {p.nombre}</option>
+                <option key={p.id} value={p.id} className="bg-[#0A1128]">{p.codigoProyecto} - {p.nombre}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm text-gray-600">Materiales</label>
-              <button type="button" onClick={addDetalle} className="text-blue-600 hover:underline text-xs font-medium">
-                + Agregar material
+            <div className="flex justify-between items-center mb-3">
+              <label className="block text-sm font-medium text-[#FFFFFF]">Materiales</label>
+              <button type="button" onClick={addDetalle} className="text-[#06B6D4] hover:text-[#06B6D4]/80 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer">
+                <Plus size={14} /> Agregar material
               </button>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               {detalles.map((detalle, index) => (
-                <div key={index} className="flex gap-2 items-start">
+                <div key={index} className="flex gap-3 items-center bg-[#0A1128] p-3.5 rounded-2xl border border-[#334155]">
                   <select value={detalle.materialId}
                     onChange={e => updateDetalle(index, 'materialId', e.target.value)}
-                    className="flex-1 border rounded-lg px-3 py-2 text-sm" required>
-                    <option value="">Material...</option>
+                    className="flex-1 bg-[#111D4A] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#06B6D4] transition-all cursor-pointer" required>
+                    <option value="" className="bg-[#111D4A]">Material...</option>
                     {materiales.map(m => (
-                      <option key={m.id} value={m.id}>{m.nombre} ({m.sku})</option>
+                      <option key={m.id} value={m.id} className="bg-[#111D4A]">{m.nombre} ({m.sku})</option>
                     ))}
                   </select>
                   <input type="number" step="1" min="1" placeholder="Cantidad"
                     value={detalle.cantidadSolicitada}
                     onChange={e => updateDetalle(index, 'cantidadSolicitada', e.target.value)}
                     onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
-                    className="w-full sm:w-28 border rounded-lg px-3 py-2 text-sm" required />
+                    className="w-full sm:w-28 bg-[#111D4A] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-2.5 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] transition-all font-bold" required />
                   <button type="button" onClick={() => removeDetalle(index)}
                     disabled={detalles.length === 1}
-                    className="text-red-500 hover:text-red-700 disabled:opacity-30 p-2">
-                    <Trash2 size={16} />
+                    className="text-[#EF4444] hover:text-[#EF4444]/80 disabled:opacity-30 p-2 rounded-xl transition-colors cursor-pointer">
+                    <Trash2 size={18} />
                   </button>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
-            <Button type="submit" disabled={crear.isPending}>
-              {crear.isPending ? 'Guardando...' : 'Crear'}
+          <div className="flex justify-end gap-3 pt-4 border-t border-[#334155]">
+            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)} className="bg-[#1E293B] hover:bg-white/10 text-[#FFFFFF] border border-[#334155] px-5 py-2.5 rounded-xl font-medium transition-all cursor-pointer">Cancelar</Button>
+            <Button type="submit" disabled={crear.isPending} className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold px-6 py-2.5 rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+              {crear.isPending ? 'Guardando...' : 'Crear Requerimiento'}
             </Button>
           </div>
         </form>
