@@ -7,7 +7,7 @@ import type { Material, CreateMaterialDto } from '../../types';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { Plus, Edit2, Trash2, Package, ImagePlus, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Package, ImagePlus, X, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const emptyForm: CreateMaterialDto = {
@@ -76,18 +76,22 @@ export default function MaterialesPage() {
   const [form, setForm] = useState<CreateMaterialDto>(emptyForm);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [filterCategory, setFilterCategory] = useState<number | null>(null);
+  const [search, setSearch] = useState('');
 
   const grouped = useMemo(() => {
     const map = new Map<number, Material[]>();
     categorias.forEach(c => map.set(c.id, []));
+    const q = search.toLowerCase().trim();
     materiales.forEach(m => {
+      const matchesSearch = !q || m.nombre.toLowerCase().includes(q);
+      if (!matchesSearch) return;
       const catId = m.categoria?.id;
       if (catId && map.has(catId)) {
         map.get(catId)!.push(m);
       }
     });
     return map;
-  }, [materiales, categorias]);
+  }, [materiales, categorias, search]);
 
   const openCreate = (catId?: number) => {
     setEditing(null);
@@ -190,11 +194,21 @@ export default function MaterialesPage() {
           <h1 className="text-3xl font-extrabold text-[#FFFFFF] mb-2">Catálogo de Materiales</h1>
           <p className="text-[#94A3B8] text-sm">Gestiona tus artículos organizados por categorías.</p>
         </div>
-        <div className="flex gap-3 self-start sm:self-auto">
+        <div className="flex gap-3 self-start sm:self-auto flex-wrap">
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+            <input
+              type="text"
+              placeholder="Buscar nombre o SKU..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-9 pr-4 py-2.5 bg-[#111D4A] text-[#FFFFFF] border border-[#334155] rounded-xl text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] transition-all w-48 sm:w-56"
+            />
+          </div>
           <select
             value={filterCategory ?? ''}
             onChange={e => setFilterCategory(e.target.value ? Number(e.target.value) : null)}
-            className="bg-[#111D4A] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] cursor-pointer shadow-md transition-all"
+            className="bg-[#111D4A] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#06B6D4] cursor-pointer transition-all"
           >
             <option value="" className="bg-[#111D4A]">Todas las categorías</option>
             {categorias.map(c => <option key={c.id} value={c.id} className="bg-[#111D4A]">{c.nombre}</option>)}
