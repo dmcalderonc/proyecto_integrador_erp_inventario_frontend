@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useUnidadesMedida } from '../../store/useUnidadesMedida';
 import type { UnidadMedida } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';

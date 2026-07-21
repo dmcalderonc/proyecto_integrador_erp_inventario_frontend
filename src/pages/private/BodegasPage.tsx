@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useBodegas } from '../../store/useBodegas';
 import type { Bodega } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';

@@ -1,5 +1,3 @@
-
-import React from 'react';
 import { Link } from 'react-router-dom';
 
 // Marcadores de posición para Navbar y Footer con tus colores aplicados

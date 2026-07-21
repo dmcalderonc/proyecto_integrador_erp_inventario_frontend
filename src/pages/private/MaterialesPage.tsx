@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMateriales } from '../../store/useMateriales';
 import { useCategorias } from '../../store/useCategorias';

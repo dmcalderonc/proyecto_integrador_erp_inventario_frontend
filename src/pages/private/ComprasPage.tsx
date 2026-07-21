@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useCompras } from '../../store/useCompras';
 import { useMateriales } from '../../store/useMateriales';
 import type { OrdenCompra, CrearCompraDto, DetalleCompra } from '../../types';

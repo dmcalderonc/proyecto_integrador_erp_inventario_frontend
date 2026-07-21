@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useDespachos } from '../../store/useDespachos';
 import { useCompras } from '../../store/useCompras';
 import { useRequirements } from '../../store/useRequirements';

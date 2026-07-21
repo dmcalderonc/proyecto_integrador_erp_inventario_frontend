@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useSolicitudes } from '../../store/useSolicitudes';
 import { useProyectos } from '../../store/useProyectos';
 import { useMateriales } from '../../store/useMateriales';
