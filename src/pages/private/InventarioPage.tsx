@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { useInventario } from '../../store/useInventario';
 import { Search, Package } from 'lucide-react';
 import type { Inventario } from '../../types';
