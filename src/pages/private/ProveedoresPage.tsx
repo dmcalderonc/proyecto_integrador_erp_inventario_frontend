@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useProveedores } from '../../store/useProveedores';
 import type { Proveedor } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';
@@ -42,72 +42,156 @@ export default function ProveedoresPage() {
   };
 
   const columns = [
-    { key: 'ruc', header: 'RUC', sortable: true },
-    { key: 'razon_social', header: 'Razón Social', sortable: true },
-    { key: 'email', header: 'Email', sortable: true },
-    { key: 'telefono', header: 'Teléfono' },
-    { key: 'direccion', header: 'Dirección' },
+    { 
+      key: 'ruc', 
+      header: 'RUC', 
+      sortable: true,
+      render: (item: Proveedor) => (
+        <span className="font-mono text-xs bg-[#0A1128] text-[#10B981] px-2.5 py-1 rounded-lg border border-[#334155] font-semibold">
+          {item.ruc}
+        </span>
+      )
+    },
+    { 
+      key: 'razon_social', 
+      header: 'Razón Social', 
+      sortable: true,
+      render: (item: Proveedor) => <span className="text-[#FFFFFF] font-bold">{item.razon_social}</span> 
+    },
+    { 
+      key: 'email', 
+      header: 'Email', 
+      sortable: true,
+      render: (item: Proveedor) => <span className="text-[#06B6D4] font-medium">{item.email}</span> 
+    },
+    { 
+      key: 'telefono', 
+      header: 'Teléfono',
+      render: (item: Proveedor) => <span className="text-[#94A3B8]">{item.telefono || '-'}</span> 
+    },
+    { 
+      key: 'direccion', 
+      header: 'Dirección',
+      render: (item: Proveedor) => <span className="text-[#94A3B8] text-xs">{item.direccion || '-'}</span> 
+    },
   ];
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
-        <h1 className="text-2xl font-bold">Proveedores</h1>
-        <Button onClick={openCreate}>
-          <Plus size={16} className="inline mr-1" /> Nuevo
+    <div className="space-y-8 animate-fade-in">
+      {/* Header de la sección */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-[#FFFFFF] mb-2">Proveedores</h1>
+          <p className="text-[#94A3B8] text-sm">Administra el directorio de contactos y empresas proveedoras.</p>
+        </div>
+        <Button 
+          onClick={openCreate}
+          className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold px-5 py-3 rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 hover:scale-105 active:scale-95 cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
+        >
+          <Plus size={18} /> Nuevo Proveedor
         </Button>
       </div>
 
-      <DataTable columns={columns} data={proveedores} loading={isLoading} onEdit={openEdit} onDelete={openDelete} searchable searchKeys={["nombre", "email", "telefono"]} />
+      {/* Tabla de Proveedores */}
+      <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl overflow-hidden">
+        <DataTable 
+          columns={columns} 
+          data={proveedores} 
+          loading={isLoading} 
+          onEdit={openEdit} 
+          onDelete={openDelete} 
+          searchable 
+          searchKeys={["nombre", "email", "telefono"]} 
+        />
+      </div>
 
+      {/* Modal de Crear / Editar */}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Proveedor' : 'Nuevo Proveedor'}>
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-5 text-[#94A3B8] p-1">
           <div>
-            <label className="block text-sm text-gray-600 mb-1">RUC</label>
-            <input placeholder="Ej: 1790012345001" value={form.ruc}
+            <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">RUC</label>
+            <input 
+              placeholder="Ej: 1790012345001" 
+              value={form.ruc}
               onChange={e => setForm({ ...form, ruc: e.target.value })}
-              className="w-full border rounded-lg px-3 py-2 text-sm" maxLength={13} required />
+              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all font-mono" 
+              maxLength={13} 
+              required 
+            />
           </div>
+
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Razón Social</label>
-            <input placeholder="Ej: Constructora ABC Cía. Ltda." value={form.razon_social}
+            <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Razón Social</label>
+            <input 
+              placeholder="Ej: Constructora ABC Cía. Ltda." 
+              value={form.razon_social}
               onChange={e => setForm({ ...form, razon_social: e.target.value })}
-              className="w-full border rounded-lg px-3 py-2 text-sm" required />
+              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all" 
+              required 
+            />
           </div>
+
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Correo electrónico</label>
-            <input type="email" placeholder="Ej: contacto@abc.com" value={form.email}
+            <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Correo electrónico</label>
+            <input 
+              type="email" 
+              placeholder="Ej: contacto@abc.com" 
+              value={form.email}
               onChange={e => setForm({ ...form, email: e.target.value })}
-              className="w-full border rounded-lg px-3 py-2 text-sm" required />
+              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all" 
+              required 
+            />
           </div>
+
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Teléfono</label>
-            <input placeholder="Ej: 0991234567" value={form.telefono}
+            <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Teléfono</label>
+            <input 
+              placeholder="Ej: 0991234567" 
+              value={form.telefono}
               onChange={e => setForm({ ...form, telefono: e.target.value })}
-              className="w-full border rounded-lg px-3 py-2 text-sm" />
+              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all" 
+            />
           </div>
+
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Dirección</label>
-            <input placeholder="Ej: Av. Principal y 5 de Octubre" value={form.direccion}
+            <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Dirección</label>
+            <input 
+              placeholder="Ej: Av. Principal y 5 de Octubre" 
+              value={form.direccion}
               onChange={e => setForm({ ...form, direccion: e.target.value })}
-              className="w-full border rounded-lg px-3 py-2 text-sm" />
+              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all" 
+            />
           </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
-            <Button type="submit" disabled={crear.isPending || actualizar.isPending}>
-              {editing ? 'Actualizar' : 'Crear'}
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-[#334155]">
+            <Button 
+              type="button" 
+              variant="secondary" 
+              onClick={() => setModalOpen(false)}
+              className="bg-[#1E293B] hover:bg-white/10 text-[#FFFFFF] border border-[#334155] px-5 py-2.5 rounded-xl font-medium transition-all cursor-pointer"
+            >
+              Cancelar
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={crear.isPending || actualizar.isPending}
+              className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold px-6 py-2.5 rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
+              {editing ? (actualizar.isPending ? 'Guardando...' : 'Actualizar') : (crear.isPending ? 'Creando...' : 'Crear')}
             </Button>
           </div>
         </form>
       </Modal>
 
+      {/* Confirmación de Eliminación */}
       <ConfirmDialog
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleDelete}
         title="Eliminar proveedor"
         message={`¿Estás seguro de eliminar al proveedor "${deleting?.razon_social}"? Esta acción no se puede deshacer.`}
-        loading={eliminar.isPending} />
+        loading={eliminar.isPending} 
+      />
     </div>
   );
 }

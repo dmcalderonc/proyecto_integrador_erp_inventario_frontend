@@ -1,3 +1,4 @@
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { FolderOpen, ClipboardList, DollarSign, Activity, AlertTriangle, TrendingUp, Users, Tags, Package } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
@@ -29,7 +30,7 @@ interface AlertaStock {
   bodega?: { nombre: string };
 }
 
-const PIE_COLORS = ['#3B82F6', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6', '#EC4899'];
+const PIE_COLORS = ['#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
 export default function DashboardPage() {
   const { data: kpis, isLoading, isError } = useQuery({
@@ -88,14 +89,14 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div>
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">Dashboard</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-xl shadow-sm p-6 animate-pulse border border-gray-100">
-              <div className="h-10 w-10 bg-gray-200 rounded-lg mb-4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+      <div className="space-y-6">
+        <h1 className="text-3xl font-extrabold text-[#FFFFFF]">Dashboard</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="bg-[#111D4A] rounded-3xl border border-[#334155] p-6 animate-pulse shadow-2xl">
+              <div className="h-10 w-10 bg-[#1E293B] rounded-xl mb-4"></div>
+              <div className="h-4 bg-[#1E293B] rounded-lg w-1/2 mb-2"></div>
+              <div className="h-8 bg-[#1E293B] rounded-xl w-1/3"></div>
             </div>
           ))}
         </div>
@@ -105,62 +106,81 @@ export default function DashboardPage() {
 
   if (isError) {
     return (
-      <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center border border-red-100">
-        <p className="font-medium">Error al cargar los datos del dashboard.</p>
+      <div className="bg-red-500/10 text-red-400 p-6 rounded-3xl text-center border border-red-500/30">
+        <p className="font-semibold text-lg">Error al cargar los datos del dashboard.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Dashboard</h1>
+    <div className="space-y-8 animate-fade-in">
+      <div>
+        <h1 className="text-3xl font-extrabold text-[#FFFFFF] mb-2">Dashboard</h1>
+        <p className="text-[#94A3B8] text-sm">Resumen general y métricas clave de tu sistema de inventario.</p>
+      </div>
 
       {/* KPI Cards - Row 1 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 flex items-center gap-4">
-          <div className="bg-purple-100 p-3 rounded-lg text-purple-600"><Users size={22} /></div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl p-6 border border-[#334155] shadow-2xl flex items-center gap-4 hover:border-[#334155]/80 transition-all">
+          <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+            <Users size={24} />
+          </div>
           <div>
-            <p className="text-xs font-medium text-gray-500">Total Usuarios</p>
-            <p className="text-2xl font-bold text-gray-900">{kpis?.totalUsuarios ?? 0}</p>
+            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Total Usuarios</p>
+            <p className="text-3xl font-extrabold text-[#FFFFFF] mt-1">{kpis?.totalUsuarios ?? 0}</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 flex items-center gap-4">
-          <div className="bg-cyan-100 p-3 rounded-lg text-cyan-600"><Tags size={22} /></div>
+
+        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl p-6 border border-[#334155] shadow-2xl flex items-center gap-4 hover:border-[#334155]/80 transition-all">
+          <div className="w-12 h-12 rounded-2xl bg-[#06B6D4]/10 border border-[#06B6D4]/30 flex items-center justify-center text-[#06B6D4] shrink-0">
+            <Tags size={24} />
+          </div>
           <div>
-            <p className="text-xs font-medium text-gray-500">Categorías</p>
-            <p className="text-2xl font-bold text-gray-900">{kpis?.totalCategorias ?? 0}</p>
+            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Categorías</p>
+            <p className="text-3xl font-extrabold text-[#FFFFFF] mt-1">{kpis?.totalCategorias ?? 0}</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 flex items-center gap-4">
-          <div className="bg-rose-100 p-3 rounded-lg text-rose-600"><Package size={22} /></div>
+
+        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl p-6 border border-[#334155] shadow-2xl flex items-center gap-4 hover:border-[#334155]/80 transition-all">
+          <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
+            <Package size={24} />
+          </div>
           <div>
-            <p className="text-xs font-medium text-gray-500">Total Materiales</p>
-            <p className="text-2xl font-bold text-gray-900">{kpis?.totalMateriales ?? 0}</p>
+            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Total Materiales</p>
+            <p className="text-3xl font-extrabold text-[#FFFFFF] mt-1">{kpis?.totalMateriales ?? 0}</p>
           </div>
         </div>
       </div>
 
       {/* KPI Cards - Row 2 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 flex items-center gap-4">
-          <div className="bg-blue-100 p-3 rounded-lg text-blue-600"><FolderOpen size={22} /></div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl p-6 border border-[#334155] shadow-2xl flex items-center gap-4 hover:border-[#334155]/80 transition-all">
+          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+            <FolderOpen size={24} />
+          </div>
           <div>
-            <p className="text-xs font-medium text-gray-500">Proyectos Activos</p>
-            <p className="text-2xl font-bold text-gray-900">{kpis?.proyectosActivos ?? 0}</p>
+            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Proyectos Activos</p>
+            <p className="text-3xl font-extrabold text-[#FFFFFF] mt-1">{kpis?.proyectosActivos ?? 0}</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 flex items-center gap-4">
-          <div className="bg-orange-100 p-3 rounded-lg text-orange-600"><ClipboardList size={22} /></div>
+
+        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl p-6 border border-[#334155] shadow-2xl flex items-center gap-4 hover:border-[#334155]/80 transition-all">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+            <ClipboardList size={24} />
+          </div>
           <div>
-            <p className="text-xs font-medium text-gray-500">Requerimientos Pendientes</p>
-            <p className="text-2xl font-bold text-gray-900">{kpis?.requerimientosPendientes ?? 0}</p>
+            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Requerimientos Pendientes</p>
+            <p className="text-3xl font-extrabold text-[#FFFFFF] mt-1">{kpis?.requerimientosPendientes ?? 0}</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 flex items-center gap-4">
-          <div className="bg-green-100 p-3 rounded-lg text-green-600"><DollarSign size={22} /></div>
+
+        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl p-6 border border-[#334155] shadow-2xl flex items-center gap-4 hover:border-[#334155]/80 transition-all">
+          <div className="w-12 h-12 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/30 flex items-center justify-center text-[#10B981] shrink-0">
+            <DollarSign size={24} />
+          </div>
           <div>
-            <p className="text-xs font-medium text-gray-500">Valorización Inventario</p>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Valorización Inventario</p>
+            <p className="text-3xl font-extrabold text-[#10B981] mt-1">
               ${(kpis?.valorizacionTotalInventario ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </p>
           </div>
@@ -170,46 +190,63 @@ export default function DashboardPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Bar Chart - Actividad por Módulo */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp size={18} className="text-blue-600" />
-            <h2 className="font-semibold text-gray-800">Actividad por Módulo</h2>
+        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl">
+          <div className="flex items-center gap-2.5 mb-6">
+            <div className="w-8 h-8 rounded-xl bg-[#06B6D4]/10 border border-[#06B6D4]/30 flex items-center justify-center text-[#06B6D4]">
+              <TrendingUp size={18} />
+            </div>
+            <h2 className="font-bold text-[#FFFFFF] text-lg">Actividad por Módulo</h2>
           </div>
           {modulosData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={260}>
               <BarChart data={modulosData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Bar dataKey="value" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.5} />
+                <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94A3B8' }} stroke="#334155" />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#94A3B8' }} stroke="#334155" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#0A1128', borderColor: '#334155', borderRadius: '12px', color: '#FFFFFF' }}
+                  itemStyle={{ color: '#06B6D4' }}
+                />
+                <Bar dataKey="value" fill="#06B6D4" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-[250px] flex items-center justify-center text-sm text-gray-400">Sin datos disponibles</div>
+            <div className="h-[260px] flex items-center justify-center text-sm text-[#94A3B8]">Sin datos disponibles</div>
           )}
         </div>
 
         {/* Pie Chart - Acciones Recientes */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Activity size={18} className="text-purple-600" />
-            <h2 className="font-semibold text-gray-800">Tipos de Acción</h2>
+        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl">
+          <div className="flex items-center gap-2.5 mb-6">
+            <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+              <Activity size={18} />
+            </div>
+            <h2 className="font-bold text-[#FFFFFF] text-lg">Tipos de Acción</h2>
           </div>
           {accionesData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={260}>
               <PieChart>
-                <Pie data={accionesData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${(name ?? '').substring(0, 10)} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false}>
+                <Pie 
+                  data={accionesData} 
+                  cx="50%" 
+                  cy="50%" 
+                  outerRadius={80} 
+                  dataKey="value" 
+                  label={({ name, percent }) => `${(name ?? '').substring(0, 10)} ${((percent ?? 0) * 100).toFixed(0)}%`} 
+                  labelLine={false}
+                >
                   {accionesData.map((_, i) => (
                     <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#0A1128', borderColor: '#334155', borderRadius: '12px', color: '#FFFFFF' }}
+                />
+                <Legend wrapperStyle={{ fontSize: 11, color: '#94A3B8' }} />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-[250px] flex items-center justify-center text-sm text-gray-400">Sin datos disponibles</div>
+            <div className="h-[260px] flex items-center justify-center text-sm text-[#94A3B8]">Sin datos disponibles</div>
           )}
         </div>
       </div>
@@ -217,49 +254,55 @@ export default function DashboardPage() {
       {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Alertas de Stock Bajo */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <AlertTriangle size={18} className="text-amber-500" />
-            <h2 className="font-semibold text-gray-800">Alertas de Stock Bajo</h2>
+        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl">
+          <div className="flex items-center gap-2.5 mb-6">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+              <AlertTriangle size={18} />
+            </div>
+            <h2 className="font-bold text-[#FFFFFF] text-lg">Alertas de Stock Bajo</h2>
           </div>
           {alertas.length > 0 ? (
-            <div className="space-y-2 max-h-[280px] overflow-y-auto">
+            <div className="space-y-3 max-h-[280px] overflow-y-auto pr-1">
               {alertas.map(a => (
-                <div key={a.id} className="flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-100">
+                <div key={a.id} className="flex items-center justify-between p-4 bg-[#0A1128] rounded-2xl border border-amber-500/30">
                   <div>
-                    <p className="text-sm font-medium text-gray-800">{a.material?.nombre || 'N/A'}</p>
-                    <p className="text-xs text-gray-500">{a.bodega?.nombre || 'N/A'} · {a.material?.sku}</p>
+                    <p className="text-sm font-bold text-[#FFFFFF]">{a.material?.nombre || 'N/A'}</p>
+                    <p className="text-xs text-[#94A3B8] mt-0.5">{a.bodega?.nombre || 'N/A'} · SKU: {a.material?.sku}</p>
                   </div>
-                  <span className="text-sm font-bold text-amber-600">{a.cantidad_disponible} uds</span>
+                  <span className="text-xs font-extrabold bg-amber-500/10 text-amber-400 px-3 py-1.5 rounded-xl border border-amber-500/30">
+                    {a.cantidad_disponible} uds
+                  </span>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="h-[280px] flex items-center justify-center text-sm text-gray-400">No hay alertas de stock</div>
+            <div className="h-[280px] flex items-center justify-center text-sm text-[#94A3B8]">No hay alertas de stock</div>
           )}
         </div>
 
         {/* Actividad Reciente */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Activity size={18} className="text-green-600" />
-            <h2 className="font-semibold text-gray-800">Actividad Reciente</h2>
+        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl">
+          <div className="flex items-center gap-2.5 mb-6">
+            <div className="w-8 h-8 rounded-xl bg-[#10B981]/10 border border-[#10B981]/30 flex items-center justify-center text-[#10B981]">
+              <Activity size={18} />
+            </div>
+            <h2 className="font-bold text-[#FFFFFF] text-lg">Actividad Reciente</h2>
           </div>
           {timeline.length > 0 ? (
-            <div className="space-y-2 max-h-[280px] overflow-y-auto">
+            <div className="space-y-3 max-h-[280px] overflow-y-auto pr-1">
               {timeline.map(log => (
-                <div key={log._id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 shrink-0"></div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">{log.accion?.replace(/_/g, ' ')}</p>
-                    <p className="text-xs text-gray-500">{log.modulo} · {log.usuario_id}</p>
-                    <p className="text-xs text-gray-400">{formatTime(log)}</p>
+                <div key={log._id} className="flex items-start gap-3.5 p-3.5 bg-[#0A1128] rounded-2xl border border-[#334155]">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#06B6D4] mt-2 shrink-0 animate-pulse"></div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-[#FFFFFF] truncate">{log.accion?.replace(/_/g, ' ')}</p>
+                    <p className="text-xs text-[#94A3B8] mt-0.5">{log.modulo} · Usuario: {log.usuario_id}</p>
+                    <p className="text-[11px] text-[#94A3B8]/60 mt-1">{formatTime(log)}</p>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="h-[280px] flex items-center justify-center text-sm text-gray-400">Sin actividad reciente</div>
+            <div className="h-[280px] flex items-center justify-center text-sm text-[#94A3B8]">Sin actividad reciente</div>
           )}
         </div>
       </div>
