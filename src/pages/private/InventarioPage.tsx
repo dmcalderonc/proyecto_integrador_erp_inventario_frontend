@@ -2,6 +2,7 @@ import { useInventario } from '../../store/useInventario';
 import { Search, Package } from 'lucide-react';
 import type { Inventario } from '../../types';
 import { cn } from '../../lib/utils';
+import { useState } from 'react';
 
 export default function InventarioPage() {
     const { inventario, isLoading } = useInventario();
