@@ -84,14 +84,20 @@ export default function CotizacionesPage() {
   const columns = [
     {
       key: 'solicitud', header: 'Solicitud',
+      sortable: true,
+      sortValue: (item: Cotizacion) => item.solicitud?.codigo ?? `#${item.solicitudId}`,
       render: (item: Cotizacion) => item.solicitud?.codigo ?? `#${item.solicitudId}`,
     },
     {
       key: 'proveedor', header: 'Proveedor',
+      sortable: true,
+      sortValue: (item: Cotizacion) => item.proveedor?.razon_social ?? '',
       render: (item: Cotizacion) => item.proveedor?.razon_social ?? `#${item.proveedorId}`,
     },
     {
       key: 'precioOfertadoTotal', header: 'Precio',
+      sortable: true,
+      sortValue: (item: Cotizacion) => Number(item.precioOfertadoTotal),
       render: (item: Cotizacion) => (
         <span className="font-semibold">${Number(item.precioOfertadoTotal).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
       ),

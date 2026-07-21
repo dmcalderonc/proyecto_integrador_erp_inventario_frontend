@@ -6,6 +6,7 @@ export interface Material {
   nombre: string;
   descripcion?: string;
   sku: string;
+  imagen?: string;
   unidadMedida?: UnidadMedida;
   categoria_id?: number;
   categoria?: Categoria;
@@ -14,6 +15,7 @@ export interface Material {
 export interface CreateMaterialDto {
   nombre: string;
   descripcion?: string;
+  imagen?: string;
   unidad_medida_id: number;
   categoria_id: number;
 }

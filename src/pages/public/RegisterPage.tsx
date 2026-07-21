@@ -6,6 +6,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../../api/http';
 import { Button } from '../../components/ui/Button';
+import { Navbar } from '../../components/ui/Navbar';
+import { Footer } from '../../components/ui/Footer';
 
 const registerSchema = z.object({
   username: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
@@ -47,7 +49,9 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Navbar />
+      <div className="flex-1 flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-6 sm:p-10 rounded-xl shadow-lg">
         <div>
           <h2 className="mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
@@ -161,6 +165,8 @@ export function RegisterPage() {
           </div>
         </form>
       </div>
+      </div>
+      <Footer />
     </div>
   );
 }

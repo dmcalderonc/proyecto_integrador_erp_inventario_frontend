@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import { Navbar } from '../../components/ui/Navbar';
+import { Footer } from '../../components/ui/Footer';
 
 function FloatingShape({ className, style }: { className: string; style?: React.CSSProperties }) {
   return <div className={`absolute rounded-full opacity-20 blur-sm animate-pulse ${className}`} style={style} />;
@@ -119,6 +121,7 @@ function DashboardMockup() {
 export function LandingPage() {
   return (
     <div className="min-h-screen overflow-hidden">
+      <Navbar />
       <style>{`
         @keyframes gradientShift {
           0%, 100% { background-position: 0% 50%; }
@@ -397,9 +400,10 @@ export function LandingPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </Link>
-          <p className="text-gray-600 text-xs mt-8">Proyecto Integrador — ERP de Inventario &copy; 2025</p>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

@@ -67,10 +67,12 @@ export default function ProyectosPage() {
   };
 
   const columns = [
-    { key: 'nombre', header: 'Nombre' },
-    { key: 'codigoProyecto', header: 'Código' },
+    { key: 'nombre', header: 'Nombre', sortable: true },
+    { key: 'codigoProyecto', header: 'Código', sortable: true },
     {
       key: 'fechaInicio', header: 'Fecha de inicio',
+      sortable: true,
+      sortValue: (item: Proyecto) => item.fechaInicio ?? '',
       render: (item: Proyecto) => item.fechaInicio ? new Date(item.fechaInicio).toLocaleDateString() : '-',
     },
     {

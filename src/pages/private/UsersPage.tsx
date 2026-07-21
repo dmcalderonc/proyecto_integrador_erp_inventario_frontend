@@ -58,10 +58,10 @@ export default function UsersPage() {
   };
 
   const columns = [
-    { key: 'nombre', header: 'Nombre' },
-    { key: 'email', header: 'Email' },
+    { key: 'nombre', header: 'Nombre', sortable: true },
+    { key: 'email', header: 'Email', sortable: true },
     {
-      key: 'rol', header: 'Rol',
+      key: 'rol', header: 'Rol', sortable: true, sortValue: (item: User) => item.rol,
       render: (item: User) => (
         <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
           {item.rol}

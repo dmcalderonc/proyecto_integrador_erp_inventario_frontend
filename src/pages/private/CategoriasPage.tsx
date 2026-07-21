@@ -42,8 +42,8 @@ export default function CategoriasPage() {
   };
 
   const columns = [
-    { key: 'nombre', header: 'Nombre' },
-    { key: 'prefijo', header: 'Prefijo' },
+    { key: 'nombre', header: 'Nombre', sortable: true },
+    { key: 'prefijo', header: 'Prefijo', sortable: true },
   ];
 
   return (

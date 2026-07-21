@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type { ReactNode } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface Column<T> {
   key: string;
   header: string;
   render?: (item: T) => ReactNode;
+  sortable?: boolean;
+  sortValue?: (item: T) => string | number;
 }
 
 interface DataTableProps<T> {
@@ -31,19 +33,52 @@ export function DataTable<T extends { id: any }>({
 }: DataTableProps<T>) {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
-  const filteredData = searchable && searchTerm
-    ? data.filter(item =>
-        (searchKeys || columns.map(c => c.key)).some(key => {
-          const val = (item as any)[key];
-          return val !== null && val !== undefined && String(val).toLowerCase().includes(searchTerm.toLowerCase());
-        })
-      )
-    : data;
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
 
-  const totalPages = Math.ceil(filteredData.length / pageSize);
+  const filteredData = useMemo(() => {
+    if (!searchable || !searchTerm) return data;
+    return data.filter(item =>
+      (searchKeys || columns.map(c => c.key)).some(key => {
+        const val = (item as any)[key];
+        return val !== null && val !== undefined && String(val).toLowerCase().includes(searchTerm.toLowerCase());
+      })
+    );
+  }, [data, searchTerm, searchable, searchKeys, columns]);
+
+  const sortedData = useMemo(() => {
+    if (!sortKey) return filteredData;
+    const col = columns.find(c => c.key === sortKey);
+    return [...filteredData].sort((a, b) => {
+      let aVal: string | number;
+      let bVal: string | number;
+      if (col?.sortValue) {
+        aVal = col.sortValue(a);
+        bVal = col.sortValue(b);
+      } else {
+        aVal = String((a as any)[sortKey] ?? '').toLowerCase();
+        bVal = String((b as any)[sortKey] ?? '').toLowerCase();
+      }
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+      const cmp = String(aVal).localeCompare(String(bVal), 'es', { numeric: true });
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [filteredData, sortKey, sortDir, columns]);
+
+  const totalPages = Math.ceil(sortedData.length / pageSize);
   const start = (page - 1) * pageSize;
-  const paginatedData = filteredData.slice(start, start + pageSize);
+  const paginatedData = sortedData.slice(start, start + pageSize);
 
   if (loading) {
     return (
@@ -81,8 +116,19 @@ export function DataTable<T extends { id: any }>({
           <thead className="bg-gray-50 border-b">
             <tr>
               {columns.map(col => (
-                <th key={col.key} className="px-4 py-3 text-left font-medium text-gray-600">
-                  {col.header}
+                <th
+                  key={col.key}
+                  className={`px-4 py-3 text-left font-medium text-gray-600 ${col.sortable ? 'cursor-pointer hover:bg-gray-100 select-none' : ''}`}
+                  onClick={() => col.sortable && handleSort(col.key)}
+                >
+                  <span className="flex items-center gap-1">
+                    {col.header}
+                    {col.sortable && (
+                      sortKey === col.key
+                        ? (sortDir === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)
+                        : <ArrowUpDown size={14} className="text-gray-300" />
+                    )}
+                  </span>
                 </th>
               ))}
               {(onEdit || onDelete) && (
@@ -118,11 +164,10 @@ export function DataTable<T extends { id: any }>({
         </table>
       </div>
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-3 px-1">
           <p className="text-xs text-gray-500">
-            {filteredData.length} registro{filteredData.length !== 1 ? 's' : ''} · Página {page} de {totalPages}
+            {sortedData.length} registro{sortedData.length !== 1 ? 's' : ''} · Página {page} de {totalPages}
           </p>
           <div className="flex items-center gap-1">
             <button

@@ -107,22 +107,30 @@ export default function ComprasPage() {
   };
 
   const columns = [
-    { key: 'codigo', header: 'Código' },
+    { key: 'codigo', header: 'Código', sortable: true },
     {
       key: 'proveedor', header: 'Proveedor',
+      sortable: true,
+      sortValue: (item: OrdenCompra) => item.proveedor?.razon_social ?? '',
       render: (item: OrdenCompra) => item.proveedor?.razon_social ?? '-',
     },
-    { key: 'estado', header: 'Estado' },
+    { key: 'estado', header: 'Estado', sortable: true },
     {
       key: 'subtotal', header: 'Subtotal',
+      sortable: true,
+      sortValue: (item: OrdenCompra) => Number(item.subtotal),
       render: (item: OrdenCompra) => `$${Number(item.subtotal).toFixed(2)}`,
     },
     {
       key: 'impuestos', header: 'Impuestos',
+      sortable: true,
+      sortValue: (item: OrdenCompra) => Number(item.impuestos),
       render: (item: OrdenCompra) => `$${Number(item.impuestos).toFixed(2)}`,
     },
     {
       key: 'total', header: 'Total',
+      sortable: true,
+      sortValue: (item: OrdenCompra) => Number(item.total),
       render: (item: OrdenCompra) => (
         <span className="font-semibold">${Number(item.total).toFixed(2)}</span>
       ),

@@ -42,8 +42,8 @@ export default function UnidadesMedidaPage() {
   };
 
   const columns = [
-    { key: 'nombre', header: 'Nombre' },
-    { key: 'simbolo', header: 'Símbolo' },
+    { key: 'nombre', header: 'Nombre', sortable: true },
+    { key: 'simbolo', header: 'Símbolo', sortable: true },
   ];
 
   return (

@@ -16,6 +16,7 @@ import ProyectosPage from '../pages/private/ProyectosPage';
 import RequirementsPage from '../pages/private/RequirementsPage';
 import type { JSX } from 'react/jsx-runtime';
 import DespachosPage from '../pages/private/DespachosPage';
+import ProfilePage from '../pages/private/ProfilePage';
 
 interface PrivateRoute {
   path: string;
@@ -25,6 +26,7 @@ interface PrivateRoute {
 
 export const privateRoutes: PrivateRoute[] = [
   { path: '/dashboard', element: <DashboardPage />, allowedRoles: [] },
+  { path: '/profile', element: <ProfilePage />, allowedRoles: [] },
   { path: '/users', element: <UsersPage />, allowedRoles: ['ADMIN'] },
   { path: '/proveedores', element: <ProveedoresPage />, allowedRoles: ['ADMIN', 'COMPRADOR'] },
   { path: '/categorias', element: <CategoriasPage />, allowedRoles: ['ADMIN'] },

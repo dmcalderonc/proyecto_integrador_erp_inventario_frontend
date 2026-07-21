@@ -2,6 +2,8 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Package, Tag, Ruler } from 'lucide-react';
 import { publicMaterialesApi } from '../../api/public-materiales.api';
+import { Navbar } from '../../components/ui/Navbar';
+import { Footer } from '../../components/ui/Footer';
 
 export default function PublicMaterialDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,18 +18,10 @@ export default function PublicMaterialDetailPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <Link to="/" className="font-bold text-xl text-blue-600">StockLy</Link>
-          <div className="flex gap-3">
-            <Link to="/login" className="text-sm text-gray-600 hover:text-gray-900 font-medium">Iniciar sesión</Link>
-            <Link to="/register" className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium">Registrarse</Link>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Navbar />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex-1 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         <Link to="/materiales" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-6">
           <ArrowLeft size={16} /> Volver al catálogo
         </Link>
@@ -46,6 +40,12 @@ export default function PublicMaterialDetailPage() {
           </div>
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
+            {(material as any).imagen && (
+              <div className="w-full h-64 rounded-lg overflow-hidden mb-6 bg-gray-100">
+                <img src={(material as any).imagen} alt={material.nombre} className="w-full h-full object-cover" />
+              </div>
+            )}
+
             <div className="flex flex-wrap items-start gap-3 mb-6">
               <span className="text-sm font-mono bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg">{material.sku}</span>
               {material.unidadMedida && (
@@ -84,6 +84,8 @@ export default function PublicMaterialDetailPage() {
           </div>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 }

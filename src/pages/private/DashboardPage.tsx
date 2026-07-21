@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { FolderOpen, ClipboardList, DollarSign, Activity, AlertTriangle, TrendingUp } from 'lucide-react';
+import { FolderOpen, ClipboardList, DollarSign, Activity, AlertTriangle, TrendingUp, Users, Tags, Package } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import api from '../../api/http';
 
@@ -7,6 +7,9 @@ interface DashboardKpis {
   proyectosActivos: number;
   requerimientosPendientes: number;
   valorizacionTotalInventario: number;
+  totalUsuarios: number;
+  totalCategorias: number;
+  totalMateriales: number;
 }
 
 interface AuditLog {
@@ -112,7 +115,32 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Dashboard</h1>
 
-      {/* KPI Cards */}
+      {/* KPI Cards - Row 1 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 flex items-center gap-4">
+          <div className="bg-purple-100 p-3 rounded-lg text-purple-600"><Users size={22} /></div>
+          <div>
+            <p className="text-xs font-medium text-gray-500">Total Usuarios</p>
+            <p className="text-2xl font-bold text-gray-900">{kpis?.totalUsuarios ?? 0}</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 flex items-center gap-4">
+          <div className="bg-cyan-100 p-3 rounded-lg text-cyan-600"><Tags size={22} /></div>
+          <div>
+            <p className="text-xs font-medium text-gray-500">Categorías</p>
+            <p className="text-2xl font-bold text-gray-900">{kpis?.totalCategorias ?? 0}</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 flex items-center gap-4">
+          <div className="bg-rose-100 p-3 rounded-lg text-rose-600"><Package size={22} /></div>
+          <div>
+            <p className="text-xs font-medium text-gray-500">Total Materiales</p>
+            <p className="text-2xl font-bold text-gray-900">{kpis?.totalMateriales ?? 0}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* KPI Cards - Row 2 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 flex items-center gap-4">
           <div className="bg-blue-100 p-3 rounded-lg text-blue-600"><FolderOpen size={22} /></div>

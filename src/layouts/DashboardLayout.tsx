@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { cn } from '../lib/utils';
+import { Breadcrumbs } from '../components/ui/Breadcrumbs';
+import { Footer } from '../components/ui/Footer';
 import {
   LayoutDashboard,
   Users,
@@ -62,7 +64,7 @@ export function DashboardLayout() {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Top bar - mobile */}
       <div className="md:hidden fixed top-0 inset-x-0 h-14 bg-white border-b shadow-sm z-30 flex items-center px-4">
         <button
@@ -97,8 +99,10 @@ export function DashboardLayout() {
         </div>
 
         <div className="p-4 border-b shrink-0">
-          <p className="text-sm font-semibold text-gray-800 truncate">{user?.nombre || 'Usuario'}</p>
-          <p className="text-xs text-gray-500 font-medium">{user?.rol}</p>
+          <Link to="/profile" className="block hover:bg-gray-50 rounded-lg p-1 -m-1 transition-colors">
+            <p className="text-sm font-semibold text-gray-800 truncate">{user?.nombre || 'Usuario'}</p>
+            <p className="text-xs text-gray-500 font-medium">{user?.rol}</p>
+          </Link>
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar">
@@ -136,11 +140,16 @@ export function DashboardLayout() {
       </aside>
 
       {/* Main content */}
-      <main className="md:ml-64 min-w-0 pt-14 md:pt-0">
+      <main className="md:ml-64 min-w-0 pt-14 md:pt-0 flex-1">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 md:px-8">
+          <Breadcrumbs />
           <Outlet />
         </div>
       </main>
+
+      <div className="md:ml-64">
+        <Footer />
+      </div>
     </div>
   );
 }

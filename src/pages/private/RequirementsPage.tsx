@@ -104,14 +104,28 @@ export default function RequirementsPage() {
   };
 
   const columns = [
-    { key: 'id', header: 'ID', render: (item: Requirement) => `REQ-${item.id}` },
-    { key: 'proyecto', header: 'Proyecto', render: (item: Requirement) => item.proyecto?.nombre ?? '-' },
+    {
+      key: 'id', header: 'ID',
+      sortable: true,
+      sortValue: (item: Requirement) => item.id,
+      render: (item: Requirement) => `REQ-${item.id}`,
+    },
+    {
+      key: 'proyecto', header: 'Proyecto',
+      sortable: true,
+      sortValue: (item: Requirement) => item.proyecto?.nombre ?? '',
+      render: (item: Requirement) => item.proyecto?.nombre ?? '-',
+    },
     {
       key: 'usuarioSolicitante', header: 'Solicitante',
+      sortable: true,
+      sortValue: (item: Requirement) => item.usuarioSolicitante?.nombre ?? '',
       render: (item: Requirement) => item.usuarioSolicitante?.nombre ?? '-',
     },
     {
       key: 'fechaSolicitud', header: 'Fecha',
+      sortable: true,
+      sortValue: (item: Requirement) => item.fechaSolicitud ?? '',
       render: (item: Requirement) => item.fechaSolicitud ? new Date(item.fechaSolicitud).toLocaleDateString() : '-',
     },
     {

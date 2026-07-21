@@ -42,10 +42,10 @@ export default function BodegasPage() {
   };
 
   const columns = [
-    { key: 'nombre', header: 'Nombre' },
-    { key: 'ubicacion', header: 'Ubicación' },
+    { key: 'nombre', header: 'Nombre', sortable: true },
+    { key: 'ubicacion', header: 'Ubicación', sortable: true },
     {
-      key: 'isPrincipal', header: 'Principal',
+      key: 'isPrincipal', header: 'Principal', sortable: true, sortValue: (item: Bodega) => item.isPrincipal ? 'Sí' : 'No',
       render: (item: Bodega) => (
         <span className={item.isPrincipal ? 'text-green-600 font-medium' : 'text-gray-400'}>
           {item.isPrincipal ? 'Sí' : 'No'}

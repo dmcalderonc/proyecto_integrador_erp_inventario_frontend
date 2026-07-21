@@ -42,9 +42,9 @@ export default function ProveedoresPage() {
   };
 
   const columns = [
-    { key: 'ruc', header: 'RUC' },
-    { key: 'razon_social', header: 'Razón Social' },
-    { key: 'email', header: 'Email' },
+    { key: 'ruc', header: 'RUC', sortable: true },
+    { key: 'razon_social', header: 'Razón Social', sortable: true },
+    { key: 'email', header: 'Email', sortable: true },
     { key: 'telefono', header: 'Teléfono' },
     { key: 'direccion', header: 'Dirección' },
   ];
