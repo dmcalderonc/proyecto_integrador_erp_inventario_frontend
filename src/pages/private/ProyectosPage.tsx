@@ -87,7 +87,7 @@ export default function ProyectosPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <h1 className="text-2xl font-bold">Proyectos</h1>
         {isAdmin && (
           <Button onClick={openCreate}>
@@ -102,6 +102,8 @@ export default function ProyectosPage() {
         loading={isLoading}
         onEdit={isAdmin ? openEdit : undefined}
         onDelete={isAdmin ? openDelete : undefined}
+        searchable
+        searchKeys={["nombre", "estado"]}
       />
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Proyecto' : 'Nuevo Proyecto'}>

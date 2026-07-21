@@ -150,12 +150,12 @@ export default function ComprasPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <h1 className="text-2xl font-bold">Órdenes de Compra</h1>
         <Button onClick={openCreate}><Plus size={16} className="inline mr-1" /> Nueva</Button>
       </div>
 
-      <DataTable columns={columns} data={compras} loading={isLoading} />
+      <DataTable columns={columns} data={compras} loading={isLoading} searchable searchKeys={["codigo", "estado"]} />
 
       {/* Modal Crear */}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nueva Orden de Compra">
@@ -178,7 +178,7 @@ export default function ComprasPage() {
               </button>
             </div>
             {(form.detalles ?? []).map((det: DetalleCompra, i: number) => (
-              <div key={i} className="flex gap-2 mb-2 items-end">
+              <div key={i} className="flex flex-col sm:flex-row gap-2 mb-2 sm:items-end">
                 <select value={det.materialId} onChange={e => updateDetalle(i, 'materialId', Number(e.target.value))}
                   className="flex-1 border rounded-lg px-3 py-2 text-sm" required>
                   <option value={0}>Seleccione material</option>
@@ -187,10 +187,10 @@ export default function ComprasPage() {
                 <input type="number" step="1" min="1" placeholder="Cantidad" value={det.cantidad}
                   onChange={e => updateDetalle(i, 'cantidad', Number(e.target.value))}
                   onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
-                  className="w-20 border rounded-lg px-3 py-2 text-sm" required />
+                  className="w-full sm:w-20 border rounded-lg px-3 py-2 text-sm" required />
                 <input type="number" min="0" step="0.01" placeholder="P. Unitario" value={det.precioUnitario}
                   onChange={e => updateDetalle(i, 'precioUnitario', Number(e.target.value))}
-                  className="w-28 border rounded-lg px-3 py-2 text-sm" required />
+                  className="w-full sm:w-28 border rounded-lg px-3 py-2 text-sm" required />
                 <button type="button" onClick={() => removeDetalle(i)} className="text-red-500 hover:text-red-700 p-2">
                   <Trash2 size={16} />
                 </button>

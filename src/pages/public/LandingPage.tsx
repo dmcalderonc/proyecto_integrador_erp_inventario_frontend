@@ -49,7 +49,7 @@ function DashboardMockup() {
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-3 gap-3 mb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
           {[
             { label: 'Materiales', value: '1,247', change: '+12%', color: 'bg-teal-500' },
             { label: 'Bodegas', value: '8', change: '+2', color: 'bg-orange-500' },
@@ -243,7 +243,7 @@ export function LandingPage() {
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-3 gap-6 pt-4 animate-slide-up opacity-0 delay-400">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 animate-slide-up opacity-0 delay-400">
                 {[
                   { value: '4', label: 'Roles' },
                   { value: '10+', label: 'Módulos' },

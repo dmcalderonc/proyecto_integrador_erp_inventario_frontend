@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { cn } from '../lib/utils';
@@ -16,7 +17,9 @@ import {
   ClipboardCheck,
   PackageCheck,
   Activity,
-  LogOut
+  LogOut,
+  Menu,
+  X,
 } from 'lucide-react';
 import type { UserRole } from '../types';
 
@@ -32,6 +35,7 @@ const navLinks: NavItem[] = [
   { to: '/users', label: 'Usuarios', icon: Users, roles: ['ADMIN'] },
   { to: '/bodegas', label: 'Bodegas', icon: Box, roles: ['ADMIN', 'BODEGUERO'] },
   { to: '/categorias', label: 'Categorías', icon: Tags, roles: ['ADMIN'] },
+  { to: '/unidades-medida', label: 'Unidades de Medida', icon: Tags, roles: ['ADMIN'] },
   { to: '/proveedores', label: 'Proveedores', icon: Truck, roles: ['ADMIN', 'COMPRADOR'] },
   { to: '/materiales', label: 'Materiales', icon: Package, roles: ['ADMIN', 'BODEGUERO', 'COMPRADOR'] },
   { to: '/inventario', label: 'Inventario', icon: Box, roles: ['ADMIN', 'BODEGUERO'] },
@@ -49,14 +53,44 @@ const navLinks: NavItem[] = [
 export function DashboardLayout() {
   const location = useLocation();
   const { user, logout, hasRole } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const filteredLinks = navLinks.filter(link => hasRole(link.roles));
 
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar Fijo */}
-      <aside className="w-64 bg-white border-r shadow-sm fixed inset-y-0 left-0 flex flex-col z-10">
-        <div className="h-16 flex items-center px-6 border-b shrink-0">
+    <div className="min-h-screen bg-gray-50">
+      {/* Top bar - mobile */}
+      <div className="md:hidden fixed top-0 inset-x-0 h-14 bg-white border-b shadow-sm z-30 flex items-center px-4">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+        >
+          {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+        <Link to="/dashboard" className="ml-3 font-bold text-lg text-blue-600">
+          StockLy
+        </Link>
+      </div>
+
+      {/* Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={cn(
+        "fixed inset-y-0 left-0 w-64 bg-white border-r shadow-sm flex flex-col z-40 transition-transform duration-200 ease-in-out",
+        "md:translate-x-0",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="h-14 md:h-16 flex items-center px-6 border-b shrink-0">
           <Link to="/dashboard" className="font-bold text-xl text-blue-600">
             StockLy
           </Link>
@@ -101,9 +135,9 @@ export function DashboardLayout() {
         </div>
       </aside>
 
-      {/* Contenido Principal con margen izquierdo (ml-64 compensa el width del sidebar) */}
-      <main className="flex-1 ml-64 min-w-0">
-        <div className="max-w-7xl mx-auto py-6 px-8">
+      {/* Main content */}
+      <main className="md:ml-64 min-w-0 pt-14 md:pt-0">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 md:px-8">
           <Outlet />
         </div>
       </main>

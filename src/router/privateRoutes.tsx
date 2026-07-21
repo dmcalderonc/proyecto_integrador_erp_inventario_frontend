@@ -6,15 +6,16 @@ import BodegasPage from '../pages/private/BodegasPage';
 import ComprasPage from '../pages/private/ComprasPage';
 import MovimientosPage from '../pages/private/MovimientosPage';
 import AjustesPage from '../pages/private/AjustesPage';
-import CotizacionesPage from '../pages/cotizaciones/CotizacionesPage';
-import SolicitudesPage from '../pages/solicitudes/SolicitudesPage';
-import DashboardPage from '../pages/dashboard/DashboardPage';
-import MaterialesPage from '../pages/materiales/MaterialesPage';
-import InventarioPage from '../pages/inventario/InventarioPage';
-import ProyectosPage from '../pages/proyectos/ProyectosPage';
-import RequirementsPage from '../pages/requirements/RequirementsPage';
+import CotizacionesPage from '../pages/private/CotizacionesPage';
+import SolicitudesPage from '../pages/private/SolicitudesPage';
+import DashboardPage from '../pages/private/DashboardPage';
+import MaterialesPage from '../pages/private/MaterialesPage';
+import UnidadesMedidaPage from '../pages/private/UnidadesMedidaPage';
+import InventarioPage from '../pages/private/InventarioPage';
+import ProyectosPage from '../pages/private/ProyectosPage';
+import RequirementsPage from '../pages/private/RequirementsPage';
 import type { JSX } from 'react/jsx-runtime';
-import DespachosPage from '../pages/despachos/DespachosPage';
+import DespachosPage from '../pages/private/DespachosPage';
 
 interface PrivateRoute {
   path: string;
@@ -27,6 +28,7 @@ export const privateRoutes: PrivateRoute[] = [
   { path: '/users', element: <UsersPage />, allowedRoles: ['ADMIN'] },
   { path: '/proveedores', element: <ProveedoresPage />, allowedRoles: ['ADMIN', 'COMPRADOR'] },
   { path: '/categorias', element: <CategoriasPage />, allowedRoles: ['ADMIN'] },
+  { path: '/unidades-medida', element: <UnidadesMedidaPage />, allowedRoles: ['ADMIN'] },
   { path: '/bodegas', element: <BodegasPage />, allowedRoles: ['ADMIN', 'BODEGUERO'] },
 
 

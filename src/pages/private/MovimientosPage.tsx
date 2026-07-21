@@ -111,12 +111,12 @@ export default function MovimientosPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <h1 className="text-2xl font-bold">Movimientos de Inventario</h1>
         <Button onClick={openCreate}><Plus size={16} className="inline mr-1" /> Nuevo</Button>
       </div>
 
-      <DataTable columns={columns} data={movimientos} loading={isLoading} />
+      <DataTable columns={columns} data={movimientos} loading={isLoading} searchable searchKeys={["codigo", "tipo", "estado"]} />
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Registrar Movimiento">
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -166,7 +166,7 @@ export default function MovimientosPage() {
               </button>
             </div>
             {form.detalles.map((det, i) => (
-              <div key={i} className="flex gap-2 mb-2 items-end">
+              <div key={i} className="flex flex-col sm:flex-row gap-2 mb-2 sm:items-end">
                 <select value={det.materialId} onChange={e => updateDetalle(i, 'materialId', Number(e.target.value))}
                   className="flex-1 border rounded-lg px-3 py-2 text-sm" required>
                   <option value={0}>Seleccione material</option>
@@ -175,7 +175,7 @@ export default function MovimientosPage() {
                 <input type="number" step="1" min="1" placeholder="Cantidad" value={det.cantidad}
                   onChange={e => updateDetalle(i, 'cantidad', Number(e.target.value))}
                   onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
-                  className="w-24 border rounded-lg px-3 py-2 text-sm" required />
+                  className="w-full sm:w-24 border rounded-lg px-3 py-2 text-sm" required />
                 <button type="button" onClick={() => removeDetalle(i)} className="text-red-500 hover:text-red-700 p-2">
                   <Trash2 size={16} />
                 </button>

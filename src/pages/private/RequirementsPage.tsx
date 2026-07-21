@@ -165,7 +165,7 @@ export default function RequirementsPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <h1 className="text-2xl font-bold">Requerimientos</h1>
         {canCreate && (
           <Button onClick={openCreate}>
@@ -174,7 +174,7 @@ export default function RequirementsPage() {
         )}
       </div>
 
-      <DataTable columns={columns} data={requirements} loading={isLoading} />
+      <DataTable columns={columns} data={requirements} loading={isLoading} searchable searchKeys={["codigo", "estado"]} />
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo Requerimiento">
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -212,7 +212,7 @@ export default function RequirementsPage() {
                     value={detalle.cantidadSolicitada}
                     onChange={e => updateDetalle(index, 'cantidadSolicitada', e.target.value)}
                     onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
-                    className="w-28 border rounded-lg px-3 py-2 text-sm" required />
+                    className="w-full sm:w-28 border rounded-lg px-3 py-2 text-sm" required />
                   <button type="button" onClick={() => removeDetalle(index)}
                     disabled={detalles.length === 1}
                     className="text-red-500 hover:text-red-700 disabled:opacity-30 p-2">
@@ -239,6 +239,9 @@ export default function RequirementsPage() {
         title="Cambiar estado"
         message={statusAction ? `¿Confirmás que querés ${statusAction.label} el requerimiento REQ-${statusAction.requirement.id}?` : ''}
         loading={actualizarEstado.isPending}
+        confirmLabel={statusAction?.estado === 'APROBADO' ? 'Aprobar' : statusAction?.estado === 'RECHAZADO' ? 'Rechazar' : statusAction?.estado === 'ATENDIDO' ? 'Marcar Atendido' : 'Confirmar'}
+        loadingLabel={statusAction?.estado === 'APROBADO' ? 'Aprobando...' : statusAction?.estado === 'RECHAZADO' ? 'Rechazando...' : statusAction?.estado === 'ATENDIDO' ? 'Procesando...' : 'Procesando...'}
+        variant={statusAction?.estado === 'APROBADO' ? 'success' : 'danger'}
       />
 
       <ConfirmDialog

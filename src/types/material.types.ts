@@ -1,13 +1,12 @@
 import type { Categoria } from './categoria.types';
-
-export type UnidadMedida = 'U' | 'KG' | 'M' | 'M2';
+import type { UnidadMedida } from './unidad-medida.types';
 
 export interface Material {
   id: number;
   nombre: string;
   descripcion?: string;
   sku: string;
-  unidad_medida: UnidadMedida;
+  unidadMedida?: UnidadMedida;
   categoria_id?: number;
   categoria?: Categoria;
 }
@@ -15,6 +14,6 @@ export interface Material {
 export interface CreateMaterialDto {
   nombre: string;
   descripcion?: string;
-  unidad_medida: UnidadMedida;
+  unidad_medida_id: number;
   categoria_id: number;
 }

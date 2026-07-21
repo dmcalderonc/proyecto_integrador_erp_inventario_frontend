@@ -157,13 +157,13 @@ export default function SolicitudesPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <h1 className="text-2xl font-bold">Solicitudes de Compra</h1>
         <Button onClick={openCreate}><Plus size={16} className="inline mr-1" /> Nueva</Button>
       </div>
 
       {/* Filtros */}
-      <div className="flex gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div>
           <label className="block text-xs text-gray-500 mb-1">Estado</label>
           <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)}
@@ -189,7 +189,7 @@ export default function SolicitudesPage() {
         )}
       </div>
 
-      <DataTable columns={columns} data={solicitudes} loading={isLoading} />
+      <DataTable columns={columns} data={solicitudes} loading={isLoading} searchable searchKeys={["codigo", "estado"]} />
 
       {/* Modal Crear */}
       <Modal open={createModalOpen} onClose={() => setCreateModalOpen(false)} title="Nueva Solicitud de Compra">
@@ -226,7 +226,7 @@ export default function SolicitudesPage() {
               <p className="text-sm text-gray-400">Agrega al menos un material.</p>
             )}
             {createForm.detalles.map((det, i) => (
-              <div key={i} className="flex gap-2 mb-2 items-end">
+              <div key={i} className="flex flex-col sm:flex-row gap-2 mb-2 sm:items-end">
                 <select value={det.materialId} onChange={e => updateDetalle(i, 'materialId', Number(e.target.value))}
                   className="flex-1 border rounded-lg px-3 py-2 text-sm" required>
                   <option value={0}>Seleccione material</option>
@@ -235,7 +235,7 @@ export default function SolicitudesPage() {
                 <input type="number" step="1" min="1" placeholder="Cantidad" value={det.cantidadRequerida}
                   onChange={e => updateDetalle(i, 'cantidadRequerida', Number(e.target.value))}
                   onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
-                  className="w-24 border rounded-lg px-3 py-2 text-sm" required />
+                  className="w-full sm:w-24 border rounded-lg px-3 py-2 text-sm" required />
                 <button type="button" onClick={() => removeDetalle(i)} className="text-red-500 hover:text-red-700 p-2">
                   <Trash2 size={16} />
                 </button>
@@ -285,7 +285,7 @@ export default function SolicitudesPage() {
       <Modal open={detailModalOpen} onClose={() => setDetailModalOpen(false)} title={`Detalle — ${selected?.codigo ?? ''}`}>
         {selected && (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <div><span className="font-medium text-gray-600">Estado:</span> <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${badgeEstado[selected.estado]}`}>{selected.estado}</span></div>
               <div><span className="font-medium text-gray-600">Prioridad:</span> <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${badgePrioridad[selected.nivelPrioridad]}`}>{selected.nivelPrioridad}</span></div>
               <div><span className="font-medium text-gray-600">Proyecto:</span> {selected.proyecto?.nombre ?? '-'}</div>

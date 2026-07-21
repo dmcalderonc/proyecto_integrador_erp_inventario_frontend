@@ -123,7 +123,7 @@ export default function AjustesPage() {
               <p className="text-sm text-gray-400">Agrega al menos un material para ajustar.</p>
             )}
             {form.detalles.map((det, i) => (
-              <div key={i} className="flex gap-2 mb-2 items-end">
+              <div key={i} className="flex flex-col sm:flex-row gap-2 mb-2 sm:items-end">
                 <select value={det.materialId} onChange={e => updateDetalle(i, 'materialId', Number(e.target.value))}
                   className="flex-1 border rounded-lg px-3 py-2 text-sm" required>
                   <option value={0}>Seleccione material</option>
@@ -132,7 +132,7 @@ export default function AjustesPage() {
                 <input type="number" step="1" min="0" placeholder="Stock físico" value={det.stockFisico}
                   onChange={e => updateDetalle(i, 'stockFisico', Number(e.target.value))}
                   onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
-                  className="w-32 border rounded-lg px-3 py-2 text-sm" required />
+                  className="w-full sm:w-32 border rounded-lg px-3 py-2 text-sm" required />
                 <button type="button" onClick={() => removeDetalle(i)} className="text-red-500 hover:text-red-700 p-2">
                   <Trash2 size={16} />
                 </button>
@@ -149,7 +149,7 @@ export default function AjustesPage() {
       </div>
 
       <h2 className="text-lg font-semibold mb-3">Historial de Ajustes</h2>
-      <DataTable columns={columns} data={ajustes} loading={isLoading} />
+      <DataTable columns={columns} data={ajustes} loading={isLoading} searchable searchKeys={["codigo", "estado"]} />
 
       <Modal open={detailOpen} onClose={() => setDetailOpen(false)} title={`Ajuste - ${selectedAjuste?.bodega?.nombre ?? ''}`}>
         {selectedAjuste && (

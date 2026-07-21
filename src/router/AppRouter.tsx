@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { ProtectedRoute } from '../guards/ProtectedRoute';
-import { NotFoundPage } from '../pages/NotFoundPage';
+import { NotFoundPage } from '../pages/public/NotFoundPage';
 import { publicRoutes } from './publicRoutes';
 import { privateRoutes } from './privateRoutes';
 import { DashboardLayout } from '../layouts/DashboardLayout';

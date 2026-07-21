@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
@@ -41,10 +41,10 @@ export function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-md w-full space-y-8 bg-white p-6 sm:p-10 rounded-xl shadow-lg">
                 <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                    <h2 className="mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
                         Iniciar Sesión
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-600">
@@ -105,6 +105,15 @@ export function Login() {
                                 'Ingresar'
                             )}
                         </Button>
+                    </div>
+
+                    <div className="text-center">
+                        <p className="text-sm text-gray-600">
+                            ¿No tienes una cuenta?{' '}
+                            <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+                                Registrarse
+                            </Link>
+                        </p>
                     </div>
                 </form>
             </div>

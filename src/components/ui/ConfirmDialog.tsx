@@ -3,6 +3,8 @@ import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@
 import { AlertTriangle } from 'lucide-react';
 import { Button } from './Button';
 
+type ConfirmVariant = 'danger' | 'success' | 'warning';
+
 interface ConfirmDialogProps {
   open: boolean;
   onClose: () => void;
@@ -12,9 +14,17 @@ interface ConfirmDialogProps {
   loading?: boolean;
   confirmLabel?: string;
   loadingLabel?: string;
+  variant?: ConfirmVariant;
 }
 
-export function ConfirmDialog({ open, onClose, onConfirm, title, message, loading, confirmLabel = 'Eliminar', loadingLabel = 'Eliminando...' }: ConfirmDialogProps) {
+const variantStyles: Record<ConfirmVariant, { bg: string; icon: string; btn: string }> = {
+  danger:  { bg: 'bg-red-100',    icon: 'text-red-600',    btn: 'danger'  },
+  success: { bg: 'bg-green-100',  icon: 'text-green-600',  btn: 'success' },
+  warning: { bg: 'bg-amber-100',  icon: 'text-amber-600',  btn: 'danger'  },
+};
+
+export function ConfirmDialog({ open, onClose, onConfirm, title, message, loading, confirmLabel = 'Eliminar', loadingLabel = 'Eliminando...', variant = 'danger' }: ConfirmDialogProps) {
+  const v = variantStyles[variant];
   return (
     <Transition show={open} as={Fragment}>
       <Dialog onClose={onClose} className="relative z-50">
@@ -42,8 +52,8 @@ export function ConfirmDialog({ open, onClose, onConfirm, title, message, loadin
           >
             <DialogPanel className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="bg-red-100 p-2 rounded-full">
-                  <AlertTriangle className="text-red-600" size={24} />
+                <div className={`${v.bg} p-2 rounded-full`}>
+                  <AlertTriangle className={v.icon} size={24} />
                 </div>
                 <DialogTitle className="text-lg font-bold">{title}</DialogTitle>
               </div>
@@ -52,7 +62,7 @@ export function ConfirmDialog({ open, onClose, onConfirm, title, message, loadin
                 <Button variant="secondary" onClick={onClose} disabled={loading}>
                   Cancelar
                 </Button>
-                <Button variant="danger" onClick={onConfirm} disabled={loading}>
+                <Button variant={v.btn as any} onClick={onConfirm} disabled={loading}>
                   {loading ? loadingLabel : confirmLabel}
                 </Button>
               </div>

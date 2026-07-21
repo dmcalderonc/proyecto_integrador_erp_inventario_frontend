@@ -51,14 +51,14 @@ export default function ProveedoresPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <h1 className="text-2xl font-bold">Proveedores</h1>
         <Button onClick={openCreate}>
           <Plus size={16} className="inline mr-1" /> Nuevo
         </Button>
       </div>
 
-      <DataTable columns={columns} data={proveedores} loading={isLoading} onEdit={openEdit} onDelete={openDelete} />
+      <DataTable columns={columns} data={proveedores} loading={isLoading} onEdit={openEdit} onDelete={openDelete} searchable searchKeys={["nombre", "email", "telefono"]} />
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Proveedor' : 'Nuevo Proveedor'}>
         <form onSubmit={handleSubmit} className="space-y-3">

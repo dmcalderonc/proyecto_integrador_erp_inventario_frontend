@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMateriales } from '../../store/useMateriales';
 import { useCategorias } from '../../store/useCategorias';
+import { useUnidadesMedida } from '../../store/useUnidadesMedida';
 import type { Material, CreateMaterialDto } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
@@ -11,20 +12,14 @@ import { Plus } from 'lucide-react';
 const emptyForm: CreateMaterialDto = {
   nombre: '',
   descripcion: '',
-  unidad_medida: 'U',
+  unidad_medida_id: 0,
   categoria_id: 0,
 };
-
-const unidades = [
-  { value: 'U', label: 'Unidad (U)' },
-  { value: 'KG', label: 'Kilogramo (KG)' },
-  { value: 'M', label: 'Metro (M)' },
-  { value: 'M2', label: 'Metro cuadrado (M2)' },
-];
 
 export default function MaterialesPage() {
   const { materiales, isLoading, crear, actualizar, eliminar } = useMateriales();
   const { categorias, isLoading: isLoadingCats } = useCategorias();
+  const { unidades: unidadesMedida, isLoading: isLoadingUnidades } = useUnidadesMedida();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -43,8 +38,8 @@ export default function MaterialesPage() {
     setForm({
       nombre: item.nombre,
       descripcion: item.descripcion ?? '',
-      unidad_medida: item.unidad_medida,
-      categoria_id: item.categoria_id ?? 0,
+      unidad_medida_id: item.unidadMedida?.id ?? 0,
+      categoria_id: item.categoria?.id ?? 0,
     });
     setModalOpen(true);
   };
@@ -58,6 +53,7 @@ export default function MaterialesPage() {
     e.preventDefault();
     const dto: CreateMaterialDto = {
       ...form,
+      unidad_medida_id: Number(form.unidad_medida_id),
       categoria_id: Number(form.categoria_id),
     };
 
@@ -80,20 +76,20 @@ export default function MaterialesPage() {
     { key: 'sku', header: 'SKU' },
     { key: 'nombre', header: 'Nombre' },
     { key: 'descripcion', header: 'Descripción', render: (item: Material) => item.descripcion || '-' },
-    { key: 'unidad_medida', header: 'Unidad' },
+    { key: 'unidadMedida', header: 'Unidad', render: (item: Material) => item.unidadMedida?.simbolo || '-' },
     { key: 'categoria', header: 'Categoría', render: (item: Material) => item.categoria?.nombre || '-' },
   ];
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Catálogo de Materiales</h1>
         <Button onClick={openCreate}>
           <Plus size={16} className="inline mr-1" /> Nuevo
         </Button>
       </div>
 
-      <DataTable columns={columns} data={materiales} loading={isLoading} onEdit={openEdit} onDelete={openDelete} />
+      <DataTable columns={columns} data={materiales} loading={isLoading} onEdit={openEdit} onDelete={openDelete} searchable searchKeys={["sku", "nombre"]} />
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Material' : 'Nuevo Material'}>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -120,13 +116,15 @@ export default function MaterialesPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Unidad de Medida</label>
             <select
-              value={form.unidad_medida}
-              onChange={e => setForm({ ...form, unidad_medida: e.target.value as CreateMaterialDto['unidad_medida'] })}
+              value={form.unidad_medida_id}
+              onChange={e => setForm({ ...form, unidad_medida_id: Number(e.target.value) })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               required
             >
-              {unidades.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
+              <option value={0} disabled>Seleccione unidad</option>
+              {unidadesMedida.map(u => <option key={u.id} value={u.id}>{u.nombre} ({u.simbolo})</option>)}
             </select>
+            {isLoadingUnidades && <p className="text-xs text-gray-400 mt-1">Cargando unidades...</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
@@ -144,7 +142,7 @@ export default function MaterialesPage() {
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
-            <Button type="submit" disabled={crear.isPending || actualizar.isPending || form.categoria_id === 0}>
+            <Button type="submit" disabled={crear.isPending || actualizar.isPending || form.categoria_id === 0 || form.unidad_medida_id === 0}>
               {editing ? 'Actualizar' : 'Crear'}
             </Button>
           </div>

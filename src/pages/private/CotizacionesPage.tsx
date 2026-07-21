@@ -115,12 +115,12 @@ export default function CotizacionesPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <h1 className="text-2xl font-bold">Cotizaciones</h1>
         <Button onClick={openCreate}><Plus size={16} className="inline mr-1" /> Nueva</Button>
       </div>
 
-      <DataTable columns={columns} data={cotizaciones} loading={isLoading} onEdit={openEdit} onDelete={openDelete} />
+      <DataTable columns={columns} data={cotizaciones} loading={isLoading} onEdit={openEdit} onDelete={openDelete} searchable searchKeys={["codigo", "estado"]} />
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Cotización' : 'Nueva Cotización'}>
         <form onSubmit={handleSubmit} className="space-y-3">

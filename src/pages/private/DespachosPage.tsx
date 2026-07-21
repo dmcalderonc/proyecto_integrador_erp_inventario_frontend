@@ -155,7 +155,7 @@ export default function DespachosPage() {
 
             <div className="space-y-3">
               {detalles.map((detalle, index) => (
-                <div key={index} className="flex gap-3 items-start">
+                <div key={index} className="flex flex-col sm:flex-row gap-3 sm:items-start">
                   <select
                     value={detalle.materialId}
                     onChange={e => updateDetalle(index, 'materialId', e.target.value)}
@@ -175,7 +175,7 @@ export default function DespachosPage() {
                     value={detalle.cantidad}
                     onChange={e => updateDetalle(index, 'cantidad', e.target.value)}
                     onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
-                    className="w-32 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full sm:w-32 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
                   <button
