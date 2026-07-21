@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Search, ChevronLeft, ChevronRight, Package } from 'lucide-react';
@@ -20,12 +20,28 @@ export default function PublicMaterialesPage() {
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState('nombre');
   const [order, setOrder] = useState<'ASC' | 'DESC'>('ASC');
+  const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
   const limit = 10;
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['publicMateriales', search, page, sort, order],
+  const { data: categorias } = useQuery({
+    queryKey: ['publicCategorias'],
     queryFn: async () => {
-      const res = await publicMaterialesApi.getAll({ search: search || undefined, page, limit, sort, order });
+      const res = await publicMaterialesApi.getCategorias();
+      return res.data;
+    },
+  });
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['publicMateriales', search, page, sort, order, categoryFilter],
+    queryFn: async () => {
+      const res = await publicMaterialesApi.getAll({
+        search: search || undefined,
+        categoria: categoryFilter ?? undefined,
+        page,
+        limit,
+        sort,
+        order,
+      });
       return res.data;
     },
   });
@@ -91,7 +107,7 @@ export default function PublicMaterialesPage() {
         <h1 className="text-3xl sm:text-4xl font-extrabold text-[#FFFFFF] mb-2">Catálogo de Materiales</h1>
         <p className="text-[#94A3B8] mb-8 text-base">Explora nuestro inventario de materiales disponibles</p>
 
-        {/* Search + Sort */}
+        {/* Search + Sort + Filter */}
         <div className="flex flex-col sm:flex-row gap-3 mb-8">
           <div className="relative flex-1">
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
@@ -103,6 +119,14 @@ export default function PublicMaterialesPage() {
               className="w-full pl-11 pr-4 py-3 bg-[#111D4A] text-[#FFFFFF] border border-[#334155] rounded-xl text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all shadow-md"
             />
           </div>
+          <select
+            value={categoryFilter ?? ''}
+            onChange={e => { setCategoryFilter(e.target.value ? Number(e.target.value) : null); setPage(1); }}
+            className="bg-[#111D4A] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 cursor-pointer shadow-md transition-all"
+          >
+            <option value="" className="bg-[#111D4A]">Todas las categorías</option>
+            {categorias?.map(c => <option key={c.id} value={c.id} className="bg-[#111D4A]">{c.nombre}</option>)}
+          </select>
           <select
             value={`${sort}-${order}`}
             onChange={e => {

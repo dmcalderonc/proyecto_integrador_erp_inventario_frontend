@@ -10,7 +10,11 @@ export interface LoginResponse {
     user: {
       id: string;
       username: string;
+      email: string;
       rol: UserRole;
+      fotoPerfil?: string;
+      googleId?: string;
+      avatarUrl?: string;
     };
   };
 }

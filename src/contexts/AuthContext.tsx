@@ -7,12 +7,32 @@ interface AuthContextType {
     user: User | null;
     token: string | null;
     login: (credentials: LoginRequest) => Promise<void>;
+    loginWithToken: (token: string) => void;
     logout: () => void;
+    updateProfile: (fotoPerfil: string | null) => void;
+    updateGoogleId: (googleId: string | null, avatarUrl?: string | null) => void;
     hasRole: (allowedRoles: UserRole[]) => boolean;
     isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+function parseUserFromToken(token: string): User | null {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return {
+            id: payload.sub || payload.id,
+            nombre: payload.username || payload.email,
+            email: payload.email || '',
+            rol: payload.rol,
+            estado: true,
+            fechaCreacion: '',
+            fechaActualizacion: '',
+        };
+    } catch {
+        return null;
+    }
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(() => {
@@ -38,6 +58,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             estado: true,
             fechaCreacion: '',
             fechaActualizacion: '',
+            fotoPerfil: (rawUser as any).fotoPerfil ?? undefined,
+            googleId: rawUser.googleId ?? undefined,
+            avatarUrl: rawUser.avatarUrl ?? undefined,
         };
         setUser(userData);
 
@@ -45,11 +68,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('user', JSON.stringify(userData));
     };
 
+    const loginWithToken = (accessToken: string) => {
+        setToken(accessToken);
+        localStorage.setItem('token', accessToken);
+
+        const userData = parseUserFromToken(accessToken);
+        if (userData) {
+            setUser(userData);
+            localStorage.setItem('user', JSON.stringify(userData));
+        }
+    };
+
     const logout = () => {
         setUser(null);
         setToken(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+    };
+
+    const updateProfile = (fotoPerfil: string | null) => {
+        if (!user) return;
+        const updated = { ...user, fotoPerfil: fotoPerfil ?? undefined };
+        setUser(updated);
+        localStorage.setItem('user', JSON.stringify(updated));
+    };
+
+    const updateGoogleId = (googleId: string | null, avatarUrl?: string | null) => {
+        if (!user) return;
+        const updated = { ...user, googleId: googleId ?? undefined, avatarUrl: avatarUrl ?? undefined };
+        setUser(updated);
+        localStorage.setItem('user', JSON.stringify(updated));
     };
 
     const hasRole = (allowedRoles: UserRole[]) => {
@@ -62,7 +110,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             user,
             token,
             login,
+            loginWithToken,
             logout,
+            updateProfile,
+            updateGoogleId,
             hasRole,
             isAuthenticated: !!token
         }}>

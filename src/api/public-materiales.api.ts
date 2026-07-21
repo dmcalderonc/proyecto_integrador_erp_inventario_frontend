@@ -1,5 +1,5 @@
 import api from './http';
-import type { Material } from '../types';
+import type { Material, Categoria } from '../types';
 
 export interface PublicMaterialResponse {
   data: Material[];
@@ -12,7 +12,8 @@ export interface PublicMaterialResponse {
 }
 
 export const publicMaterialesApi = {
-  getAll: (params: { search?: string; page?: number; limit?: number; sort?: string; order?: string }) =>
+  getAll: (params: { search?: string; categoria?: number; page?: number; limit?: number; sort?: string; order?: string }) =>
     api.get<PublicMaterialResponse>('/public/materiales', { params }),
   getById: (id: number) => api.get<Material>(`/public/materiales/${id}`),
+  getCategorias: () => api.get<Categoria[]>('/public/categorias'),
 };

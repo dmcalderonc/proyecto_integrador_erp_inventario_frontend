@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useProyectos } from '../../store/useProyectos';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Proyecto, EstadoProyecto } from '../../types';
