@@ -12,6 +12,8 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [linkingGoogle, setLinkingGoogle] = useState(false);
 
+  const displayImage = user.fotoPerfil || user.avatarUrl || null;
+
   if (!user) return null;
 
   const rolColors: Record<string, string> = {
@@ -89,8 +91,8 @@ export default function ProfilePage() {
         <div className="flex items-center gap-5 pb-6 border-b border-[#334155]">
           <div className="relative group shrink-0">
             <div className="w-20 h-20 rounded-2xl bg-[#0A1128] border border-[#334155] flex items-center justify-center text-[#06B6D4] overflow-hidden shadow-inner">
-              {user.fotoPerfil ? (
-                <img src={user.fotoPerfil} alt={user.nombre} className="w-full h-full object-cover" />
+              {displayImage ? (
+                <img src={displayImage} alt={user.nombre} className="w-full h-full object-cover" />
               ) : (
                 <User size={38} />
               )}
@@ -99,7 +101,7 @@ export default function ProfilePage() {
               <Camera size={22} className="text-white" />
               <input type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" onChange={handleFileChange} className="hidden" disabled={uploading} />
             </label>
-            {user.fotoPerfil && (
+            {displayImage && (
               <button
                 onClick={handleRemovePhoto}
                 disabled={uploading}
@@ -123,7 +125,7 @@ export default function ProfilePage() {
           <input
             type="text"
             placeholder="https://ejemplo.com/foto.jpg"
-            defaultValue={user.fotoPerfil?.startsWith('data:') ? '' : (user.fotoPerfil || '')}
+            defaultValue={displayImage?.startsWith('data:') ? '' : (displayImage || '')}
             onBlur={e => handleImageUrl(e.target.value)}
             className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-2.5 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] transition-all"
           />
