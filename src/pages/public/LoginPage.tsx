@@ -9,8 +9,6 @@ import { Button } from '../../components/ui/Button';
 import { Navbar } from '../../components/ui/Navbar';
 import { Footer } from '../../components/ui/Footer';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
 const loginSchema = z.object({
     email: z.string().email('Por favor ingresa un correo electrónico válido'),
     password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
@@ -192,7 +190,7 @@ export function Login() {
                         </div>
 
                         {/* <a
-                            href={`${API_URL}/auth/google`}
+                            href={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/auth/google`}
                             className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-xl border border-gray-300 transition-all hover:shadow-lg hover:scale-[1.02] active:scale-95 cursor-pointer"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
