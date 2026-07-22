@@ -35,17 +35,17 @@ export function Breadcrumbs() {
   });
 
   return (
-    <nav className="flex items-center gap-1 text-xs text-gray-500 mb-4">
-      <Link to="/dashboard" className="hover:text-blue-600 transition-colors">
+    <nav className="flex items-center gap-1 text-xs text-text-muted mb-5">
+      <Link to="/dashboard" className="hover:text-accent transition-colors">
         <Home size={14} />
       </Link>
       {crumbs.map(crumb => (
         <span key={crumb.path} className="flex items-center gap-1">
-          <ChevronRight size={12} className="text-gray-300" />
+          <ChevronRight size={12} className="text-border-default" />
           {crumb.isLast ? (
-            <span className="font-medium text-gray-700">{crumb.name}</span>
+            <span className="font-medium text-text-secondary">{crumb.name}</span>
           ) : (
-            <Link to={crumb.path} className="hover:text-blue-600 transition-colors">
+            <Link to={crumb.path} className="hover:text-accent transition-colors">
               {crumb.name}
             </Link>
           )}

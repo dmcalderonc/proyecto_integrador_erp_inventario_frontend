@@ -7,6 +7,7 @@ import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { getBadgeStyle } from '../../lib/design-tokens';
 import { Plus, ExternalLink } from 'lucide-react';
 
 const emptyForm: CreateCotizacionDto = {
@@ -15,12 +16,6 @@ const emptyForm: CreateCotizacionDto = {
   precioOfertadoTotal: 0,
   archivoRespaldoUrl: '',
   estado: 'EN_EVALUACION',
-};
-
-const badgeEstado: Record<string, string> = {
-  EN_EVALUACION: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-  ELEGIDA: 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/30',
-  DESCARTADA: 'bg-red-500/10 text-red-400 border-red-500/30',
 };
 
 export default function CotizacionesPage() {
@@ -87,7 +82,7 @@ export default function CotizacionesPage() {
       sortable: true,
       sortValue: (item: Cotizacion) => item.solicitud?.codigo ?? `#${item.solicitudId}`,
       render: (item: Cotizacion) => (
-        <span className="font-mono text-xs bg-[#0A1128] text-[#06B6D4] px-2.5 py-1 rounded-lg border border-[#334155] font-semibold">
+        <span className="font-mono text-xs bg-base text-accent px-2.5 py-1 rounded-lg border border-border-subtle font-semibold">
           {item.solicitud?.codigo ?? `#${item.solicitudId}`}
         </span>
       ),
@@ -96,14 +91,14 @@ export default function CotizacionesPage() {
       key: 'proveedor', header: 'Proveedor',
       sortable: true,
       sortValue: (item: Cotizacion) => item.proveedor?.razon_social ?? '',
-      render: (item: Cotizacion) => <span className="text-[#FFFFFF] font-medium">{item.proveedor?.razon_social ?? `#${item.proveedorId}`}</span>,
+      render: (item: Cotizacion) => <span className="text-text-primary font-medium">{item.proveedor?.razon_social ?? `#${item.proveedorId}`}</span>,
     },
     {
       key: 'precioOfertadoTotal', header: 'Precio',
       sortable: true,
       sortValue: (item: Cotizacion) => Number(item.precioOfertadoTotal),
       render: (item: Cotizacion) => (
-        <span className="font-bold text-[#FFFFFF]">
+        <span className="font-bold text-text-primary">
           ${Number(item.precioOfertadoTotal).toLocaleString('en-US', { minimumFractionDigits: 2 })}
         </span>
       ),
@@ -111,7 +106,7 @@ export default function CotizacionesPage() {
     {
       key: 'estado', header: 'Estado',
       render: (item: Cotizacion) => (
-        <span className={`inline-block px-3 py-1 rounded-xl text-xs font-semibold border ${badgeEstado[item.estado] ?? 'bg-[#0A1128] text-[#94A3B8] border-[#334155]'}`}>
+        <span className={`inline-block px-3 py-1 rounded-xl text-xs font-semibold border ${getBadgeStyle(item.estado)}`}>
           {item.estado}
         </span>
       ),
@@ -124,119 +119,105 @@ export default function CotizacionesPage() {
             href={item.archivoRespaldoUrl} 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="inline-flex items-center gap-1 text-xs text-[#06B6D4] hover:text-[#10B981] font-semibold transition-colors"
+            className="inline-flex items-center gap-1 text-xs text-accent hover:text-success font-semibold transition-colors"
           >
             Ver <ExternalLink size={12} />
           </a>
-        ) : <span className="text-[#94A3B8]">-</span>,
+        ) : <span className="text-text-muted">-</span>,
     },
   ];
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* Header de la sección */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#FFFFFF] mb-2">Cotizaciones</h1>
-          <p className="text-[#94A3B8] text-sm">Gestiona y evalúa las ofertas de precios enviadas por proveedores.</p>
+          <h1 className="text-2xl font-bold text-text-primary">Cotizaciones</h1>
+          <p className="text-sm text-text-secondary mt-1">Gestiona y evalua las ofertas de precios enviadas por proveedores.</p>
         </div>
-        <Button 
-          onClick={openCreate}
-          className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold px-5 py-3 rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 hover:scale-105 active:scale-95 cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
-        >
-          <Plus size={18} /> Nueva Cotización
+        <Button onClick={openCreate} className="gap-1.5">
+          <Plus size={16} /> Nueva Cotizacion
         </Button>
       </div>
 
-      {/* Tabla de Cotizaciones */}
-      <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl overflow-hidden">
+      <div className="bg-surface rounded-xl border border-border-subtle p-6">
         <DataTable columns={columns} data={cotizaciones} loading={isLoading} onEdit={openEdit} onDelete={openDelete} searchable searchKeys={["codigo", "estado"]} />
       </div>
 
-      {/* Modal Crear / Editar */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Cotización' : 'Nueva Cotización'}>
-        <form onSubmit={handleSubmit} className="space-y-5 text-[#94A3B8] p-1">
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Cotizacion' : 'Nueva Cotizacion'}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Solicitud de Compra</label>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">Solicitud de Compra</label>
             <select 
               value={form.solicitudId}
               onChange={e => setForm({ ...form, solicitudId: Number(e.target.value) })}
-              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer disabled:opacity-50" 
+              className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all cursor-pointer disabled:opacity-50" 
               required 
               disabled={!!editing}
             >
-              <option value={0} className="bg-[#0A1128]">Seleccione solicitud</option>
+              <option value={0}>Seleccione solicitud</option>
               {solicitudes.map(s => (
-                <option key={s.id} value={s.id} className="bg-[#0A1128]">{s.codigo} — {s.estado}</option>
+                <option key={s.id} value={s.id}>{s.codigo} — {s.estado}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Proveedor</label>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">Proveedor</label>
             <select 
               value={form.proveedorId}
               onChange={e => setForm({ ...form, proveedorId: Number(e.target.value) })}
-              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer" 
+              className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all cursor-pointer" 
               required
             >
-              <option value={0} className="bg-[#0A1128]">Seleccione proveedor</option>
+              <option value={0}>Seleccione proveedor</option>
               {proveedores.map(p => (
-                <option key={p.id} value={p.id} className="bg-[#0A1128]">{p.razon_social}</option>
+                <option key={p.id} value={p.id}>{p.razon_social}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Precio Ofertado Total</label>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">Precio Ofertado Total</label>
             <input 
               type="number" 
               step="0.01" 
               min="0" 
               value={form.precioOfertadoTotal}
               onChange={e => setForm({ ...form, precioOfertadoTotal: Number(e.target.value) })}
-              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all font-semibold" 
+              className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all" 
               required 
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">URL Archivo de Respaldo (opcional)</label>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">URL Archivo de Respaldo (opcional)</label>
             <input 
               type="text" 
               placeholder="https://..." 
               value={form.archivoRespaldoUrl ?? ''}
               onChange={e => setForm({ ...form, archivoRespaldoUrl: e.target.value })}
-              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all" 
+              className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all" 
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Estado</label>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">Estado</label>
             <select 
               value={form.estado}
               onChange={e => setForm({ ...form, estado: e.target.value as EstadoCotizacion })}
-              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer"
+              className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all cursor-pointer"
             >
-              <option value="EN_EVALUACION" className="bg-[#0A1128]">EN_EVALUACION</option>
-              <option value="ELEGIDA" className="bg-[#0A1128]">ELEGIDA</option>
-              <option value="DESCARTADA" className="bg-[#0A1128]">DESCARTADA</option>
+              <option value="EN_EVALUACION">EN_EVALUACION</option>
+              <option value="ELEGIDA">ELEGIDA</option>
+              <option value="DESCARTADA">DESCARTADA</option>
             </select>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-[#334155]">
-            <Button 
-              type="button" 
-              variant="secondary" 
-              onClick={() => setModalOpen(false)}
-              className="bg-[#1E293B] hover:bg-white/10 text-[#FFFFFF] border border-[#334155] px-5 py-2.5 rounded-xl font-medium transition-all cursor-pointer"
-            >
-              Cancelar
-            </Button>
+          <div className="flex justify-end gap-3 pt-4 border-t border-border-subtle">
+            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
             <Button 
               type="submit" 
               disabled={crear.isPending || actualizar.isPending}
-              className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold px-6 py-2.5 rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {editing ? (actualizar.isPending ? 'Guardando...' : 'Actualizar') : (crear.isPending ? 'Creando...' : 'Crear')}
             </Button>
@@ -244,13 +225,12 @@ export default function CotizacionesPage() {
         </form>
       </Modal>
 
-      {/* Confirmación de Eliminación */}
       <ConfirmDialog
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleDelete}
-        title="Eliminar cotización"
-        message="¿Estás seguro de eliminar esta cotización?"
+        title="Eliminar cotizacion"
+        message="Estas seguro de eliminar esta cotizacion?"
         loading={eliminar.isPending} 
       />
     </div>

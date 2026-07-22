@@ -16,8 +16,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(() => {
-        const savedUser = localStorage.getItem('user');
-        return savedUser ? JSON.parse(savedUser) : null;
+        try {
+            const savedUser = localStorage.getItem('user');
+            return savedUser ? JSON.parse(savedUser) : null;
+        } catch {
+            localStorage.removeItem('user');
+            return null;
+        }
     });
 
     const [token, setToken] = useState<string | null>(() => {
@@ -32,8 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const rawUser = data.data.user;
         const userData: User = {
             id: rawUser.id,
-            nombre: (rawUser as any).nombre ?? rawUser.username,
-            email: (rawUser as any).email ?? '',
+            nombre: rawUser.nombre,
+            email: rawUser.email,
             rol: rawUser.rol,
             estado: true,
             fechaCreacion: '',

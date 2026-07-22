@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useRequirements } from '../../store/useRequirements';
@@ -10,19 +10,16 @@ import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { Plus, Trash2 } from 'lucide-react';
+import { SmartCombobox } from '../../components/ui/SmartCombobox';
+import type { ComboboxOption } from '../../components/ui/SmartCombobox';
+import { RequirementTimeline } from '../../components/ui/RequirementTimeline';
+import type { TimelineEvent } from '../../components/ui/RequirementTimeline';
+import { getBadgeStyle } from '../../lib/design-tokens';
+import { Plus, Trash2, History } from 'lucide-react';
 
-const badgeColors: Record<RequirementStatus, string> = {
-  PENDIENTE: 'bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30',
-  APROBADO: 'bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/30',
-  PARCIALMENTE_ATENDIDO: 'bg-[#F97316]/10 text-[#F97316] border border-[#F97316]/30',
-  ATENDIDO: 'bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/30',
-  RECHAZADO: 'bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/30',
-};
+type DetalleForm = { materialId: number; cantidadSolicitada: string };
 
-type DetalleForm = { materialId: string; cantidadSolicitada: string };
-
-const emptyDetalle = (): DetalleForm => ({ materialId: '', cantidadSolicitada: '' });
+const emptyDetalle = (): DetalleForm => ({ materialId: 0, cantidadSolicitada: '' });
 
 interface StatusAction {
   requirement: Requirement;
@@ -30,17 +27,60 @@ interface StatusAction {
   label: string;
 }
 
+const generateMockTimeline = (req: Requirement): TimelineEvent[] => {
+  const events: TimelineEvent[] = [
+    {
+      id: '1',
+      fecha: req.fechaSolicitud || new Date().toISOString(),
+      titulo: 'Requerimiento Creado',
+      descripcion: `Solicitud REQ-${req.id} generada por ${req.usuarioSolicitante?.nombre || 'el usuario'}.`,
+      tipo: 'CREACION'
+    }
+  ];
+
+  if (req.estado !== 'PENDIENTE') {
+    events.push({
+      id: '2',
+      fecha: new Date(new Date(req.fechaSolicitud || new Date()).getTime() + 3600000).toISOString(),
+      titulo: req.estado === 'RECHAZADO' ? 'Requerimiento Rechazado' : 'Aprobación de Administrador',
+      descripcion: req.estado === 'RECHAZADO' ? 'El requerimiento fue denegado.' : 'El requerimiento fue aprobado y pasó a revisión logística.',
+      tipo: req.estado === 'RECHAZADO' ? 'RECHAZADO' : 'APROBACION'
+    });
+  }
+
+  if (req.estado === 'PARCIALMENTE_ATENDIDO') {
+    events.push({
+      id: '3',
+      fecha: new Date(new Date(req.fechaSolicitud || new Date()).getTime() + 7200000).toISOString(),
+      titulo: 'División de Requerimiento (Split)',
+      descripcion: `Stock insuficiente en bodega principal. Se preparó un despacho parcial y el remanente pasó a compras.`,
+      tipo: 'SPLIT'
+    });
+  }
+
+  if (req.estado === 'ATENDIDO' || req.estado === 'PARCIALMENTE_ATENDIDO') {
+      events.push({
+      id: '4',
+      fecha: new Date().toISOString(),
+      titulo: 'Despacho Confirmado',
+      descripcion: 'Materiales entregados en obra de forma exitosa.',
+      tipo: 'DESPACHO'
+    });
+  }
+
+  return events;
+};
+
 export default function RequirementsPage() {
   const { requirements, isLoading, crear, actualizarEstado, eliminar } = useRequirements();
   const { proyectos } = useProyectos();
   const { hasRole } = useAuth();
 
-  // Lógica de roles corregida
-  const canChangeStatus = hasRole(['ADMIN', 'BODEGUERO']);
-  const canCreate = hasRole(['ADMIN', 'BODEGUERO', 'SOLICITANTE']);
+  const canApproveReject = hasRole(['ADMIN']); 
+  const canMarkAttended = hasRole(['ADMIN', 'BODEGUERO']); 
+  const canCreate = hasRole(['ADMIN', 'SOLICITANTE']); 
   const isAdmin = hasRole(['ADMIN']);
 
-  // GET /materiales es público, se usa solo para poblar el select del formulario
   const { data: materiales = [] } = useQuery({
     queryKey: ['materiales'],
     queryFn: async () => {
@@ -49,45 +89,65 @@ export default function RequirementsPage() {
     },
   });
 
+  const materialOptions: ComboboxOption[] = materiales.map((m: any) => ({
+    id: m.id,
+    nombre: `${m.sku} - ${m.nombre}`,
+  }));
+
+  const proyectoOptions: ComboboxOption[] = proyectos.map((p: any) => ({
+    id: p.id,
+    nombre: `${p.codigoProyecto || 'PROY'} - ${p.nombre}`,
+  }));
+
   const [modalOpen, setModalOpen] = useState(false);
-  const [proyectoId, setProyectoId] = useState('');
+  const [selectedProyecto, setSelectedProyecto] = useState<ComboboxOption | null>(null);
   const [detalles, setDetalles] = useState<DetalleForm[]>([emptyDetalle()]);
 
   const [statusAction, setStatusAction] = useState<StatusAction | null>(null);
   const [deleting, setDeleting] = useState<Requirement | null>(null);
 
+  const [timelineOpen, setTimelineOpen] = useState(false);
+  const [selectedReqForTimeline, setSelectedReqForTimeline] = useState<Requirement | null>(null);
+
   const openCreate = () => {
-    setProyectoId('');
+    setSelectedProyecto(null);
     setDetalles([emptyDetalle()]);
     setModalOpen(true);
   };
 
   const addDetalle = () => setDetalles([...detalles, emptyDetalle()]);
   const removeDetalle = (index: number) => setDetalles(detalles.filter((_, i) => i !== index));
-  const updateDetalle = (index: number, field: keyof DetalleForm, value: string) => {
+  
+  const updateCantidad = (index: number, cantidad: string) => {
     const next = [...detalles];
-    next[index] = { ...next[index], [field]: value };
+    next[index] = { ...next[index], cantidadSolicitada: cantidad };
+    setDetalles(next);
+  };
+
+  const updateMaterial = (index: number, option: ComboboxOption) => {
+    const next = [...detalles];
+    next[index] = { ...next[index], materialId: Number(option.id) };
     setDetalles(next);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!proyectoId) {
-      toast.error('Seleccioná un proyecto');
+    if (!selectedProyecto) {
+      toast.error('Seleccioná un proyecto válido');
       return;
     }
 
     const detallesValidos = detalles
-      .filter(d => d.materialId !== '' && Number(d.cantidadSolicitada) > 0)
-      .map(d => ({ materialId: Number(d.materialId), cantidadSolicitada: Number(d.cantidadSolicitada) }));
+      .filter(d => d.materialId !== 0 && Number(d.cantidadSolicitada) > 0)
+      .map(d => ({ materialId: d.materialId, cantidadSolicitada: Number(d.cantidadSolicitada) }));
 
     if (detallesValidos.length === 0) {
       toast.error('Agregá al menos un material con cantidad válida');
       return;
     }
 
-    await crear.mutateAsync({ proyectoId, detalles: detallesValidos });
+    await crear.mutateAsync({ proyectoId: String(selectedProyecto.id), detalles: detallesValidos });
     setModalOpen(false);
   };
 
@@ -103,13 +163,18 @@ export default function RequirementsPage() {
     setDeleting(null);
   };
 
+  const openTimeline = (req: Requirement) => {
+    setSelectedReqForTimeline(req);
+    setTimelineOpen(true);
+  };
+
   const columns = [
     {
       key: 'id', header: 'ID',
       sortable: true,
       sortValue: (item: Requirement) => item.id,
       render: (item: Requirement) => (
-        <span className="font-mono text-xs bg-[#111D4A] text-[#94A3B8] px-2.5 py-1 rounded-md border border-[#334155] font-semibold">
+        <span className="font-mono text-xs bg-base text-text-muted px-2.5 py-1 rounded-lg border border-border-subtle font-semibold">
           REQ-{item.id}
         </span>
       ),
@@ -118,24 +183,24 @@ export default function RequirementsPage() {
       key: 'proyecto', header: 'Proyecto',
       sortable: true,
       sortValue: (item: Requirement) => item.proyecto?.nombre ?? '',
-      render: (item: Requirement) => <span className="text-[#FFFFFF] font-bold">{item.proyecto?.nombre ?? '-'}</span>,
+      render: (item: Requirement) => <span className="text-text-primary font-bold">{item.proyecto?.nombre ?? '-'}</span>,
     },
     {
       key: 'usuarioSolicitante', header: 'Solicitante',
       sortable: true,
       sortValue: (item: Requirement) => item.usuarioSolicitante?.nombre ?? '',
-      render: (item: Requirement) => <span className="text-[#94A3B8]">{item.usuarioSolicitante?.nombre ?? '-'}</span>,
+      render: (item: Requirement) => <span className="text-text-secondary">{item.usuarioSolicitante?.nombre ?? '-'}</span>,
     },
     {
       key: 'fechaSolicitud', header: 'Fecha',
       sortable: true,
       sortValue: (item: Requirement) => item.fechaSolicitud ?? '',
-      render: (item: Requirement) => <span className="text-[#94A3B8]">{item.fechaSolicitud ? new Date(item.fechaSolicitud).toLocaleDateString() : '-'}</span>,
+      render: (item: Requirement) => <span className="text-text-secondary">{item.fechaSolicitud ? new Date(item.fechaSolicitud).toLocaleDateString() : '-'}</span>,
     },
     {
       key: 'estado', header: 'Estado',
       render: (item: Requirement) => (
-        <span className={`inline-block px-3 py-1 rounded-xl text-xs font-semibold border ${badgeColors[item.estado]}`}>
+        <span className={`inline-block px-3 py-1 rounded-xl text-xs font-semibold border ${getBadgeStyle(item.estado)}`}>
           {item.estado}
         </span>
       ),
@@ -143,27 +208,35 @@ export default function RequirementsPage() {
     {
       key: 'acciones', header: 'Acciones',
       render: (item: Requirement) => (
-        <div className="flex justify-end gap-2">
-          {canChangeStatus && item.estado === 'PENDIENTE' && (
+        <div className="flex justify-end gap-3 items-center">
+          <button
+            onClick={() => openTimeline(item)}
+            className="text-accent hover:text-accent/80 text-xs font-medium cursor-pointer flex items-center gap-1 transition-colors"
+            title="Ver trazabilidad"
+          >
+            <History size={14} /> Historial
+          </button>
+
+          {canApproveReject && item.estado === 'PENDIENTE' && (
             <button
               onClick={() => setStatusAction({ requirement: item, estado: 'APROBADO', label: 'aprobar' })}
-              className="text-[#3B82F6] hover:text-[#3B82F6]/80 text-xs font-medium cursor-pointer"
+              className="text-accent hover:text-accent/80 text-xs font-medium cursor-pointer transition-colors"
             >
               Aprobar
             </button>
           )}
-          {canChangeStatus && item.estado === 'APROBADO' && (
+          {canMarkAttended && item.estado === 'APROBADO' && (
             <button
               onClick={() => setStatusAction({ requirement: item, estado: 'ATENDIDO', label: 'marcar como atendido' })}
-              className="text-[#10B981] hover:text-[#10B981]/80 text-xs font-medium cursor-pointer"
+              className="text-success hover:text-success/80 text-xs font-medium cursor-pointer transition-colors"
             >
               Marcar Atendido
             </button>
           )}
-          {canChangeStatus && item.estado !== 'RECHAZADO' && item.estado !== 'ATENDIDO' && (
+          {canApproveReject && item.estado !== 'RECHAZADO' && item.estado !== 'ATENDIDO' && (
             <button
               onClick={() => setStatusAction({ requirement: item, estado: 'RECHAZADO', label: 'rechazar' })}
-              className="text-[#EF4444] hover:text-[#EF4444]/80 text-xs font-medium cursor-pointer"
+              className="text-danger hover:text-danger/80 text-xs font-medium cursor-pointer transition-colors"
             >
               Rechazar
             </button>
@@ -171,7 +244,7 @@ export default function RequirementsPage() {
           {isAdmin && (
             <button
               onClick={() => setDeleting(item)}
-              className="text-[#94A3B8] hover:text-[#FFFFFF] text-xs font-medium cursor-pointer"
+              className="text-text-muted hover:text-text-primary text-xs font-medium cursor-pointer transition-colors"
             >
               Eliminar
             </button>
@@ -182,77 +255,96 @@ export default function RequirementsPage() {
   ];
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#FFFFFF]">Requerimientos</h1>
-          <p className="text-[#94A3B8] mt-1 text-sm">Gestioná las solicitudes de materiales para tus proyectos.</p>
+          <h1 className="text-2xl font-bold text-text-primary">Requerimientos</h1>
+          <p className="text-sm text-text-secondary mt-1">Gestioná las solicitudes de materiales para tus proyectos.</p>
         </div>
         {canCreate && (
-          <Button onClick={openCreate} className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold px-6 py-2 rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 hover:scale-105 active:scale-95 cursor-pointer flex items-center">
-            <Plus size={18} className="mr-1.5" /> Nuevo Requerimiento
+          <Button onClick={openCreate} className="gap-1.5">
+            <Plus size={16} /> Nuevo Requerimiento
           </Button>
         )}
       </div>
 
-      <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl overflow-hidden">
+      <div className="bg-surface rounded-xl border border-border-subtle p-6">
         <DataTable columns={columns} data={requirements} loading={isLoading} searchable searchKeys={["codigo", "estado"]} />
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo Requerimiento">
-        <form onSubmit={handleSubmit} className="space-y-5 text-[#94A3B8] p-1">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Proyecto</label>
-            <select value={proyectoId} onChange={e => setProyectoId(e.target.value)}
-              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer" required>
-              <option value="" className="bg-[#0A1128]">Seleccioná un proyecto</option>
-              {proyectos.map(p => (
-                <option key={p.id} value={p.id} className="bg-[#0A1128]">{p.codigoProyecto} - {p.nombre}</option>
-              ))}
-            </select>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">Proyecto</label>
+            <SmartCombobox
+              options={proyectoOptions}
+              value={selectedProyecto}
+              onChange={setSelectedProyecto}
+              placeholder="Buscar proyecto por nombre o código..."
+            />
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-3">
-              <label className="block text-sm font-medium text-[#FFFFFF]">Materiales</label>
-              <button type="button" onClick={addDetalle} className="text-[#06B6D4] hover:text-[#06B6D4]/80 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer">
+              <label className="block text-sm font-medium text-text-primary">Materiales</label>
+              <button type="button" onClick={addDetalle} className="text-accent hover:text-accent/80 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer">
                 <Plus size={14} /> Agregar material
               </button>
             </div>
 
             <div className="space-y-3">
-              {detalles.map((detalle, index) => (
-                <div key={index} className="flex gap-3 items-center bg-[#0A1128] p-3.5 rounded-2xl border border-[#334155]">
-                  <select value={detalle.materialId}
-                    onChange={e => updateDetalle(index, 'materialId', e.target.value)}
-                    className="flex-1 bg-[#111D4A] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#06B6D4] transition-all cursor-pointer" required>
-                    <option value="" className="bg-[#111D4A]">Material...</option>
-                    {materiales.map(m => (
-                      <option key={m.id} value={m.id} className="bg-[#111D4A]">{m.nombre} ({m.sku})</option>
-                    ))}
-                  </select>
-                  <input type="number" step="1" min="1" placeholder="Cantidad"
-                    value={detalle.cantidadSolicitada}
-                    onChange={e => updateDetalle(index, 'cantidadSolicitada', e.target.value)}
-                    onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
-                    className="w-full sm:w-28 bg-[#111D4A] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-2.5 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] transition-all font-bold" required />
-                  <button type="button" onClick={() => removeDetalle(index)}
-                    disabled={detalles.length === 1}
-                    className="text-[#EF4444] hover:text-[#EF4444]/80 disabled:opacity-30 p-2 rounded-xl transition-colors cursor-pointer">
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              ))}
+              {detalles.map((detalle, index) => {
+                const currentMaterialOption = materialOptions.find(m => m.id === detalle.materialId) || null;
+                return (
+                  <div key={index} className="flex flex-col sm:flex-row gap-3 items-center bg-base p-3.5 rounded-xl border border-border-subtle">
+                    <div className="flex-1 w-full">
+                      <SmartCombobox
+                        options={materialOptions}
+                        value={currentMaterialOption}
+                        onChange={(opt) => updateMaterial(index, opt)}
+                        placeholder="Buscar material o SKU..."
+                      />
+                    </div>
+                    <input type="number" step="1" min="1" placeholder="Cantidad"
+                      value={detalle.cantidadSolicitada}
+                      onChange={e => updateCantidad(index, e.target.value)}
+                      onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
+                      className="w-full sm:w-28 bg-base text-text-primary border border-border-subtle rounded-xl px-4 py-2.5 text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all" required />
+                    <button type="button" onClick={() => removeDetalle(index)}
+                      disabled={detalles.length === 1}
+                      className="text-danger hover:text-danger/80 disabled:opacity-30 p-2 rounded-xl transition-colors cursor-pointer">
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-[#334155]">
-            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)} className="bg-[#1E293B] hover:bg-white/10 text-[#FFFFFF] border border-[#334155] px-5 py-2.5 rounded-xl font-medium transition-all cursor-pointer">Cancelar</Button>
-            <Button type="submit" disabled={crear.isPending} className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold px-6 py-2.5 rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border-subtle">
+            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
+            <Button type="submit" disabled={crear.isPending}>
               {crear.isPending ? 'Guardando...' : 'Crear Requerimiento'}
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal 
+        open={timelineOpen} 
+        onClose={() => setTimelineOpen(false)} 
+        title={selectedReqForTimeline ? `Trazabilidad - REQ-${selectedReqForTimeline.id}` : 'Trazabilidad'}
+      >
+        <div className="p-2 sm:p-4 overflow-y-auto max-h-[70vh]">
+          {selectedReqForTimeline ? (
+            <RequirementTimeline 
+              eventos={generateMockTimeline(selectedReqForTimeline)} 
+              estadoActual={selectedReqForTimeline.estado} 
+            />
+          ) : (
+            <p className="text-center text-text-secondary">Cargando historial...</p>
+          )}
+        </div>
       </Modal>
 
       <ConfirmDialog

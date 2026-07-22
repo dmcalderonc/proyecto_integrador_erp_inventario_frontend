@@ -11,10 +11,8 @@ export interface User {
 }
 
 export interface CreateUserDto {
-  username: string;
+  nombre: string;
   email: string;
   password: string;
   rol: UserRole;
-  is_active?: boolean;
-  bodega_id?: number;
 }
