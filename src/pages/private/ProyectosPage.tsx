@@ -71,14 +71,14 @@ export default function ProyectosPage() {
       key: 'nombre',
       header: 'Nombre',
       sortable: true,
-      render: (item: Proyecto) => <span className="text-[#FFFFFF] font-bold">{item.nombre}</span>
+      render: (item: Proyecto) => <span className="text-black font-bold">{item.nombre}</span>
     },
     {
       key: 'codigoProyecto',
       header: 'Código',
       sortable: true,
       render: (item: Proyecto) => (
-        <span className="font-mono text-xs bg-[#0A1128] text-[#10B981] px-2.5 py-1 rounded-lg border border-[#334155] font-semibold">
+        <span className="font-mono text-xs bg-slate-200 text-black px-2.5 py-1 rounded-lg border border-slate-300 font-semibold">
           {item.codigoProyecto || '-'}
         </span>
       )
@@ -89,7 +89,7 @@ export default function ProyectosPage() {
       sortable: true,
       sortValue: (item: Proyecto) => item.fechaInicio ?? '',
       render: (item: Proyecto) => (
-        <span className="text-[#94A3B8]">
+        <span className="text-black font-medium">
           {item.fechaInicio ? new Date(item.fechaInicio).toLocaleDateString() : '-'}
         </span>
       ),
@@ -99,8 +99,8 @@ export default function ProyectosPage() {
       header: 'Estado',
       render: (item: Proyecto) => (
         <span className={`inline-block px-3 py-1 rounded-xl text-xs font-semibold border ${item.estado === 'ACTIVO'
-            ? 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/30'
-            : 'bg-[#0A1128] text-[#94A3B8]/60 border-[#334155]'
+            ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+            : 'bg-slate-200 text-slate-800 border-slate-300'
           }`}>
           {item.estado}
         </span>
@@ -126,8 +126,8 @@ export default function ProyectosPage() {
         )}
       </div>
 
-      {/* Tabla de Proyectos */}
-      <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl overflow-hidden text-[#FFFFFF] [&_table]:text-[#FFFFFF] [&_th]:text-[#94A3B8] [&_th]:bg-[#0A1128]/50 [&_td]:text-[#FFFFFF] [&_input]:bg-[#0A1128] [&_input]:text-[#FFFFFF] [&_input]:border-[#334155] [&_button]:text-[#FFFFFF]">
+      {/* Tabla de Proyectos (Fuerza letras negras en la tabla e inputs) */}
+      <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl overflow-hidden text-black [&_table]:text-black [&_th]:text-black [&_th]:font-bold [&_th]:bg-slate-100 [&_td]:text-black [&_input]:text-black [&_input]:bg-white [&_input]:placeholder-slate-500 [&_button]:text-black">
         <DataTable
           columns={columns}
           data={proyectos}
