@@ -123,7 +123,7 @@ export default function MovimientosPage() {
       key: 'ticket', header: '',
       render: (item: Movimiento) => (
         <Button 
-          className="!px-3 !py-1.5 !text-xs bg-[#1E293B] hover:bg-white/10 text-[#FFFFFF] border border-[#334155] rounded-xl transition-all" 
+          className="!px-3 !py-1.5 !text-xs bg-[#1E293B] hover:bg-white/10 text-[#303357] border border-[#334155] rounded-xl transition-all" 
           onClick={() => handleDownloadTicket(item)}
         >
           <FileDown size={14} className="inline mr-1 text-[#06B6D4]" /> Ticket

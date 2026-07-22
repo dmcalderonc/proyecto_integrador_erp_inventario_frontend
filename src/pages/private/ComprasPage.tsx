@@ -180,7 +180,7 @@ export default function ComprasPage() {
           {(item.estado === 'BORRADOR' || item.estado === 'PENDIENTE') && (
             <>
               <Button 
-                className="!px-2.5 !py-1 !text-xs bg-[#1E293B] hover:bg-white/10 text-[#FFFFFF] border border-[#334155] rounded-xl transition-all" 
+                className="!px-2.5 !py-1 !text-xs bg-[#1E293B] hover:bg-white/10 text-[#303357] border border-[#334155] rounded-xl transition-all" 
                 onClick={() => openEdit(item)}
               >
                 <Edit size={14} className="inline mr-1 text-amber-400" /> Editar
