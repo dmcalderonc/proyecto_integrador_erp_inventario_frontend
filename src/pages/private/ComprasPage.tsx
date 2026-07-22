@@ -122,7 +122,7 @@ export default function ComprasPage() {
       header: 'Proveedor',
       sortable: true,
       sortValue: (item: OrdenCompra) => item.proveedor?.razon_social ?? '',
-      render: (item: OrdenCompra) => <span className="text-[#FFFFFF] font-medium">{item.proveedor?.razon_social ?? '-'}</span>,
+      render: (item: OrdenCompra) => <span className="text-[#303357] font-medium">{item.proveedor?.razon_social ?? '-'}</span>,
     },
     { 
       key: 'estado', 
@@ -163,7 +163,7 @@ export default function ComprasPage() {
       sortable: true,
       sortValue: (item: OrdenCompra) => Number(item.total),
       render: (item: OrdenCompra) => (
-        <span className="font-bold text-[#FFFFFF]">${Number(item.total).toFixed(2)}</span>
+        <span className="font-bold text-[#303357]">${Number(item.total).toFixed(2)}</span>
       ),
     },
     {
@@ -172,7 +172,7 @@ export default function ComprasPage() {
       render: (item: OrdenCompra) => (
         <div className="flex gap-1.5 flex-wrap">
           <Button 
-            className="!px-2.5 !py-1 !text-xs bg-[#1E293B] hover:bg-white/10 text-[#FFFFFF] border border-[#334155] rounded-xl transition-all" 
+            className="!px-2.5 !py-1 !text-xs bg-[#1E293B] hover:bg-white/10 text-[#303357] border border-[#334155] rounded-xl transition-all" 
             onClick={() => handleDownloadPdf(item)}
           >
             <FileDown size={14} className="inline mr-1 text-[#06B6D4]" /> PDF

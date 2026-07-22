@@ -69,7 +69,7 @@ export default function UsersPage() {
       key: 'nombre', 
       header: 'Nombre', 
       sortable: true,
-      render: (item: User) => <span className="text-[#FFFFFF] font-bold">{item.nombre}</span> 
+      render: (item: User) => <span className="text-[#303357] font-bold">{item.nombre}</span> 
     },
     { 
       key: 'email', 

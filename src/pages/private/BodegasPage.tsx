@@ -46,7 +46,7 @@ export default function BodegasPage() {
       key: 'nombre', 
       header: 'Nombre', 
       sortable: true,
-      render: (item: Bodega) => <span className="text-[#FFFFFF] font-bold">{item.nombre}</span> 
+      render: (item: Bodega) => <span className="text-[#303357] font-bold">{item.nombre}</span> 
     },
     { 
       key: 'ubicacion', 

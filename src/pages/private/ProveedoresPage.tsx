@@ -56,7 +56,7 @@ export default function ProveedoresPage() {
       key: 'razon_social', 
       header: 'Razón Social', 
       sortable: true,
-      render: (item: Proveedor) => <span className="text-[#FFFFFF] font-bold">{item.razon_social}</span> 
+      render: (item: Proveedor) => <span className="text-[#303357] font-bold">{item.razon_social}</span> 
     },
     { 
       key: 'email', 

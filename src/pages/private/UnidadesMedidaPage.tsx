@@ -46,7 +46,7 @@ export default function UnidadesMedidaPage() {
       key: 'nombre', 
       header: 'Nombre', 
       sortable: true,
-      render: (item: UnidadMedida) => <span className="text-[#FFFFFF] font-bold">{item.nombre}</span>
+      render: (item: UnidadMedida) => <span className="text-[#303357] font-bold">{item.nombre}</span>
     },
     { 
       key: 'simbolo', 

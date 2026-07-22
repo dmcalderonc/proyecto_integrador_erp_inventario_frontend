@@ -105,11 +105,11 @@ export default function MovimientosPage() {
     },
     { 
       key: 'bodegaOrigenId', header: 'Origen', 
-      render: (item: Movimiento) => <span className="text-[#FFFFFF] font-medium">{item.bodegaOrigen?.nombre ?? '-'}</span> 
+      render: (item: Movimiento) => <span className="text-[#303357] font-medium">{item.bodegaOrigen?.nombre ?? '-'}</span> 
     },
     { 
       key: 'bodegaDestinoId', header: 'Destino', 
-      render: (item: Movimiento) => <span className="text-[#FFFFFF] font-medium">{item.bodegaDestino?.nombre ?? '-'}</span> 
+      render: (item: Movimiento) => <span className="text-[#303357] font-medium">{item.bodegaDestino?.nombre ?? '-'}</span> 
     },
     { 
       key: 'estado', header: 'Estado',

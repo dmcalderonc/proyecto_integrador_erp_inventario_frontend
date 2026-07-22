@@ -96,14 +96,14 @@ export default function CotizacionesPage() {
       key: 'proveedor', header: 'Proveedor',
       sortable: true,
       sortValue: (item: Cotizacion) => item.proveedor?.razon_social ?? '',
-      render: (item: Cotizacion) => <span className="text-[#FFFFFF] font-medium">{item.proveedor?.razon_social ?? `#${item.proveedorId}`}</span>,
+      render: (item: Cotizacion) => <span className="text-[#303357] font-medium">{item.proveedor?.razon_social ?? `#${item.proveedorId}`}</span>,
     },
     {
       key: 'precioOfertadoTotal', header: 'Precio',
       sortable: true,
       sortValue: (item: Cotizacion) => Number(item.precioOfertadoTotal),
       render: (item: Cotizacion) => (
-        <span className="font-bold text-[#FFFFFF]">
+        <span className="font-bold text-[#303357]">
           ${Number(item.precioOfertadoTotal).toLocaleString('en-US', { minimumFractionDigits: 2 })}
         </span>
       ),

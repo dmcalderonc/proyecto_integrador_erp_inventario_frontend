@@ -46,7 +46,7 @@ export default function CategoriasPage() {
       key: 'nombre', 
       header: 'Nombre', 
       sortable: true,
-      render: (item: Categoria) => <span className="text-[#FFFFFF] font-bold">{item.nombre}</span>
+      render: (item: Categoria) => <span className="text-[#303357] font-bold">{item.nombre}</span>
     },
     { 
       key: 'prefijo', 

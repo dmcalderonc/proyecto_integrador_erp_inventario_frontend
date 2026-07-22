@@ -122,7 +122,7 @@ export default function SolicitudesPage() {
     },
     {
       key: 'proyecto', header: 'Proyecto',
-      render: (item: SolicitudCompra) => <span className="text-[#FFFFFF] font-medium">{item.proyecto?.nombre ?? '-'}</span>,
+      render: (item: SolicitudCompra) => <span className="text-[#303357] font-medium">{item.proyecto?.nombre ?? '-'}</span>,
     },
     {
       key: 'usuarioSolicitante', header: 'Solicitante',
@@ -153,13 +153,13 @@ export default function SolicitudesPage() {
       render: (item: SolicitudCompra) => (
         <div className="flex gap-1.5 justify-end">
           <Button 
-            className="!px-2.5 !py-1.5 !text-xs bg-[#1E293B] hover:bg-white/10 text-[#FFFFFF] border border-[#334155] rounded-xl transition-all" 
+            className="!px-2.5 !py-1.5 !text-xs bg-[#1E293B] hover:bg-white/10 text-[#303357] border border-[#334155] rounded-xl transition-all" 
             onClick={() => openEdit(item)}
           >
             <Pencil size={14} className="inline mr-1 text-amber-400" /> Editar
           </Button>
           <Button 
-            className="!px-2.5 !py-1.5 !text-xs bg-[#1E293B] hover:bg-white/10 text-[#FFFFFF] border border-[#334155] rounded-xl transition-all" 
+            className="!px-2.5 !py-1.5 !text-xs bg-[#1E293B] hover:bg-white/10 text-[#303357] border border-[#334155] rounded-xl transition-all" 
             onClick={() => openDetail(item)}
           >
             <Eye size={14} className="inline mr-1 text-[#06B6D4]" /> Ver
@@ -396,7 +396,7 @@ export default function SolicitudesPage() {
                 <div className="overflow-x-auto rounded-2xl border border-[#334155]">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="bg-[#0A1128] text-[#FFFFFF] border-b border-[#334155]">
+                      <tr className="bg-[#0A1128] text-[#303357] border-b border-[#334155]">
                         <th className="text-left px-4 py-3 font-semibold">Material</th>
                         <th className="text-right px-4 py-3 font-semibold">Cantidad</th>
                       </tr>
@@ -404,7 +404,7 @@ export default function SolicitudesPage() {
                     <tbody className="divide-y divide-[#334155] bg-[#111D4A]">
                       {selected.detalles.map((d, i) => (
                         <tr key={i} className="hover:bg-white/5 transition-colors">
-                          <td className="px-4 py-3 text-[#FFFFFF] font-medium">{d.material?.nombre ?? `Material #${d.materialId}`}</td>
+                          <td className="px-4 py-3 text-[#303357] font-medium">{d.material?.nombre ?? `Material #${d.materialId}`}</td>
                           <td className="text-right px-4 py-3 font-bold text-[#10B981]">{d.cantidadRequerida}</td>
                         </tr>
                       ))}
@@ -420,7 +420,7 @@ export default function SolicitudesPage() {
                 <div className="overflow-x-auto rounded-2xl border border-[#334155]">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="bg-[#0A1128] text-[#FFFFFF] border-b border-[#334155]">
+                      <tr className="bg-[#0A1128] text-[#303357] border-b border-[#334155]">
                         <th className="text-left px-4 py-3 font-semibold">Proveedor</th>
                         <th className="text-right px-4 py-3 font-semibold">Precio Total</th>
                         <th className="text-center px-4 py-3 font-semibold">Estado</th>
@@ -429,7 +429,7 @@ export default function SolicitudesPage() {
                     <tbody className="divide-y divide-[#334155] bg-[#111D4A]">
                       {selected.cotizaciones.map((c, i) => (
                         <tr key={i} className="hover:bg-white/5 transition-colors">
-                          <td className="px-4 py-3 text-[#FFFFFF] font-medium">{c.proveedor?.razon_social ?? `Proveedor #${c.proveedorId}`}</td>
+                          <td className="px-4 py-3 text-[#303357] font-medium">{c.proveedor?.razon_social ?? `Proveedor #${c.proveedorId}`}</td>
                           <td className="text-right px-4 py-3 font-bold text-[#10B981]">${Number(c.precioOfertadoTotal).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
                           <td className="text-center px-4 py-3">
                             <span className={`inline-block px-2.5 py-0.5 rounded-xl text-xs font-semibold border ${badgeEstado[c.estado] ?? 'bg-[#0A1128] text-[#94A3B8] border-[#334155]'}`}>

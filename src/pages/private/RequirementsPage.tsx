@@ -118,7 +118,7 @@ export default function RequirementsPage() {
       key: 'proyecto', header: 'Proyecto',
       sortable: true,
       sortValue: (item: Requirement) => item.proyecto?.nombre ?? '',
-      render: (item: Requirement) => <span className="text-[#FFFFFF] font-bold">{item.proyecto?.nombre ?? '-'}</span>,
+      render: (item: Requirement) => <span className="text-[#303357] font-bold">{item.proyecto?.nombre ?? '-'}</span>,
     },
     {
       key: 'usuarioSolicitante', header: 'Solicitante',
@@ -171,7 +171,7 @@ export default function RequirementsPage() {
           {isAdmin && (
             <button
               onClick={() => setDeleting(item)}
-              className="text-[#94A3B8] hover:text-[#FFFFFF] text-xs font-medium cursor-pointer"
+              className="text-[#94A3B8] hover:text-[#303357] text-xs font-medium cursor-pointer"
             >
               Eliminar
             </button>
