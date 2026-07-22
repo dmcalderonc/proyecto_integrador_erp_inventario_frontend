@@ -67,15 +67,15 @@ export default function ProyectosPage() {
   };
 
   const columns = [
-    { 
-      key: 'nombre', 
-      header: 'Nombre', 
+    {
+      key: 'nombre',
+      header: 'Nombre',
       sortable: true,
-      render: (item: Proyecto) => <span className="text-[#FFFFFF] font-bold">{item.nombre}</span> 
+      render: (item: Proyecto) => <span className="text-[#FFFFFF] font-bold">{item.nombre}</span>
     },
-    { 
-      key: 'codigoProyecto', 
-      header: 'Código', 
+    {
+      key: 'codigoProyecto',
+      header: 'Código',
       sortable: true,
       render: (item: Proyecto) => (
         <span className="font-mono text-xs bg-[#0A1128] text-[#10B981] px-2.5 py-1 rounded-lg border border-[#334155] font-semibold">
@@ -84,7 +84,7 @@ export default function ProyectosPage() {
       )
     },
     {
-      key: 'fechaInicio', 
+      key: 'fechaInicio',
       header: 'Fecha de inicio',
       sortable: true,
       sortValue: (item: Proyecto) => item.fechaInicio ?? '',
@@ -95,14 +95,13 @@ export default function ProyectosPage() {
       ),
     },
     {
-      key: 'estado', 
+      key: 'estado',
       header: 'Estado',
       render: (item: Proyecto) => (
-        <span className={`inline-block px-3 py-1 rounded-xl text-xs font-semibold border ${
-          item.estado === 'ACTIVO' 
-            ? 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/30' 
+        <span className={`inline-block px-3 py-1 rounded-xl text-xs font-semibold border ${item.estado === 'ACTIVO'
+            ? 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/30'
             : 'bg-[#0A1128] text-[#94A3B8]/60 border-[#334155]'
-        }`}>
+          }`}>
           {item.estado}
         </span>
       ),
@@ -118,7 +117,7 @@ export default function ProyectosPage() {
           <p className="text-[#94A3B8] text-sm">Gestiona obras, centros de costos y bodegas asociadas.</p>
         </div>
         {isAdmin && (
-          <Button 
+          <Button
             onClick={openCreate}
             className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold px-5 py-3 rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 hover:scale-105 active:scale-95 cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
           >
@@ -128,7 +127,7 @@ export default function ProyectosPage() {
       </div>
 
       {/* Tabla de Proyectos */}
-      <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl overflow-hidden">
+      <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl overflow-hidden text-[#FFFFFF] [&_table]:text-[#FFFFFF] [&_th]:text-[#94A3B8] [&_th]:bg-[#0A1128]/50 [&_td]:text-[#FFFFFF] [&_input]:bg-[#0A1128] [&_input]:text-[#FFFFFF] [&_input]:border-[#334155] [&_button]:text-[#FFFFFF]">
         <DataTable
           columns={columns}
           data={proyectos}
@@ -145,40 +144,40 @@ export default function ProyectosPage() {
         <form onSubmit={handleSubmit} className="space-y-5 text-[#94A3B8] p-1">
           <div>
             <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Nombre</label>
-            <input 
-              placeholder="Ej: Construcción Torre Norte" 
+            <input
+              placeholder="Ej: Construcción Torre Norte"
               value={form.nombre}
               onChange={e => setForm({ ...form, nombre: e.target.value })}
-              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all" 
-              required 
+              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all"
+              required
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Código de proyecto (opcional)</label>
-            <input 
-              placeholder="Ej: PROY-2026-001 (Automático si se deja vacío)" 
+            <input
+              placeholder="Ej: PROY-2026-001 (Automático si se deja vacío)"
               value={form.codigoProyecto}
               onChange={e => setForm({ ...form, codigoProyecto: e.target.value })}
-              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all font-mono" 
+              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all font-mono"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Fecha de inicio</label>
-            <input 
-              type="date" 
+            <input
+              type="date"
               value={form.fechaInicio}
               onChange={e => setForm({ ...form, fechaInicio: e.target.value })}
-              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer [color-scheme:dark]" 
-              required 
+              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer [color-scheme:dark]"
+              required
             />
           </div>
 
           {editing && (
             <div>
               <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Estado</label>
-              <select 
+              <select
                 value={form.estado}
                 onChange={e => setForm({ ...form, estado: e.target.value as EstadoProyecto })}
                 className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer"
@@ -190,16 +189,16 @@ export default function ProyectosPage() {
           )}
 
           <div className="flex justify-end gap-3 pt-4 border-t border-[#334155]">
-            <Button 
-              type="button" 
-              variant="secondary" 
+            <Button
+              type="button"
+              variant="secondary"
               onClick={() => setModalOpen(false)}
               className="bg-[#1E293B] hover:bg-white/10 text-[#FFFFFF] border border-[#334155] px-5 py-2.5 rounded-xl font-medium transition-all cursor-pointer"
             >
               Cancelar
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={crear.isPending || actualizar.isPending}
               className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold px-6 py-2.5 rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
@@ -216,7 +215,7 @@ export default function ProyectosPage() {
         onConfirm={handleDelete}
         title="Eliminar proyecto"
         message={`¿Estás seguro de eliminar el proyecto "${deleting?.nombre}"? Se eliminará también la bodega de obra asociada.`}
-        loading={eliminar.isPending} 
+        loading={eliminar.isPending}
       />
     </div>
   );

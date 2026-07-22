@@ -1,0 +1,787 @@
+{
+  "info": {
+    "name": "Stockly - ERP Inventario API",
+    "_postman_id": "stockly-erp-api-collection",
+    "description": "Colección completa de endpoints del backend Stockly ERP de Inventario.\n\nBase URL: https://calderon-erp.uaeftt-ute.site\n\nAutenticación: JWT Bearer Token (obtener desde POST /auth/login)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://calderon-erp.uaeftt-ute.site"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"diegoadmin@mail.com\",\n  \"password\": \"admin123\""
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nuevo_usuario\",\n  \"email\": \"nuevo@mail.com\",\n  \"password\": \"password123\",\n  \"rol\": \"SOLICITANTE\""
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Google OAuth - Iniciar",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/auth/google", "host": ["{{baseUrl}}"], "path": ["auth", "google"] }
+          }
+        },
+        {
+          "name": "Google OAuth - Callback",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/auth/google/callback", "host": ["{{baseUrl}}"], "path": ["auth", "google", "callback"] }
+          }
+        },
+        {
+          "name": "Desvincular Google",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/auth/google", "host": ["{{baseUrl}}"], "path": ["auth", "google"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users (ADMIN)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Get Own Profile",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users/profile", "host": ["{{baseUrl}}"], "path": ["users", "profile"] }
+          }
+        },
+        {
+          "name": "Update Own Profile Photo",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fotoPerfil\": \"https://ejemplo.com/foto.jpg\""
+            },
+            "url": { "raw": "{{baseUrl}}/users/profile", "host": ["{{baseUrl}}"], "path": ["users", "profile"] }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["users", "{{userId}}"] }
+          }
+        },
+        {
+          "name": "Create User (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nuevo_usuario\",\n  \"email\": \"nuevo@mail.com\",\n  \"password\": \"password123\",\n  \"rol\": \"SOLICITANTE\",\n  \"is_active\": true"
+            },
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Update User PATCH (ADMIN)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rol\": \"BODEGUERO\",\n  \"is_active\": true"
+            },
+            "url": { "raw": "{{baseUrl}}/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["users", "{{userId}}"] }
+          }
+        },
+        {
+          "name": "Update User PUT (ADMIN)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nombre_actualizado\",\n  \"email\": \"email_actualizado@mail.com\",\n  \"rol\": \"COMPRADOR\",\n  \"is_active\": true"
+            },
+            "url": { "raw": "{{baseUrl}}/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["users", "{{userId}}"] }
+          }
+        },
+        {
+          "name": "Delete User (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["users", "{{userId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Materiales",
+      "item": [
+        {
+          "name": "Get All Materiales",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/materiales", "host": ["{{baseUrl}}"], "path": ["materiales"] }
+          }
+        },
+        {
+          "name": "Get Material by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/materiales/{{materialId}}", "host": ["{{baseUrl}}"], "path": ["materiales", "{{materialId}}"] }
+          }
+        },
+        {
+          "name": "Create Material",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Cable USB-C\",\n  \"descripcion\": \"Cable de datos USB-C 2 metros\",\n  \"sku\": \"CBL-USBC-001\",\n  \"precioUnitario\": 15000,\n  \"stockMinimo\": 10,\n  \"categoriaId\": 1,\n  \"unidadMedidaId\": 1"
+            },
+            "url": { "raw": "{{baseUrl}}/materiales", "host": ["{{baseUrl}}"], "path": ["materiales"] }
+          }
+        },
+        {
+          "name": "Update Material",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Cable USB-C v2\",\n  \"precioUnitario\": 18000"
+            },
+            "url": { "raw": "{{baseUrl}}/materiales/{{materialId}}", "host": ["{{baseUrl}}"], "path": ["materiales", "{{materialId}}"] }
+          }
+        },
+        {
+          "name": "Delete Material (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/materiales/{{materialId}}", "host": ["{{baseUrl}}"], "path": ["materiales", "{{materialId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public (Sin Auth)",
+      "item": [
+        {
+          "name": "Get Categorias (Público)",
+          "request": {
+            "method": "GET",
+            "auth": { "type": "noauth" },
+            "url": { "raw": "{{baseUrl}}/public/categorias", "host": ["{{baseUrl}}"], "path": ["public", "categorias"] }
+          }
+        },
+        {
+          "name": "Get Materiales (Público, con filtros)",
+          "request": {
+            "method": "GET",
+            "auth": { "type": "noauth" },
+            "url": {
+              "raw": "{{baseUrl}}/public/materiales?search=&categoriaId=&sortBy=nombre&order=ASC&page=1&limit=12",
+              "host": ["{{baseUrl}}"],
+              "path": ["public", "materiales"],
+              "query": [
+                { "key": "search", "value": "", "description": "Buscar por nombre, SKU o descripción" },
+                { "key": "categoriaId", "value": "", "description": "Filtrar por categoría" },
+                { "key": "sortBy", "value": "nombre", "description": "Campo de ordenamiento" },
+                { "key": "order", "value": "ASC", "description": "ASC o DESC" },
+                { "key": "page", "value": "1", "description": "Página actual" },
+                { "key": "limit", "value": "12", "description": "Resultados por página" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Material by ID (Público)",
+          "request": {
+            "method": "GET",
+            "auth": { "type": "noauth" },
+            "url": { "raw": "{{baseUrl}}/public/materiales/{{materialId}}", "host": ["{{baseUrl}}"], "path": ["public", "materiales", "{{materialId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categorías",
+      "item": [
+        {
+          "name": "Get All Categorías",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/categorias", "host": ["{{baseUrl}}"], "path": ["categorias"] }
+          }
+        },
+        {
+          "name": "Get Categoría by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/categorias/{{categoriaId}}", "host": ["{{baseUrl}}"], "path": ["categorias", "{{categoriaId}}"] }
+          }
+        },
+        {
+          "name": "Create Categoría (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Electrónica\"" },
+            "url": { "raw": "{{baseUrl}}/categorias", "host": ["{{baseUrl}}"], "path": ["categorias"] }
+          }
+        },
+        {
+          "name": "Update Categoría (ADMIN)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Electrónica y Computación\"" },
+            "url": { "raw": "{{baseUrl}}/categorias/{{categoriaId}}", "host": ["{{baseUrl}}"], "path": ["categorias", "{{categoriaId}}"] }
+          }
+        },
+        {
+          "name": "Delete Categoría (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/categorias/{{categoriaId}}", "host": ["{{baseUrl}}"], "path": ["categorias", "{{categoriaId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Unidades de Medida",
+      "item": [
+        {
+          "name": "Get All Unidades",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/unidades-medida", "host": ["{{baseUrl}}"], "path": ["unidades-medida"] }
+          }
+        },
+        {
+          "name": "Get Unidad by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/unidades-medida/{{unidadId}}", "host": ["{{baseUrl}}"], "path": ["unidades-medida", "{{unidadId}}"] }
+          }
+        },
+        {
+          "name": "Create Unidad (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Litro\",\n  \"simbolo\": \"L\"" },
+            "url": { "raw": "{{baseUrl}}/unidades-medida", "host": ["{{baseUrl}}"], "path": ["unidades-medida"] }
+          }
+        },
+        {
+          "name": "Update Unidad (ADMIN)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Kilogramo\",\n  \"simbolo\": \"kg\"" },
+            "url": { "raw": "{{baseUrl}}/unidades-medida/{{unidadId}}", "host": ["{{baseUrl}}"], "path": ["unidades-medida", "{{unidadId}}"] }
+          }
+        },
+        {
+          "name": "Delete Unidad (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/unidades-medida/{{unidadId}}", "host": ["{{baseUrl}}"], "path": ["unidades-medida", "{{unidadId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bodegas",
+      "item": [
+        {
+          "name": "Get All Bodegas",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/bodegas", "host": ["{{baseUrl}}"], "path": ["bodegas"] }
+          }
+        },
+        {
+          "name": "Get Bodega by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/bodegas/{{bodegaId}}", "host": ["{{baseUrl}}"], "path": ["bodegas", "{{bodegaId}}"] }
+          }
+        },
+        {
+          "name": "Create Bodega (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Bodega Principal\",\n  \"ubicacion\": \"Edificio A, Piso 1\"" },
+            "url": { "raw": "{{baseUrl}}/bodegas", "host": ["{{baseUrl}}"], "path": ["bodegas"] }
+          }
+        },
+        {
+          "name": "Update Bodega (ADMIN)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Bodega Principal Actualizada\"" },
+            "url": { "raw": "{{baseUrl}}/bodegas/{{bodegaId}}", "host": ["{{baseUrl}}"], "path": ["bodegas", "{{bodegaId}}"] }
+          }
+        },
+        {
+          "name": "Delete Bodega (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/bodegas/{{bodegaId}}", "host": ["{{baseUrl}}"], "path": ["bodegas", "{{bodegaId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Proveedores",
+      "item": [
+        {
+          "name": "Get All Proveedores",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/proveedores", "host": ["{{baseUrl}}"], "path": ["proveedores"] }
+          }
+        },
+        {
+          "name": "Get Proveedor by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/proveedores/{{proveedorId}}", "host": ["{{baseUrl}}"], "path": ["proveedores", "{{proveedorId}}"] }
+          }
+        },
+        {
+          "name": "Create Proveedor (ADMIN/COMPRADOR)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Proveedor ABC S.A.\",\n  \"contacto\": \"Juan Perez\",\n  \"telefono\": \"3001234567\",\n  \"email\": \"contacto@proveedorabc.com\",\n  \"direccion\": \"Calle 10 #5-20\"" },
+            "url": { "raw": "{{baseUrl}}/proveedores", "host": ["{{baseUrl}}"], "path": ["proveedores"] }
+          }
+        },
+        {
+          "name": "Update Proveedor (ADMIN/COMPRADOR)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Proveedor ABC S.A. Actualizado\"" },
+            "url": { "raw": "{{baseUrl}}/proveedores/{{proveedorId}}", "host": ["{{baseUrl}}"], "path": ["proveedores", "{{proveedorId}}"] }
+          }
+        },
+        {
+          "name": "Delete Proveedor (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/proveedores/{{proveedorId}}", "host": ["{{baseUrl}}"], "path": ["proveedores", "{{proveedorId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Proyectos",
+      "item": [
+        {
+          "name": "Get All Proyectos",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/proyectos", "host": ["{{baseUrl}}"], "path": ["proyectos"] }
+          }
+        },
+        {
+          "name": "Get Proyecto by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/proyectos/{{proyectoId}}", "host": ["{{baseUrl}}"], "path": ["proyectos", "{{proyectoId}}"] }
+          }
+        },
+        {
+          "name": "Create Proyecto (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Proyecto Demo\",\n  \"descripcion\": \"Proyecto de ejemplo\"" },
+            "url": { "raw": "{{baseUrl}}/proyectos", "host": ["{{baseUrl}}"], "path": ["proyectos"] }
+          }
+        },
+        {
+          "name": "Update Proyecto (ADMIN)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Proyecto Actualizado\"" },
+            "url": { "raw": "{{baseUrl}}/proyectos/{{proyectoId}}", "host": ["{{baseUrl}}"], "path": ["proyectos", "{{proyectoId}}"] }
+          }
+        },
+        {
+          "name": "Delete Proyecto (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/proyectos/{{proyectoId}}", "host": ["{{baseUrl}}"], "path": ["proyectos", "{{proyectoId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Requirements",
+      "item": [
+        {
+          "name": "Get All Requirements",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/requirements", "host": ["{{baseUrl}}"], "path": ["requirements"] }
+          }
+        },
+        {
+          "name": "Get Requirement by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/requirements/{{requirementId}}", "host": ["{{baseUrl}}"], "path": ["requirements", "{{requirementId}}"] }
+          }
+        },
+        {
+          "name": "Create Requirement",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Requerimiento de prueba\",\n  \"descripcion\": \"Descripción del requerimiento\",\n  \"proyectoId\": 1" },
+            "url": { "raw": "{{baseUrl}}/requirements", "host": ["{{baseUrl}}"], "path": ["requirements"] }
+          }
+        },
+        {
+          "name": "Update Requirement Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"APROBADO\"" },
+            "url": { "raw": "{{baseUrl}}/requirements/{{requirementId}}/status", "host": ["{{baseUrl}}"], "path": ["requirements", "{{requirementId}}", "status"] }
+          }
+        },
+        {
+          "name": "Delete Requirement (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/requirements/{{requirementId}}", "host": ["{{baseUrl}}"], "path": ["requirements", "{{requirementId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Solicitudes de Compra",
+      "item": [
+        {
+          "name": "Get All Solicitudes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/solicitudes-compra",
+              "host": ["{{baseUrl}}"],
+              "path": ["solicitudes-compra"]
+            }
+          }
+        },
+        {
+          "name": "Create Solicitud de Compra",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Solicitud de compra demo\",\n  \"proyectoId\": 1" },
+            "url": { "raw": "{{baseUrl}}/solicitudes-compra", "host": ["{{baseUrl}}"], "path": ["solicitudes-compra"] }
+          }
+        },
+        {
+          "name": "Update Solicitud",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"EN_EVALUACION\"" },
+            "url": { "raw": "{{baseUrl}}/solicitudes-compra/{{solicitudId}}", "host": ["{{baseUrl}}"], "path": ["solicitudes-compra", "{{solicitudId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inventario",
+      "item": [
+        {
+          "name": "Get All Inventario",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/inventario", "host": ["{{baseUrl}}"], "path": ["inventario"] }
+          }
+        },
+        {
+          "name": "Get Inventario by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/inventario/{{inventarioId}}", "host": ["{{baseUrl}}"], "path": ["inventario", "{{inventarioId}}"] }
+          }
+        },
+        {
+          "name": "Create Inventario",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"materialId\": 1,\n  \"bodegaId\": 1,\n  \"cantidad\": 100" },
+            "url": { "raw": "{{baseUrl}}/inventario", "host": ["{{baseUrl}}"], "path": ["inventario"] }
+          }
+        },
+        {
+          "name": "Update Inventario",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"cantidad\": 200" },
+            "url": { "raw": "{{baseUrl}}/inventario/{{inventarioId}}", "host": ["{{baseUrl}}"], "path": ["inventario", "{{inventarioId}}"] }
+          }
+        },
+        {
+          "name": "Delete Inventario",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/inventario/{{inventarioId}}", "host": ["{{baseUrl}}"], "path": ["inventario", "{{inventarioId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Movimientos de Inventario",
+      "item": [
+        {
+          "name": "Get All Movimientos",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/movimientos", "host": ["{{baseUrl}}"], "path": ["movimientos"] }
+          }
+        },
+        {
+          "name": "Create Movimiento",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tipo\": \"INGRESO\",\n  \"materialId\": 1,\n  \"bodegaOrigenId\": 1,\n  \"cantidad\": 50,\n  \"observacion\": \"Ingreso de prueba\"" },
+            "url": { "raw": "{{baseUrl}}/movimientos", "host": ["{{baseUrl}}"], "path": ["movimientos"] }
+          }
+        },
+        {
+          "name": "Get Ticket PDF",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/movimientos/{{movimientoId}}/ticket", "host": ["{{baseUrl}}"], "path": ["movimientos", "{{movimientoId}}", "ticket"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ajustes de Inventario",
+      "item": [
+        {
+          "name": "Get All Ajustes",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/ajustes-inventario", "host": ["{{baseUrl}}"], "path": ["ajustes-inventario"] }
+          }
+        },
+        {
+          "name": "Create Ajuste",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"motivo\": \"Ajuste por inventario físico\",\n  \"detalles\": [\n    {\n      \"materialId\": 1,\n      \"cantidadSistema\": 100,\n      \"cantidadFisica\": 95,\n      \"diferencia\": -5\n    }\n  ]" },
+            "url": { "raw": "{{baseUrl}}/ajustes-inventario", "host": ["{{baseUrl}}"], "path": ["ajustes-inventario"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cotizaciones",
+      "item": [
+        {
+          "name": "Get All Cotizaciones",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/cotizaciones", "host": ["{{baseUrl}}"], "path": ["cotizaciones"] }
+          }
+        },
+        {
+          "name": "Get Cotización by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/cotizaciones/{{cotizacionId}}", "host": ["{{baseUrl}}"], "path": ["cotizaciones", "{{cotizacionId}}"] }
+          }
+        },
+        {
+          "name": "Create Cotización (ADMIN/COMPRADOR)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"proveedorId\": 1,\n  \"solicitudCompraId\": 1,\n  \"estado\": \"EN_EVALUACION\",\n  \"detalles\": [\n    {\n      \"materialId\": 1,\n      \"cantidad\": 10,\n      \"precioUnitario\": 15000\n    }\n  ]" },
+            "url": { "raw": "{{baseUrl}}/cotizaciones", "host": ["{{baseUrl}}"], "path": ["cotizaciones"] }
+          }
+        },
+        {
+          "name": "Update Cotización",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"ELEGIDA\"" },
+            "url": { "raw": "{{baseUrl}}/cotizaciones/{{cotizacionId}}", "host": ["{{baseUrl}}"], "path": ["cotizaciones", "{{cotizacionId}}"] }
+          }
+        },
+        {
+          "name": "Delete Cotización (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/cotizaciones/{{cotizacionId}}", "host": ["{{baseUrl}}"], "path": ["cotizaciones", "{{cotizacionId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Compras",
+      "item": [
+        {
+          "name": "Get All Compras",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/compras", "host": ["{{baseUrl}}"], "path": ["compras"] }
+          }
+        },
+        {
+          "name": "Get Compra by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/compras/{{compraId}}", "host": ["{{baseUrl}}"], "path": ["compras", "{{compraId}}"] }
+          }
+        },
+        {
+          "name": "Create Compra (Orden de Compra)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"proveedorId\": 1,\n  \"cotizacionId\": 1,\n  \"detalles\": [\n    {\n      \"materialId\": 1,\n      \"cantidad\": 10,\n      \"precioUnitario\": 15000\n    }\n  ]" },
+            "url": { "raw": "{{baseUrl}}/compras", "host": ["{{baseUrl}}"], "path": ["compras"] }
+          }
+        },
+        {
+          "name": "Get Compra PDF",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/compras/{{compraId}}/pdf", "host": ["{{baseUrl}}"], "path": ["compras", "{{compraId}}", "pdf"] }
+          }
+        },
+        {
+          "name": "Update Compra (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"APROBADA\"" },
+            "url": { "raw": "{{baseUrl}}/compras/{{compraId}}", "host": ["{{baseUrl}}"], "path": ["compras", "{{compraId}}"] }
+          }
+        },
+        {
+          "name": "Recibir Compra",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/compras/{{compraId}}/recibir", "host": ["{{baseUrl}}"], "path": ["compras", "{{compraId}}", "recibir"] }
+          }
+        },
+        {
+          "name": "Delete Compra (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/compras/{{compraId}}", "host": ["{{baseUrl}}"], "path": ["compras", "{{compraId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Despachos",
+      "item": [
+        {
+          "name": "Entrega Directa",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"materialId\": 1,\n  \"bodegaOrigenId\": 1,\n  \"cantidad\": 10,\n  \"destinatario\": \"Juan Perez\",\n  \"observacion\": \"Entrega de prueba\"" },
+            "url": { "raw": "{{baseUrl}}/despachos/entrega-directa", "host": ["{{baseUrl}}"], "path": ["despachos", "entrega-directa"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get KPIs",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/dashboard/kpis", "host": ["{{baseUrl}}"], "path": ["dashboard", "kpis"] }
+          }
+        },
+        {
+          "name": "Get Alertas Stock",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/alertas-stock?umbral=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "alertas-stock"],
+              "query": [{ "key": "umbral", "value": "10", "description": "Umbral mínimo de stock" }]
+            }
+          }
+        },
+        {
+          "name": "Get Línea de Tiempo",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/dashboard/linea-tiempo", "host": ["{{baseUrl}}"], "path": ["dashboard", "linea-tiempo"] }
+          }
+        }
+      ]
+    }
+  ]
+}
