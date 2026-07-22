@@ -22,12 +22,15 @@ function parseUserFromToken(token: string): User | null {
         const payload = JSON.parse(atob(token.split('.')[1]));
         return {
             id: payload.sub || payload.id,
-            nombre: payload.username || payload.email,
+            nombre: payload.nombre || payload.email,
             email: payload.email || '',
             rol: payload.rol,
             estado: true,
             fechaCreacion: '',
             fechaActualizacion: '',
+            fotoPerfil: payload.fotoPerfil || undefined,
+            googleId: payload.googleId || undefined,
+            avatarUrl: payload.avatarUrl || undefined,
         };
     } catch {
         return null;
