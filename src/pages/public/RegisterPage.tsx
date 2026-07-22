@@ -41,13 +41,16 @@ export function RegisterPage() {
   const onSubmit = async (data: RegisterFormInputs) => {
     setIsLoading(true);
     try {
-      await api.post('/auth/register', {
+      const res = await api.post('/auth/register', {
         username: data.username,
         email: data.email,
         password: data.password,
       });
-      toast.success('Cuenta creada exitosamente. Ahora puedes iniciar sesión.');
-      navigate('/login');
+      const { access_token, user } = res.data;
+      localStorage.setItem('token', access_token);
+      localStorage.setItem('user', JSON.stringify(user));
+      toast.success('Cuenta creada exitosamente');
+      navigate('/');
     } catch (error: any) {
       toast.error(
         error.response?.data?.message || 'Error al registrar. Intenta de nuevo.'
