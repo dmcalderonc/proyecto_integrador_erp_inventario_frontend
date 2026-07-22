@@ -186,12 +186,12 @@ export function Login() {
                             <div className="absolute inset-0 flex items-center">
                                 <div className="w-full border-t border-[#334155]"></div>
                             </div>
-                            <div className="relative flex justify-center text-sm">
+                            {/* <div className="relative flex justify-center text-sm">
                                 <span className="bg-[#111D4A] px-3 text-[#94A3B8]">o continúa con</span>
-                            </div>
+                            </div> */}
                         </div>
 
-                        <a
+                        {/* <a
                             href={`${API_URL}/auth/google`}
                             className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-xl border border-gray-300 transition-all hover:shadow-lg hover:scale-[1.02] active:scale-95 cursor-pointer"
                         >
@@ -202,7 +202,7 @@ export function Login() {
                                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                             </svg>
                             Continuar con Google
-                        </a>
+                        </a> */}
 
                         <div className="text-center pt-2">
                             <p className="text-sm text-[#94A3B8]">

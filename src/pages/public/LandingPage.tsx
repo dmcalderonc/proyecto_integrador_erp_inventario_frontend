@@ -1,15 +1,22 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-// Marcadores de posición para Navbar y Footer con tus colores aplicados
+// Navbar simplificado: solo contiene el logo y el botón Entrar
 const Navbar = () => (
   <div className="relative z-50 h-16 bg-[#0A1128] text-white p-4 flex items-center justify-between max-w-7xl mx-auto px-6 border-b border-[#334155]">
-    <div className="text-2xl font-bold flex items-center gap-2 text-[#FFFFFF]">
-      <div className="w-8 h-8 rounded-lg bg-[#10B981]"></div>
+    <div className="text-2xl font-bold flex items-center gap-3 text-[#FFFFFF]">
+      {/* Logo desde public/favicon.png */}
+      <img 
+        src="/favicon.png" 
+        alt="Stockly Logo" 
+        className="w-8 h-8 object-contain" 
+      />
       Stockly
     </div>
     <div className="flex gap-4 items-center">
-      <a href="#features" className="text-[#94A3B8] hover:text-[#FFFFFF]">Funciones</a>
-      <Link to="/login" className="bg-[#1E293B] text-[#FFFFFF] px-4 py-2 rounded-lg hover:bg-white/10 border border-[#334155]">Entrar</Link>
+      <Link to="/login" className="bg-[#1E293B] text-[#FFFFFF] px-4 py-2 rounded-lg hover:bg-white/10 border border-[#334155] transition-all">
+        Entrar
+      </Link>
     </div>
   </div>
 );
@@ -48,91 +55,68 @@ function FeatureCard({ icon, title, description, color }: FeatureCardProps) {
   );
 }
 
-function DashboardMockup() {
+// Reproductor con reproducción en bucle (loop)
+function VideoPreview() {
+  const [isPlaying, setIsPlaying] = useState(false);
+
   return (
-    <div className="relative w-full max-w-xl mx-auto lg:mx-0">
-      <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl">
-        {/* Header bar */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#10B981] flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-            </div>
-            <span className="text-[#FFFFFF] font-bold text-sm">Panel de Control</span>
+    <div className="relative w-full max-w-xl mx-auto lg:mx-0 group">
+      {/* Resplandor neón animado de fondo */}
+      <div className="absolute -inset-1 bg-gradient-to-r from-[#10B981] via-[#06B6D4] to-purple-600 rounded-3xl blur-xl opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
+
+      <div className="relative bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-3 shadow-2xl overflow-hidden">
+        {/* Barra superior estilo ventana de aplicación */}
+        <div className="flex items-center justify-between px-3 py-2 border-b border-[#334155]/60 mb-2">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-red-500/80" />
+            <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+            <div className="w-3 h-3 rounded-full bg-green-500/80" />
+            <span className="text-xs text-[#94A3B8] font-mono ml-2">Stockly — Demo interactiva</span>
           </div>
-          <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-red-400" />
-            <div className="w-3 h-3 rounded-full bg-yellow-400" />
-            <div className="w-3 h-3 rounded-full bg-green-400" />
-          </div>
+          <span className="text-[10px] bg-[#10B981]/20 text-[#10B981] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+            Video HD
+          </span>
         </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-          {[
-            { label: 'Materiales', value: '1,247', change: '+12%', color: 'bg-teal-500' },
-            { label: 'Bodegas', value: '8', change: '+2', color: 'bg-[#10B981]' },
-            { label: 'Movimientos', value: '356', change: '+28%', color: 'bg-purple-500' },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-[#0A1128] rounded-xl p-3 border border-[#334155]">
-              <div className={`w-2 h-2 rounded-full ${stat.color} mb-2`} />
-              <div className="text-[#FFFFFF] font-bold text-lg">{stat.value}</div>
-              <div className="text-[#94A3B8] text-xs">{stat.label}</div>
-              <div className="text-green-400 text-xs font-semibold mt-1">{stat.change}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Chart mockup */}
-        <div className="bg-[#0A1128] rounded-xl p-4 border border-[#334155]">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[#FFFFFF] text-xs font-semibold">Movimientos por Mes</span>
-            <span className="text-[#94A3B8] text-xs">2025</span>
-          </div>
-          <div className="flex items-end gap-2 h-24">
-            {[40, 65, 45, 80, 55, 90, 70, 95, 60, 85, 75, 100].map((h, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                <div
-                  className={`w-full rounded-t-md ${i === 11 ? 'bg-[#10B981]' : 'bg-teal-400/60'} transition-all duration-500`}
-                  style={{ height: `${h}%` }}
-                />
+        {/* Contenedor del video */}
+        <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#0A1128] border border-[#334155]">
+          {!isPlaying ? (
+            /* Miniatura antes de reproducir */
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#0A1128] via-[#111D4A] to-[#1E293B] p-6 text-center">
+              <div 
+                className="w-16 h-16 rounded-full bg-[#06B6D4] text-white flex items-center justify-center shadow-lg shadow-[#06B6D4]/40 mb-4 group-hover:scale-110 transition-transform cursor-pointer"
+                onClick={() => setIsPlaying(true)}
+              >
+                <svg className="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
               </div>
-            ))}
-          </div>
-          <div className="flex justify-between mt-2">
-            {['E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'].map((m, i) => (
-              <span key={i} className="text-[#94A3B8] text-[9px] flex-1 text-center">
-                {m}
-              </span>
-            ))}
-          </div>
+              <h3 className="text-white font-bold text-lg mb-1">Ver demostración del sistema</h3>
+              <p className="text-[#94A3B8] text-xs max-w-xs">Haz clic para reproducir el video explicativo de Stockly ERP.</p>
+            </div>
+          ) : (
+            /* Embebido de YouTube con loop=1 y playlist activado para bucle continuo */
+            <iframe
+              src="https://www.youtube.com/embed/jdRJ4LMiGsM?autoplay=1&loop=1&playlist=jdRJ4LMiGsM&rel=0"
+              title="Stockly ERP Demo"
+              className="w-full h-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          )}
         </div>
       </div>
 
-      {/* Floating notification cards */}
-      <div className="absolute -top-4 -right-4 bg-white rounded-xl shadow-2xl p-3 flex items-center gap-3 animate-bounce border border-[#334155]" style={{ animationDuration: '3s' }}>
-        <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
-          <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+      {/* Tarjeta flotante decorativa */}
+      <div className="absolute -bottom-4 -right-2 bg-[#1E293B] rounded-2xl p-3 flex items-center gap-3 shadow-2xl border border-[#334155] animate-bounce" style={{ animationDuration: '4s' }}>
+        <div className="w-8 h-8 rounded-xl bg-[#10B981]/20 text-[#10B981] flex items-center justify-center">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
           </svg>
         </div>
         <div>
-          <div className="text-gray-800 text-xs font-bold">Stock Actualizado</div>
-          <div className="text-gray-400 text-[10px]">Bodega Principal</div>
-        </div>
-      </div>
-
-      <div className="absolute -bottom-3 -left-3 bg-white rounded-xl shadow-2xl p-3 flex items-center gap-3 animate-bounce border border-[#334155]" style={{ animationDuration: '4s', animationDelay: '1s' }}>
-        <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
-          <svg className="w-4 h-4 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-          </svg>
-        </div>
-        <div>
-          <div className="text-gray-800 text-xs font-bold">Nueva Cotización</div>
-          <div className="text-gray-400 text-[10px]">Pendiente de revisión</div>
+          <div className="text-white text-xs font-bold">Demostración en Video</div>
+          <div className="text-[#94A3B8] text-[10px]">YouTube HD</div>
         </div>
       </div>
     </div>
@@ -204,7 +188,6 @@ export function LandingPage() {
         <FloatingShape className="w-48 h-48 bg-[#06B6D4] top-1/3 right-20 animate-float-slow" style={{ animationDelay: '1.5s' }} />
         <FloatingShape className="w-32 h-32 bg-[#10B981] bottom-20 left-1/4 animate-float" style={{ animationDelay: '2s' }} />
         <FloatingShape className="w-56 h-56 bg-white bottom-10 right-10 animate-float-slow" style={{ animationDelay: '1s', opacity: 0.1 }} />
-        <FloatingShape className="w-20 h-20 bg-[#10B981] top-20 right-1/3 animate-float" style={{ animationDelay: '3s' }} />
 
         {/* Content */}
         <div className="relative z-10 w-full">
@@ -247,14 +230,16 @@ export function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </Link>
+
+                {/* Botón Funciones que desplaza hasta la sección de funciones (#features) */}
                 <a
                   href="#features"
                   className="inline-flex items-center gap-2 bg-[#1E293B] backdrop-blur-sm text-[#FFFFFF] font-semibold text-lg px-8 py-4 rounded-2xl border border-[#334155] hover:bg-[#1E293B]/80 transition-all"
                 >
-                  <svg className="w-5 h-5 text-[#94A3B8]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-5 h-5 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Conocer Más
+                  Funciones
                 </a>
               </div>
 
@@ -272,9 +257,9 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Right - Dashboard mockup */}
+            {/* Right - Video Preview */}
             <div className="lg:w-1/2 animate-slide-up opacity-0 delay-300 mt-12 lg:mt-0 flex justify-center lg:justify-end w-full overflow-visible">
-              <DashboardMockup />
+              <VideoPreview />
             </div>
           </div>
         </div>
@@ -331,58 +316,7 @@ export function LandingPage() {
         </div>
       </div>
 
-      {/* Roles Section */}
-      <div className="relative bg-[#0A1128] py-20 px-6 mt-[-1px] border-t border-[#334155]">
-        <div className="max-w-5xl mx-auto">
-          <div className="bg-[#111D4A] rounded-3xl p-10 lg:p-14 relative overflow-hidden shadow-2xl border border-[#334155]">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#10B981]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#06B6D4]/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
-
-            <div className="relative z-10">
-              <h3 className="text-3xl font-extrabold text-[#FFFFFF] mb-3">Diseñado para cada rol</h3>
-              <p className="text-[#94A3B8] mb-8 max-w-lg">Un sistema pensado para todos los actores de la cadena de suministro de la empresa.</p>
-
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                  { role: 'Administrador', desc: 'Control total', icon: '👑' },
-                  { role: 'Solicitante', desc: 'Crea solicitudes', icon: '📋' },
-                  { role: 'Bodeguero', desc: 'Gestiona stock', icon: '📦' },
-                  { role: 'Comprador', desc: 'Gestiona compras', icon: '🛒' },
-                ].map((item) => (
-                  <div key={item.role} className="bg-[#0A1128] rounded-2xl p-5 border border-[#334155] hover:bg-white/5 transition-all hover:scale-105 flex flex-col items-center text-center">
-                    <div className="w-10 h-10 rounded-xl bg-[#1E293B] border border-[#334155] flex items-center justify-center text-lg mb-3 shadow-lg">
-                      {item.icon}
-                    </div>
-                    <div className="text-[#FFFFFF] font-bold text-sm sm:text-base">{item.role}</div>
-                    <div className="text-[#94A3B8] text-xs mt-1">{item.desc}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="relative bg-[#0A1128] py-28 px-6 mt-[-1px] border-t border-[#334155]">
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#10B981]/50 to-transparent" />
-        <div className="max-w-3xl mx-auto text-center animate-fade-in opacity-0 delay-200">
-          <h2 className="text-4xl sm:text-5xl font-extrabold text-[#FFFFFF] mb-6">¿Listo para empezar?</h2>
-          <p className="text-[#94A3B8] text-lg mb-10 max-w-xl mx-auto leading-relaxed">Accede al sistema y comienza a gestionar tu inventario de forma inteligente y eficiente.</p>
-          <Link
-            to="/login"
-            className="inline-flex items-center gap-2 bg-[#06B6D4] text-white font-bold text-xl px-12 py-5 rounded-2xl hover:bg-[#0284C7] transition-all shadow-xl shadow-[#06B6D4]/25 hover:shadow-[#0284C7]/40 hover:scale-105 border border-[#334155]"
-          >
-            Iniciar Sesión
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </Link>
-        </div>
-      </div>
-
       <Footer />
     </div>
   );
 }
-
