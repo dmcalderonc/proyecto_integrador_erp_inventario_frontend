@@ -72,8 +72,7 @@ export default function ProyectosPage() {
       header: 'Nombre',
       sortable: true,
       render: (item: Proyecto) => (
-        /* Texto en Cian Neón vibrante */
-        <span className="text-[#00F0FF] font-bold tracking-wide">{item.nombre}</span>
+        <span className="font-bold text-[#303357]">{item.nombre}</span>
       )
     },
     {
@@ -81,7 +80,7 @@ export default function ProyectosPage() {
       header: 'Código',
       sortable: true,
       render: (item: Proyecto) => (
-        <span className="font-mono text-xs bg-[#0A1128] text-[#10B981] px-2.5 py-1 rounded-lg border border-[#10B981]/40 font-bold">
+        <span className="font-mono text-xs text-[#303357] px-2.5 py-1 rounded-lg border border-[#303357]/30 font-bold">
           {item.codigoProyecto || '-'}
         </span>
       )
@@ -92,8 +91,7 @@ export default function ProyectosPage() {
       sortable: true,
       sortValue: (item: Proyecto) => item.fechaInicio ?? '',
       render: (item: Proyecto) => (
-        /* Texto en Verde Esmeralda Neón */
-        <span className="text-[#34D399] font-semibold">
+        <span className="font-semibold text-[#303357]">
           {item.fechaInicio ? new Date(item.fechaInicio).toLocaleDateString() : '-'}
         </span>
       ),
@@ -115,17 +113,17 @@ export default function ProyectosPage() {
       header: 'Acciones',
       render: (item: Proyecto) => (
         <div className="flex items-center gap-2">
-          {/* Botón Editar - Azul/Cian Neón */}
+          {/* Botón Editar - Azul */}
           <button
             onClick={() => openEdit(item)}
-            className="flex items-center gap-1 bg-[#06B6D4]/20 text-[#00F0FF] hover:bg-[#06B6D4] hover:text-black px-3 py-1.5 rounded-lg border border-[#06B6D4]/50 transition-all font-bold text-xs cursor-pointer"
+            className="flex items-center gap-1 bg-[#06B6D4]/20 text-[#06B6D4] hover:bg-[#06B6D4] hover:text-white px-3 py-1.5 rounded-lg border border-[#06B6D4]/50 transition-all font-bold text-xs cursor-pointer"
           >
             <Edit2 size={14} /> Editar
           </button>
-          {/* Botón Eliminar - Rojo Intenso */}
+          {/* Botón Eliminar - Rojo */}
           <button
             onClick={() => openDelete(item)}
-            className="flex items-center gap-1 bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-black px-3 py-1.5 rounded-lg border border-red-500/50 transition-all font-bold text-xs cursor-pointer"
+            className="flex items-center gap-1 bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg border border-red-500/50 transition-all font-bold text-xs cursor-pointer"
           >
             <Trash2 size={14} /> Eliminar
           </button>
@@ -139,25 +137,26 @@ export default function ProyectosPage() {
       {/* Header de la sección */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#00F0FF] mb-2">Proyectos</h1>
-          <p className="text-[#34D399] text-sm">Gestiona obras, centros de costos y bodegas asociadas.</p>
+          <h1 className="text-3xl font-extrabold text-[#FFFFFF] mb-2">Proyectos</h1>
+          <p className="text-[#94A3B8] text-sm">Gestiona obras, centros de costos y bodegas asociadas.</p>
         </div>
         {isAdmin && (
           <Button
             onClick={openCreate}
-            className="bg-[#06B6D4] hover:bg-[#0284C7] text-black font-extrabold px-5 py-3 rounded-xl border border-[#06B6D4] transition-all shadow-lg shadow-[#06B6D4]/30 hover:scale-105 active:scale-95 cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
+            className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-extrabold px-5 py-3 rounded-xl border border-[#06B6D4] transition-all shadow-lg shadow-[#06B6D4]/30 hover:scale-105 active:scale-95 cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
           >
             <Plus size={18} /> Nuevo Proyecto
           </Button>
         )}
       </div>
 
-      {/* Tabla con colores saturados de alto contraste sin usar blanco ni grises claros */}
+      {/* Tabla con letras en color #303357 */}
       <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl overflow-hidden
-        [&_table]:w-full
-        [&_th]:text-[#00F0FF] [&_th]:font-extrabold [&_th]:bg-[#0A1128] [&_th]:border-b [&_th]:border-[#334155] [&_th]:p-4
-        [&_td]:border-b [&_td]:border-[#334155]/60 [&_td]:p-4
-        [&_input]:text-[#00F0FF] [&_input]:bg-[#0A1128] [&_input]:border-[#334155] [&_input]:placeholder-[#10B981]/50 [&_input]:font-semibold">
+        text-[#303357]
+        [&_table]:w-full [&_table]:text-[#303357]
+        [&_th]:text-[#303357] [&_th]:font-extrabold [&_th]:bg-[#0A1128] [&_th]:border-b [&_th]:border-[#334155] [&_th]:p-4
+        [&_td]:text-[#303357] [&_td]:border-b [&_td]:border-[#334155]/60 [&_td]:p-4
+        [&_input]:text-[#303357] [&_input]:bg-[#0A1128] [&_input]:border-[#334155] [&_input]:placeholder-[#303357]/60 [&_input]:font-semibold">
         
         <DataTable
           columns={columns}
@@ -172,44 +171,44 @@ export default function ProyectosPage() {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Proyecto' : 'Nuevo Proyecto'}>
         <form onSubmit={handleSubmit} className="space-y-5 p-1">
           <div>
-            <label className="block text-sm font-bold text-[#00F0FF] mb-1.5">Nombre</label>
+            <label className="block text-sm font-bold text-[#FFFFFF] mb-1.5">Nombre</label>
             <input
               placeholder="Ej: Construcción Torre Norte"
               value={form.nombre}
               onChange={e => setForm({ ...form, nombre: e.target.value })}
-              className="w-full bg-[#0A1128] text-[#00F0FF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#10B981]/40 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all font-semibold"
+              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all font-semibold"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-[#00F0FF] mb-1.5">Código de proyecto (opcional)</label>
+            <label className="block text-sm font-bold text-[#FFFFFF] mb-1.5">Código de proyecto (opcional)</label>
             <input
               placeholder="Ej: PROY-2026-001 (Automático si se deja vacío)"
               value={form.codigoProyecto}
               onChange={e => setForm({ ...form, codigoProyecto: e.target.value })}
-              className="w-full bg-[#0A1128] text-[#00F0FF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#10B981]/40 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all font-mono font-semibold"
+              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all font-mono font-semibold"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-[#00F0FF] mb-1.5">Fecha de inicio</label>
+            <label className="block text-sm font-bold text-[#FFFFFF] mb-1.5">Fecha de inicio</label>
             <input
               type="date"
               value={form.fechaInicio}
               onChange={e => setForm({ ...form, fechaInicio: e.target.value })}
-              className="w-full bg-[#0A1128] text-[#34D399] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer font-semibold [color-scheme:dark]"
+              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer font-semibold [color-scheme:dark]"
               required
             />
           </div>
 
           {editing && (
             <div>
-              <label className="block text-sm font-bold text-[#00F0FF] mb-1.5">Estado</label>
+              <label className="block text-sm font-bold text-[#FFFFFF] mb-1.5">Estado</label>
               <select
                 value={form.estado}
                 onChange={e => setForm({ ...form, estado: e.target.value as EstadoProyecto })}
-                className="w-full bg-[#0A1128] text-[#00F0FF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer font-semibold"
+                className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer font-semibold"
               >
                 <option value="ACTIVO" className="bg-[#0A1128] text-[#10B981]">ACTIVO</option>
                 <option value="CERRADO" className="bg-[#0A1128] text-red-400">CERRADO</option>
@@ -222,14 +221,14 @@ export default function ProyectosPage() {
               type="button"
               variant="secondary"
               onClick={() => setModalOpen(false)}
-              className="bg-[#1E293B] hover:bg-slate-800 text-[#34D399] border border-[#334155] px-5 py-2.5 rounded-xl font-bold transition-all cursor-pointer"
+              className="bg-[#1E293B] hover:bg-slate-800 text-[#FFFFFF] border border-[#334155] px-5 py-2.5 rounded-xl font-bold transition-all cursor-pointer"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={crear.isPending || actualizar.isPending}
-              className="bg-[#06B6D4] hover:bg-[#0284C7] text-black font-extrabold px-6 py-2.5 rounded-xl border border-[#06B6D4] transition-all shadow-lg shadow-[#06B6D4]/20 disabled:opacity-50 cursor-pointer"
+              className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-extrabold px-6 py-2.5 rounded-xl border border-[#06B6D4] transition-all shadow-lg shadow-[#06B6D4]/20 disabled:opacity-50 cursor-pointer"
             >
               {editing ? (actualizar.isPending ? 'Guardando...' : 'Actualizar') : (crear.isPending ? 'Creando...' : 'Crear')}
             </Button>
