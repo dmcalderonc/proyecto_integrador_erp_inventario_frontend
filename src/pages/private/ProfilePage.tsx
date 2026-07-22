@@ -12,9 +12,9 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [linkingGoogle, setLinkingGoogle] = useState(false);
 
-  const displayImage = user.fotoPerfil || user.avatarUrl || null;
-
   if (!user) return null;
+
+  const displayImage = user.fotoPerfil || user.avatarUrl || null;
 
   const rolColors: Record<string, string> = {
     ADMIN: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
