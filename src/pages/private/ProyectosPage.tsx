@@ -6,7 +6,7 @@ import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { Plus } from 'lucide-react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 
 const emptyForm = { nombre: '', codigoProyecto: '', fechaInicio: '', estado: 'ACTIVO' as EstadoProyecto };
 
@@ -71,14 +71,17 @@ export default function ProyectosPage() {
       key: 'nombre',
       header: 'Nombre',
       sortable: true,
-      render: (item: Proyecto) => <span className="text-[#E2E8F0] font-semibold">{item.nombre}</span>
+      render: (item: Proyecto) => (
+        /* Texto en Cian Neón vibrante */
+        <span className="text-[#00F0FF] font-bold tracking-wide">{item.nombre}</span>
+      )
     },
     {
       key: 'codigoProyecto',
       header: 'Código',
       sortable: true,
       render: (item: Proyecto) => (
-        <span className="font-mono text-xs bg-[#0A1128] text-[#10B981] px-2.5 py-1 rounded-lg border border-[#334155] font-semibold">
+        <span className="font-mono text-xs bg-[#0A1128] text-[#10B981] px-2.5 py-1 rounded-lg border border-[#10B981]/40 font-bold">
           {item.codigoProyecto || '-'}
         </span>
       )
@@ -89,7 +92,8 @@ export default function ProyectosPage() {
       sortable: true,
       sortValue: (item: Proyecto) => item.fechaInicio ?? '',
       render: (item: Proyecto) => (
-        <span className="text-[#94A3B8] font-medium">
+        /* Texto en Verde Esmeralda Neón */
+        <span className="text-[#34D399] font-semibold">
           {item.fechaInicio ? new Date(item.fechaInicio).toLocaleDateString() : '-'}
         </span>
       ),
@@ -98,14 +102,36 @@ export default function ProyectosPage() {
       key: 'estado',
       header: 'Estado',
       render: (item: Proyecto) => (
-        <span className={`inline-block px-3 py-1 rounded-xl text-xs font-semibold border ${item.estado === 'ACTIVO'
-            ? 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/30'
-            : 'bg-[#0A1128] text-[#94A3B8]/70 border-[#334155]'
+        <span className={`inline-block px-3 py-1 rounded-xl text-xs font-bold border ${item.estado === 'ACTIVO'
+            ? 'bg-[#10B981]/20 text-[#10B981] border-[#10B981]/50'
+            : 'bg-red-500/20 text-red-400 border-red-500/40'
           }`}>
           {item.estado}
         </span>
       ),
     },
+    ...(isAdmin ? [{
+      key: 'acciones',
+      header: 'Acciones',
+      render: (item: Proyecto) => (
+        <div className="flex items-center gap-2">
+          {/* Botón Editar - Azul/Cian Neón */}
+          <button
+            onClick={() => openEdit(item)}
+            className="flex items-center gap-1 bg-[#06B6D4]/20 text-[#00F0FF] hover:bg-[#06B6D4] hover:text-black px-3 py-1.5 rounded-lg border border-[#06B6D4]/50 transition-all font-bold text-xs cursor-pointer"
+          >
+            <Edit2 size={14} /> Editar
+          </button>
+          {/* Botón Eliminar - Rojo Intenso */}
+          <button
+            onClick={() => openDelete(item)}
+            className="flex items-center gap-1 bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-black px-3 py-1.5 rounded-lg border border-red-500/50 transition-all font-bold text-xs cursor-pointer"
+          >
+            <Trash2 size={14} /> Eliminar
+          </button>
+        </div>
+      )
+    }] : [])
   ];
 
   return (
@@ -113,47 +139,30 @@ export default function ProyectosPage() {
       {/* Header de la sección */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#E2E8F0] mb-2">Proyectos</h1>
-          <p className="text-[#94A3B8] text-sm">Gestiona obras, centros de costos y bodegas asociadas.</p>
+          <h1 className="text-3xl font-extrabold text-[#00F0FF] mb-2">Proyectos</h1>
+          <p className="text-[#34D399] text-sm">Gestiona obras, centros de costos y bodegas asociadas.</p>
         </div>
         {isAdmin && (
           <Button
             onClick={openCreate}
-            className="bg-[#06B6D4] hover:bg-[#0284C7] text-slate-900 font-extrabold px-5 py-3 rounded-xl border border-[#06B6D4]/30 transition-all shadow-lg shadow-[#06B6D4]/20 hover:scale-105 active:scale-95 cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
+            className="bg-[#06B6D4] hover:bg-[#0284C7] text-black font-extrabold px-5 py-3 rounded-xl border border-[#06B6D4] transition-all shadow-lg shadow-[#06B6D4]/30 hover:scale-105 active:scale-95 cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
           >
             <Plus size={18} /> Nuevo Proyecto
           </Button>
         )}
       </div>
 
-      {/* Tabla de Proyectos (Tema oscuro sin blanco, con soporte para botones Editar/Eliminar) */}
-      <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl overflow-hidden 
-        text-[#CBD5E1] 
-        [&_table]:text-[#CBD5E1] 
-        [&_th]:text-[#94A3B8] [&_th]:font-bold [&_th]:bg-[#0A1128]/70 [&_th]:border-b [&_th]:border-[#334155] 
-        [&_td]:text-[#E2E8F0] [&_td]:border-b [&_td]:border-[#334155]/50 
-        [&_input]:text-[#E2E8F0] [&_input]:bg-[#0A1128] [&_input]:border-[#334155] [&_input]:placeholder-[#94A3B8]/50 
-        
-        {/* Estilos para botón Editar (Azul / Cian) */}
-        [&_button[data-action='edit']]:bg-[#06B6D4]/10 
-        [&_button[data-action='edit']]:text-[#06B6D4] 
-        [&_button[data-action='edit']]:border 
-        [&_button[data-action='edit']]:border-[#06B6D4]/30 
-        [&_button[data-action='edit']]:hover:bg-[#06B6D4]/20 
-        
-        {/* Estilos para botón Eliminar (Rojo) */}
-        [&_button[data-action='delete']]:bg-red-500/10 
-        [&_button[data-action='delete']]:text-red-400 
-        [&_button[data-action='delete']]:border 
-        [&_button[data-action='delete']]:border-red-500/30 
-        [&_button[data-action='delete']]:hover:bg-red-500/20">
+      {/* Tabla con colores saturados de alto contraste sin usar blanco ni grises claros */}
+      <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl overflow-hidden
+        [&_table]:w-full
+        [&_th]:text-[#00F0FF] [&_th]:font-extrabold [&_th]:bg-[#0A1128] [&_th]:border-b [&_th]:border-[#334155] [&_th]:p-4
+        [&_td]:border-b [&_td]:border-[#334155]/60 [&_td]:p-4
+        [&_input]:text-[#00F0FF] [&_input]:bg-[#0A1128] [&_input]:border-[#334155] [&_input]:placeholder-[#10B981]/50 [&_input]:font-semibold">
         
         <DataTable
           columns={columns}
           data={proyectos}
           loading={isLoading}
-          onEdit={isAdmin ? openEdit : undefined}
-          onDelete={isAdmin ? openDelete : undefined}
           searchable
           searchKeys={["nombre", "estado"]}
         />
@@ -161,49 +170,49 @@ export default function ProyectosPage() {
 
       {/* Modal de Crear / Editar */}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Proyecto' : 'Nuevo Proyecto'}>
-        <form onSubmit={handleSubmit} className="space-y-5 text-[#94A3B8] p-1">
+        <form onSubmit={handleSubmit} className="space-y-5 p-1">
           <div>
-            <label className="block text-sm font-medium text-[#E2E8F0] mb-1.5">Nombre</label>
+            <label className="block text-sm font-bold text-[#00F0FF] mb-1.5">Nombre</label>
             <input
               placeholder="Ej: Construcción Torre Norte"
               value={form.nombre}
               onChange={e => setForm({ ...form, nombre: e.target.value })}
-              className="w-full bg-[#0A1128] text-[#E2E8F0] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all"
+              className="w-full bg-[#0A1128] text-[#00F0FF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#10B981]/40 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all font-semibold"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#E2E8F0] mb-1.5">Código de proyecto (opcional)</label>
+            <label className="block text-sm font-bold text-[#00F0FF] mb-1.5">Código de proyecto (opcional)</label>
             <input
               placeholder="Ej: PROY-2026-001 (Automático si se deja vacío)"
               value={form.codigoProyecto}
               onChange={e => setForm({ ...form, codigoProyecto: e.target.value })}
-              className="w-full bg-[#0A1128] text-[#E2E8F0] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all font-mono"
+              className="w-full bg-[#0A1128] text-[#00F0FF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#10B981]/40 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all font-mono font-semibold"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#E2E8F0] mb-1.5">Fecha de inicio</label>
+            <label className="block text-sm font-bold text-[#00F0FF] mb-1.5">Fecha de inicio</label>
             <input
               type="date"
               value={form.fechaInicio}
               onChange={e => setForm({ ...form, fechaInicio: e.target.value })}
-              className="w-full bg-[#0A1128] text-[#E2E8F0] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer [color-scheme:dark]"
+              className="w-full bg-[#0A1128] text-[#34D399] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer font-semibold [color-scheme:dark]"
               required
             />
           </div>
 
           {editing && (
             <div>
-              <label className="block text-sm font-medium text-[#E2E8F0] mb-1.5">Estado</label>
+              <label className="block text-sm font-bold text-[#00F0FF] mb-1.5">Estado</label>
               <select
                 value={form.estado}
                 onChange={e => setForm({ ...form, estado: e.target.value as EstadoProyecto })}
-                className="w-full bg-[#0A1128] text-[#E2E8F0] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer"
+                className="w-full bg-[#0A1128] text-[#00F0FF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer font-semibold"
               >
-                <option value="ACTIVO" className="bg-[#0A1128]">ACTIVO</option>
-                <option value="CERRADO" className="bg-[#0A1128]">CERRADO</option>
+                <option value="ACTIVO" className="bg-[#0A1128] text-[#10B981]">ACTIVO</option>
+                <option value="CERRADO" className="bg-[#0A1128] text-red-400">CERRADO</option>
               </select>
             </div>
           )}
@@ -213,14 +222,14 @@ export default function ProyectosPage() {
               type="button"
               variant="secondary"
               onClick={() => setModalOpen(false)}
-              className="bg-[#1E293B] hover:bg-slate-800 text-[#CBD5E1] border border-[#334155] px-5 py-2.5 rounded-xl font-medium transition-all cursor-pointer"
+              className="bg-[#1E293B] hover:bg-slate-800 text-[#34D399] border border-[#334155] px-5 py-2.5 rounded-xl font-bold transition-all cursor-pointer"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={crear.isPending || actualizar.isPending}
-              className="bg-[#06B6D4] hover:bg-[#0284C7] text-slate-900 font-extrabold px-6 py-2.5 rounded-xl border border-[#06B6D4]/30 transition-all shadow-lg shadow-[#06B6D4]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="bg-[#06B6D4] hover:bg-[#0284C7] text-black font-extrabold px-6 py-2.5 rounded-xl border border-[#06B6D4] transition-all shadow-lg shadow-[#06B6D4]/20 disabled:opacity-50 cursor-pointer"
             >
               {editing ? (actualizar.isPending ? 'Guardando...' : 'Actualizar') : (crear.isPending ? 'Creando...' : 'Crear')}
             </Button>
