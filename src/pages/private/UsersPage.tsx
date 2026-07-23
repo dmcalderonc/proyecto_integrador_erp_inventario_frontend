@@ -188,7 +188,7 @@ export default function UsersPage() {
       </div>
 
       <div className="bg-surface rounded-xl border border-border-subtle p-6">
-        <DataTable columns={columns} data={users} loading={isLoading} onEdit={openEdit} onDelete={openDelete} searchable searchKeys={['nombre', 'email', 'rol']} />
+        <DataTable columns={columns} data={users} loading={isLoading} searchable searchKeys={['nombre', 'email', 'rol']} />
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Usuario' : 'Nuevo Usuario'}>

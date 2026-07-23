@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useInventario } from '../../store/useInventario';
 import { useBodegas } from '../../store/useBodegas';
-import { Package } from 'lucide-react';
 import type { Inventario } from '../../types';
 import { cn } from '../../lib/utils';
 import { DataTable } from '../../components/ui/DataTable';

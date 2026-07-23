@@ -73,7 +73,7 @@ export default function UnidadesMedidaPage() {
       </div>
 
       <div className="bg-surface rounded-xl border border-border-subtle p-6">
-        <DataTable columns={columns} data={unidades} loading={isLoading} onEdit={openEdit} onDelete={openDelete} searchable searchKeys={["nombre", "simbolo"]} />
+        <DataTable columns={columns} data={unidades} loading={isLoading} searchable searchKeys={["nombre", "simbolo"]} />
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Unidad' : 'Nueva Unidad'}>

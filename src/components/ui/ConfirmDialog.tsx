@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
-import { AlertTriangle, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from './Button';
 
 type ConfirmVariant = 'danger' | 'success' | 'warning';

@@ -3,7 +3,6 @@ import { FolderOpen, ClipboardList, DollarSign, Activity, AlertTriangle, Trendin
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import api from '../../api/http';
 import { useAuth } from '../../contexts/AuthContext';
-import { getBadgeStyle } from '../../lib/design-tokens';
 
 interface DashboardKpis {
   proyectosActivos: number;

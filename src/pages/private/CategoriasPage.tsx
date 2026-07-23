@@ -73,7 +73,7 @@ export default function CategoriasPage() {
       </div>
 
       <div className="bg-surface rounded-xl border border-border-subtle p-6">
-        <DataTable columns={columns} data={categorias} loading={isLoading} onEdit={openEdit} onDelete={openDelete} searchable searchKeys={["nombre", "prefijo"]} />
+        <DataTable columns={columns} data={categorias} loading={isLoading} searchable searchKeys={["nombre", "prefijo"]} />
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Categoría' : 'Nueva Categoría'}>

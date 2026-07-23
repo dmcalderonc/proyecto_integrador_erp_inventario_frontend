@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRequirements } from '../../store/useRequirements';
@@ -6,15 +6,14 @@ import { useProyectos } from '../../store/useProyectos';
 import { useBodegas } from '../../store/useBodegas';
 import { materialesApi } from '../../api/materiales.api';
 import { requirementsApi } from '../../api/requirements.api';
-import type { Requirement, RequirementDetalle, ItemStatus } from '../../types';
+import type { Requirement } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { SmartCombobox } from '../../components/ui/SmartCombobox';
 import type { ComboboxOption } from '../../components/ui/SmartCombobox';
 import { getBadgeStyle } from '../../lib/design-tokens';
-import { Plus, Trash2, Eye, X, CheckCircle, XCircle, Truck, ShoppingCart, Package } from 'lucide-react';
+import { Plus, Trash2, Eye, CheckCircle, XCircle, Truck, ShoppingCart, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 type DetalleForm = { materialId: number; cantidadSolicitada: string };
@@ -39,7 +38,7 @@ export default function RequirementsPage() {
   const [bodegaSeleccionada, setBodegaSeleccionada] = useState<ComboboxOption | null>(null);
 
   const queryClient = useQueryClient();
-  const { hasRole, user } = useAuth();
+  const { hasRole } = useAuth();
   const { crear } = useRequirements();
   const { proyectos } = useProyectos();
   const { bodegas } = useBodegas();

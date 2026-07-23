@@ -51,7 +51,7 @@ export function DashboardLayout() {
     const { theme, toggleTheme } = useTheme();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    const filteredLinks = navLinks.filter(link => link.roles.includes(user?.rol ?? ''));
+    const filteredLinks = navLinks.filter(link => user?.rol && link.roles.includes(user.rol));
 
     useEffect(() => {
         setSidebarOpen(false);

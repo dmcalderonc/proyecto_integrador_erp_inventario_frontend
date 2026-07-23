@@ -35,7 +35,7 @@ const getEventConfig = (tipo: TimelineEvent['tipo']) => {
 export const RequirementTimeline: React.FC<RequirementTimelineProps> = ({ eventos }) => {
   return (
     <div className="relative space-y-6 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border-subtle before:to-transparent">
-      {eventos.map((evento, index) => {
+      {eventos.map((evento) => {
         const config = getEventConfig(evento.tipo);
         const Icon = config.icon;
 

@@ -10,7 +10,7 @@ export interface SelectOption {
 interface SearchableSelectProps {
   options: SelectOption[];
   value: SelectOption | null;
-  onChange: (value: SelectOption) => void;
+  onChange: (value: SelectOption | null) => void;
   placeholder?: string;
 }
 

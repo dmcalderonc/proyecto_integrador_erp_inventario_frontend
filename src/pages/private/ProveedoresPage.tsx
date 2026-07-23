@@ -89,7 +89,7 @@ export default function ProveedoresPage() {
       </div>
 
       <div className="bg-surface rounded-xl border border-border-subtle p-6">
-        <DataTable columns={columns} data={proveedores} loading={isLoading} onEdit={openEdit} onDelete={openDelete} searchable searchKeys={["razon_social", "email", "telefono"]} />
+        <DataTable columns={columns} data={proveedores} loading={isLoading} searchable searchKeys={["razon_social", "email", "telefono"]} />
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Proveedor' : 'Nuevo Proveedor'}>

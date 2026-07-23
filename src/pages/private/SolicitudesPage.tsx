@@ -145,7 +145,7 @@ export default function SolicitudesPage() {
               Marcar como Cotizando
             </Button>
           )}
-          {hasRole(['ADMIN']) && item.estado === 'COTIZADO' && (
+          {hasRole(['ADMIN']) && item.estado === 'COTIZANDO' && (
             <Button variant="primary" size="sm" onClick={() => aprobar.mutateAsync(item.id)}>
               <CheckCircle size={14} /> Aprobar
             </Button>

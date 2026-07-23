@@ -10,7 +10,7 @@ export interface ComboboxOption {
 interface SmartComboboxProps {
   options: ComboboxOption[];
   value: ComboboxOption | null;
-  onChange: (value: ComboboxOption) => void;
+  onChange: (value: ComboboxOption | null) => void;
   placeholder?: string;
   disabled?: boolean;
 }

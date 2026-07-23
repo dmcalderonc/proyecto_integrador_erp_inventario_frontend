@@ -131,7 +131,7 @@ export default function CotizacionesPage() {
       key: 'acciones', header: '',
       render: (item: Cotizacion) => (
         <div className="flex gap-1.5 justify-end">
-          {hasRole(['ADMIN']) && item.estado === 'COTIZADO' && (
+          {hasRole(['ADMIN']) && item.estado === 'EN_EVALUACION' && (
             <>
               <Button variant="primary" size="sm" onClick={() => seleccionar.mutateAsync(item.id)}>
                 <Check size={14} /> Seleccionar
@@ -161,7 +161,7 @@ export default function CotizacionesPage() {
       </div>
 
       <div className="bg-surface rounded-xl border border-border-subtle p-6">
-        <DataTable columns={columns} data={cotizaciones} loading={isLoading} onEdit={hasRole(['COMPRADOR', 'ADMIN']) ? openEdit : undefined} onDelete={hasRole(['ADMIN']) ? openDelete : undefined} searchable searchKeys={["codigo", "estado"]} />
+        <DataTable columns={columns} data={cotizaciones} loading={isLoading} searchable searchKeys={["codigo", "estado"]} />
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Cotizacion' : 'Nueva Cotizacion'}>

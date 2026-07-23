@@ -94,7 +94,7 @@ export default function ComprasPage() {
       subtotal: subtotalCalc,
       impuestos: impuestosCalc,
       total: totalCalc,
-      detalles: detallesNumeros,
+      detalles: detallesNumeros as any,
     };
     await crear.mutateAsync(dto);
     setModalOpen(false);

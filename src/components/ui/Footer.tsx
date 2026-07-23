@@ -1,3 +1,5 @@
+import { Package } from 'lucide-react';
+
 export function Footer() {
   return (
     <footer className="bg-base border-t border-border-subtle">
