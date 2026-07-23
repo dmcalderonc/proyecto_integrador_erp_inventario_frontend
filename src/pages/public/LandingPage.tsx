@@ -107,7 +107,7 @@ const plans = [
 ];
 
 function Sparkline() {
-  const [hovered, setHovered] = useState(null);
+  const [hovered, setHovered] = useState<number | null>(null);
   
   const values = [4200, 3800, 5100, 4700, 6300, 5900, 7200, 6800];
   const labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago'];
@@ -121,7 +121,7 @@ function Sparkline() {
   const area = `${line} L${xs[xs.length - 1].toFixed(1)},${H} L${xs[0].toFixed(1)},${H} Z`;
 
   // Lógica para que el tooltip no empuje el SVG fuera de su caja
-  const getTooltipPosition = (index, x) => {
+  const getTooltipPosition = (index: number, x: number) => {
     if (index === 0) return x + 35; // Lo empuja a la derecha en el primer punto
     if (index === xs.length - 1) return x - 35; // Lo empuja a la izquierda en el último punto
     return x; // Centrado para los demás
@@ -182,7 +182,7 @@ function Sparkline() {
   );
 }
 
-function Navbar({ scrolled, menuOpen, setMenuOpen }) {
+function Navbar({ scrolled, menuOpen, setMenuOpen }: { scrolled: boolean; menuOpen: boolean; setMenuOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
   return (
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-all w-full duration-300 ${
@@ -265,7 +265,7 @@ export function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [videoPaused, setVideoPaused] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const videoRef = useRef(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -284,7 +284,6 @@ export function LandingPage() {
   };
 
   return (
-    {/* Contenedor estricto para evitar horizontal scroll */},
     <div className="relative min-h-screen bg-background text-foreground overflow-x-hidden max-w-[100vw]" style={{ fontFamily: "var(--font-sans)" }}>
       <Navbar scrolled={scrolled} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
@@ -803,7 +802,7 @@ export function LandingPage() {
                 </p>
                 <ul className="space-y-2.5">
                   {col.links.map((l) => {
-                    const hrefMap = {
+                    const hrefMap: Record<string, string> = {
                       'Características': '#features',
                       'Precios': '#precios',
                       'Cómo funciona': '#como-funciona',
