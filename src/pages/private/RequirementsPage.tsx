@@ -1,288 +1,308 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '../../contexts/AuthContext';
 import { useRequirements } from '../../store/useRequirements';
 import { useProyectos } from '../../store/useProyectos';
+import { useBodegas } from '../../store/useBodegas';
 import { materialesApi } from '../../api/materiales.api';
-import { useAuth } from '../../contexts/AuthContext';
-import type { Requirement, RequirementStatus } from '../../types';
+import { requirementsApi } from '../../api/requirements.api';
+import type { Requirement, RequirementDetalle, ItemStatus } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { Plus, Trash2 } from 'lucide-react';
+import { SmartCombobox } from '../../components/ui/SmartCombobox';
+import type { ComboboxOption } from '../../components/ui/SmartCombobox';
+import { getBadgeStyle } from '../../lib/design-tokens';
+import { Plus, Trash2, Eye, X, CheckCircle, XCircle, Truck, ShoppingCart, Package } from 'lucide-react';
+import toast from 'react-hot-toast';
 
-const badgeColors: Record<RequirementStatus, string> = {
-  PENDIENTE: 'bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30',
-  APROBADO: 'bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/30',
-  PARCIALMENTE_ATENDIDO: 'bg-[#F97316]/10 text-[#F97316] border border-[#F97316]/30',
-  ATENDIDO: 'bg-primary/10 text-primary border border-primary/30',
-  RECHAZADO: 'bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/30',
+type DetalleForm = { materialId: number; cantidadSolicitada: string };
+
+const emptyDetalle = (): DetalleForm => ({ materialId: 0, cantidadSolicitada: '' });
+
+const itemStatusConfig: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
+  PENDIENTE: { label: 'Pendiente', icon: null, color: 'text-warning' },
+  APROBADO_BODEGA: { label: 'Aprobado', icon: <CheckCircle size={14} />, color: 'text-success' },
+  RECHAZADO: { label: 'Rechazado', icon: <XCircle size={14} />, color: 'text-danger' },
+  EN_COMPRAS: { label: 'En Compras', icon: <ShoppingCart size={14} />, color: 'text-info' },
+  EN_TRASLADO: { label: 'En Traslado', icon: <Truck size={14} />, color: 'text-purple-400' },
+  DESPACHADO: { label: 'Despachado', icon: <Package size={14} />, color: 'text-success' },
 };
 
-type DetalleForm = { materialId: string; cantidadSolicitada: string };
-
-const emptyDetalle = (): DetalleForm => ({ materialId: '', cantidadSolicitada: '' });
-
-interface StatusAction {
-  requirement: Requirement;
-  estado: RequirementStatus;
-  label: string;
-}
-
 export default function RequirementsPage() {
-  const { requirements, isLoading, crear, actualizarEstado, eliminar } = useRequirements();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedReq, setSelectedReq] = useState<Requirement | null>(null);
+  const [detalles, setDetalles] = useState<DetalleForm[]>([emptyDetalle()]);
+  const [proyectoSeleccionado, setProyectoSeleccionado] = useState<ComboboxOption | null>(null);
+  const [bodegaSeleccionada, setBodegaSeleccionada] = useState<ComboboxOption | null>(null);
+
+  const queryClient = useQueryClient();
+  const { hasRole, user } = useAuth();
+  const { crear } = useRequirements();
   const { proyectos } = useProyectos();
-  const { hasRole } = useAuth();
+  const { bodegas } = useBodegas();
 
-  // Lógica de roles corregida
-  const canChangeStatus = hasRole(['ADMIN', 'BODEGUERO']);
-  const canCreate = hasRole(['ADMIN', 'BODEGUERO', 'SOLICITANTE']);
-  const isAdmin = hasRole(['ADMIN']);
-
-  // GET /materiales es público, se usa solo para poblar el select del formulario
   const { data: materiales = [] } = useQuery({
-    queryKey: ['materiales'],
+    queryKey: ['materialesAll'],
     queryFn: async () => {
-      const res = await materialesApi.getAll();
-      return res.data;
+      const res = await materialesApi.getAll({ limit: 200 });
+      return res.data || [];
     },
   });
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [proyectoId, setProyectoId] = useState('');
-  const [detalles, setDetalles] = useState<DetalleForm[]>([emptyDetalle()]);
+  const { data: requirements = [], isLoading } = useQuery({
+    queryKey: ['requirements'],
+    queryFn: async () => {
+      const res = await requirementsApi.getAll();
+      return res.data || [];
+    },
+  });
 
-  const [statusAction, setStatusAction] = useState<StatusAction | null>(null);
-  const [deleting, setDeleting] = useState<Requirement | null>(null);
+  const evaluarItem = useMutation({
+    mutationFn: async ({ reqId, detalleId, accion }: { reqId: number; detalleId: number; accion: string }) => {
+      const { data } = await requirementsApi.evaluarItem(reqId, detalleId, accion);
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['requirements'] });
+      toast.success(`Ítem ${variables.accion === 'APROBADO' ? 'aprobado' : 'rechazado'} correctamente`);
+      if (selectedReq) {
+        requirementsApi.getById(selectedReq.id).then(({ data }) => {
+          setSelectedReq(data);
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al evaluar ítem');
+    },
+  });
+
+  const openDetail = async (req: Requirement) => {
+    const { data } = await requirementsApi.getById(req.id);
+    setSelectedReq(data);
+    setDetailOpen(true);
+  };
 
   const openCreate = () => {
-    setProyectoId('');
     setDetalles([emptyDetalle()]);
+    setProyectoSeleccionado(null);
+    setBodegaSeleccionada(null);
     setModalOpen(true);
   };
 
   const addDetalle = () => setDetalles([...detalles, emptyDetalle()]);
   const removeDetalle = (index: number) => setDetalles(detalles.filter((_, i) => i !== index));
-  const updateDetalle = (index: number, field: keyof DetalleForm, value: string) => {
-    const next = [...detalles];
-    next[index] = { ...next[index], [field]: value };
-    setDetalles(next);
+  const updateDetalle = (index: number, field: keyof DetalleForm, value: string | number) => {
+    const updated = [...detalles];
+    updated[index] = { ...updated[index], [field]: value };
+    setDetalles(updated);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    if (!proyectoSeleccionado) { toast.error('Selecciona un proyecto'); return; }
+    if (!bodegaSeleccionada) { toast.error('Selecciona una bodega'); return; }
+    const validDetalles = detalles.filter(d => d.materialId > 0 && Number(d.cantidadSolicitada) > 0);
+    if (validDetalles.length === 0) { toast.error('Agrega al menos un material válido'); return; }
 
-    if (!proyectoId) {
-      toast.error('Seleccioná un proyecto');
-      return;
-    }
-
-    const detallesValidos = detalles
-      .filter(d => d.materialId !== '' && Number(d.cantidadSolicitada) > 0)
-      .map(d => ({ materialId: Number(d.materialId), cantidadSolicitada: Number(d.cantidadSolicitada) }));
-
-    if (detallesValidos.length === 0) {
-      toast.error('Agregá al menos un material con cantidad válida');
-      return;
-    }
-
-    await crear.mutateAsync({ proyectoId, detalles: detallesValidos });
+    await crear.mutateAsync({
+      proyectoId: String(proyectoSeleccionado.id),
+      bodegaId: Number(bodegaSeleccionada.id),
+      detalles: validDetalles.map(d => ({
+        materialId: d.materialId,
+        cantidadSolicitada: Number(d.cantidadSolicitada),
+      })),
+    });
     setModalOpen(false);
   };
 
-  const handleStatusConfirm = async () => {
-    if (!statusAction) return;
-    try {
-      await actualizarEstado.mutateAsync({ id: statusAction.requirement.id, estado: statusAction.estado });
-    } catch {
-      // Error manejado por onError en useRequirements
-    }
-    setStatusAction(null);
-  };
-
-  const handleDelete = async () => {
-    if (!deleting) return;
-    try {
-      await eliminar.mutateAsync(deleting.id);
-    } catch {
-      // Error manejado por onError en useRequirements
-    }
-    setDeleting(null);
-  };
+  const materialOptions: ComboboxOption[] = materiales.map((m: any) => ({ id: m.id, nombre: `${m.sku} - ${m.nombre}` }));
+  const proyectoOptions: ComboboxOption[] = proyectos.map((p: any) => ({ id: p.id, nombre: `${p.codigoProyecto || 'PROY'} - ${p.nombre}` }));
+  const bodegaOptions: ComboboxOption[] = bodegas.map((b: any) => ({ id: b.id, nombre: b.nombre }));
 
   const columns = [
-    {
-      key: 'id', header: 'ID',
-      sortable: true,
-      sortValue: (item: Requirement) => item.id,
-      render: (item: Requirement) => (
-        <span className="font-mono text-xs bg-card text-muted-foreground px-2.5 py-1 rounded-md border border-border font-semibold">
-          REQ-{item.id}
-        </span>
-      ),
-    },
-    {
-      key: 'proyecto', header: 'Proyecto',
-      sortable: true,
-      sortValue: (item: Requirement) => item.proyecto?.nombre ?? '',
-      render: (item: Requirement) => <span className="text-card-foreground font-bold">{item.proyecto?.nombre ?? '-'}</span>,
-    },
-    {
-      key: 'usuarioSolicitante', header: 'Solicitante',
-      sortable: true,
-      sortValue: (item: Requirement) => item.usuarioSolicitante?.nombre ?? '',
-      render: (item: Requirement) => <span className="text-muted-foreground">{item.usuarioSolicitante?.nombre ?? '-'}</span>,
-    },
-    {
-      key: 'fechaSolicitud', header: 'Fecha',
-      sortable: true,
-      sortValue: (item: Requirement) => item.fechaSolicitud ?? '',
-      render: (item: Requirement) => <span className="text-muted-foreground">{item.fechaSolicitud ? new Date(item.fechaSolicitud).toLocaleDateString() : '-'}</span>,
-    },
-    {
-      key: 'estado', header: 'Estado',
-      render: (item: Requirement) => (
-        <span className={`inline-block px-3 py-1 rounded-xl text-xs font-semibold border ${badgeColors[item.estado]}`}>
-          {item.estado}
-        </span>
-      ),
-    },
-    {
-      key: 'acciones', header: 'Acciones',
-      render: (item: Requirement) => (
-        <div className="flex justify-end gap-2">
-          {canChangeStatus && item.estado === 'PENDIENTE' && (
-            <button
-              onClick={() => setStatusAction({ requirement: item, estado: 'APROBADO', label: 'aprobar' })}
-              className="text-[#3B82F6] hover:text-[#3B82F6]/80 text-xs font-medium cursor-pointer"
-            >
-              Aprobar
-            </button>
-          )}
-          {canChangeStatus && item.estado === 'APROBADO' && (
-            <button
-              onClick={() => setStatusAction({ requirement: item, estado: 'ATENDIDO', label: 'marcar como atendido' })}
-              className="text-primary hover:text-primary/80 text-xs font-medium cursor-pointer"
-            >
-              Marcar Atendido
-            </button>
-          )}
-          {canChangeStatus && item.estado !== 'RECHAZADO' && item.estado !== 'ATENDIDO' && (
-            <button
-              onClick={() => setStatusAction({ requirement: item, estado: 'RECHAZADO', label: 'rechazar' })}
-              className="text-[#EF4444] hover:text-[#EF4444]/80 text-xs font-medium cursor-pointer"
-            >
-              Rechazar
-            </button>
-          )}
-          {isAdmin && (
-            <button
-              onClick={() => setDeleting(item)}
-              className="text-muted-foreground hover:text-card-foreground text-xs font-medium cursor-pointer"
-            >
-              Eliminar
-            </button>
-          )}
-        </div>
-      ),
-    },
+    { key: 'id', header: 'ID', render: (item: Requirement) => <span className="font-mono text-sm text-accent">REQ-{String(item.id).padStart(3, '0')}</span>, sortable: true },
+    { key: 'proyecto', header: 'Proyecto', render: (item: Requirement) => <span className="text-text-primary font-medium">{item.proyecto?.nombre ?? '-'}</span>, sortValue: (item: Requirement) => item.proyecto?.nombre ?? '' },
+    { key: 'solicitante', header: 'Solicitante', render: (item: Requirement) => <span className="text-text-secondary">{item.usuarioSolicitante?.nombre ?? '-'}</span>, sortValue: (item: Requirement) => item.usuarioSolicitante?.nombre ?? '' },
+    { key: 'bodega', header: 'Bodega', render: (item: Requirement) => <span className="text-text-secondary">{item.bodega?.nombre ?? '-'}</span>, sortValue: (item: Requirement) => item.bodega?.nombre ?? '' },
+    { key: 'fecha', header: 'Fecha', render: (item: Requirement) => <span className="text-text-muted text-sm">{new Date(item.fechaSolicitud).toLocaleDateString()}</span> },
+    { key: 'items', header: 'Ítems', render: (item: Requirement) => {
+      const total = item.detalles?.length || 0;
+      const despachados = item.detalles?.filter(d => d.estadoItem === 'DESPACHADO').length || 0;
+      return <span className="text-text-primary font-medium">{despachados}/{total}</span>;
+    }},
+    { key: 'estado', header: 'Estado', render: (item: Requirement) => {
+      const style = getBadgeStyle(item.estado);
+      return <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${style}`}>{item.estado?.replace(/_/g, ' ')}</span>;
+    }},
+    { key: 'acciones', header: 'Acciones', render: (item: Requirement) => (
+      <button onClick={() => openDetail(item)} className="text-accent hover:text-accent/80 text-xs font-semibold flex items-center gap-1 transition-colors">
+        <Eye size={14} /> Ver Detalle
+      </button>
+    )},
   ];
 
   return (
-    <div className="space-y-10 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-card-foreground mb-4" style={{ fontFamily: "var(--font-heading)" }}>Requerimientos</h1>
-          <p className="text-muted-foreground mt-2 text-sm">Gestioná las solicitudes de materiales para tus proyectos.</p>
+          <h1 className="text-2xl font-bold text-text-primary">Requerimientos</h1>
+          <p className="text-sm text-text-secondary mt-1">Gestiona y evalúa los requerimientos de materiales</p>
         </div>
-        {canCreate && (
-          <Button onClick={openCreate} className="bg-accent hover:bg-accent/80 text-white font-bold px-6 py-2 rounded-xl border border-border transition-all shadow-lg shadow-accent/20 hover:scale-105 active:scale-95 cursor-pointer flex items-center">
-            <Plus size={18} className="mr-1.5" /> Nuevo Requerimiento
+        {hasRole(['SOLICITANTE', 'ADMIN']) && (
+          <Button onClick={openCreate} className="gap-1.5">
+            <Plus size={16} /> Nuevo Requerimiento
           </Button>
         )}
       </div>
 
-      <div className="bg-card backdrop-blur-lg rounded-3xl border border-border p-6 shadow-2xl overflow-hidden">
-        <DataTable columns={columns} data={requirements} loading={isLoading} searchable searchKeys={["codigo", "estado"]} />
+      <div className="bg-surface rounded-xl border border-border-subtle p-6">
+        <DataTable columns={columns} data={requirements} loading={isLoading} searchable searchKeys={['proyecto', 'solicitante']} searchPlaceholder="Buscar por proyecto o solicitante..." />
       </div>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo Requerimiento">
-        <form onSubmit={handleSubmit} className="space-y-5 text-muted-foreground p-1">
-          <div>
-            <label className="block text-sm font-medium text-card-foreground mb-1.5">Proyecto</label>
-            <select value={proyectoId} onChange={e => setProyectoId(e.target.value)}
-              className="w-full bg-background text-card-foreground border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all cursor-pointer" required>
-              <option value="" className="bg-background">Seleccioná un proyecto</option>
-              {proyectos.map(p => (
-                <option key={p.id} value={p.id} className="bg-background">{p.codigoProyecto} - {p.nombre}</option>
-              ))}
-            </select>
+      <Modal open={detailOpen} onClose={() => setDetailOpen(false)} title={`REQ-${selectedReq?.id ? String(selectedReq.id).padStart(3, '0') : ''} — Detalle`} size="lg">
+        {selectedReq && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-base rounded-xl border border-border-subtle p-3">
+                <p className="text-xs text-text-muted">Proyecto</p>
+                <p className="text-sm font-semibold text-text-primary">{selectedReq.proyecto?.nombre ?? '-'}</p>
+              </div>
+              <div className="bg-base rounded-xl border border-border-subtle p-3">
+                <p className="text-xs text-text-muted">Solicitante</p>
+                <p className="text-sm font-semibold text-text-primary">{selectedReq.usuarioSolicitante?.nombre ?? '-'}</p>
+              </div>
+              <div className="bg-base rounded-xl border border-border-subtle p-3">
+                <p className="text-xs text-text-muted">Bodega</p>
+                <p className="text-sm font-semibold text-text-primary">{selectedReq.bodega?.nombre ?? '-'}</p>
+              </div>
+              <div className="bg-base rounded-xl border border-border-subtle p-3">
+                <p className="text-xs text-text-muted">Estado</p>
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${getBadgeStyle(selectedReq.estado)}`}>{selectedReq.estado?.replace(/_/g, ' ')}</span>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border-subtle">
+                    <th className="text-left py-3 px-3 text-text-muted font-medium">Material</th>
+                    <th className="text-left py-3 px-3 text-text-muted font-medium">SKU</th>
+                    <th className="text-center py-3 px-3 text-text-muted font-medium">Cant. Solicitada</th>
+                    <th className="text-center py-3 px-3 text-text-muted font-medium">Estado Ítem</th>
+                    <th className="text-right py-3 px-3 text-text-muted font-medium">Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedReq.detalles?.map((det) => {
+                    const statusInfo = itemStatusConfig[det.estadoItem || 'PENDIENTE'];
+                    return (
+                      <tr key={det.id} className="border-b border-border-subtle/50 hover:bg-elevated/50">
+                        <td className="py-3 px-3 text-text-primary font-medium">{det.material?.nombre ?? `Material #${det.materialId}`}</td>
+                        <td className="py-3 px-3 text-text-muted font-mono text-xs">{det.material?.sku ?? '-'}</td>
+                        <td className="py-3 px-3 text-text-primary text-center font-semibold">{det.cantidadSolicitada}</td>
+                        <td className="py-3 px-3">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border ${getBadgeStyle(det.estadoItem || 'PENDIENTE')}`}>
+                            {statusInfo?.icon}
+                            {statusInfo?.label || det.estadoItem}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          {det.estadoItem === 'PENDIENTE' && hasRole(['ADMIN']) && (
+                            <div className="flex justify-end gap-2">
+                              <button
+                                onClick={() => selectedReq && evaluarItem.mutate({ reqId: selectedReq.id, detalleId: det.id, accion: 'APROBADO' })}
+                                disabled={evaluarItem.isPending}
+                                className="text-success hover:text-success/80 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                              >
+                                <CheckCircle size={14} /> Aprobar
+                              </button>
+                              <button
+                                onClick={() => selectedReq && evaluarItem.mutate({ reqId: selectedReq.id, detalleId: det.id, accion: 'RECHAZADO' })}
+                                disabled={evaluarItem.isPending}
+                                className="text-danger hover:text-danger/80 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                              >
+                                <XCircle size={14} /> Rechazar
+                              </button>
+                            </div>
+                          )}
+                          {det.estadoItem === 'APROBADO_BODEGA' && hasRole(['BODEGUERO']) && (
+                            <div className="flex justify-end">
+                              <button
+                                disabled={evaluarItem.isPending}
+                                className="text-info hover:text-info/80 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                              >
+                                <Truck size={14} /> Despachar
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo Requerimiento" size="lg">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1.5">Proyecto</label>
+              <SmartCombobox options={proyectoOptions} value={proyectoSeleccionado} onChange={setProyectoSeleccionado} placeholder="Seleccionar proyecto..." />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1.5">Bodega de Retiro *</label>
+              <SmartCombobox options={bodegaOptions} value={bodegaSeleccionada} onChange={setBodegaSeleccionada} placeholder="Seleccionar bodega..." />
+            </div>
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-3">
-              <label className="block text-sm font-medium text-card-foreground">Materiales</label>
-              <button type="button" onClick={addDetalle} className="text-accent hover:text-accent/80 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer">
-                <Plus size={14} /> Agregar material
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-sm font-medium text-text-primary">Materiales</label>
+              <button onClick={addDetalle} className="text-accent hover:text-accent/80 text-xs font-semibold flex items-center gap-1 transition-colors">
+                <Plus size={14} /> Agregar
               </button>
             </div>
-
-            <div className="space-y-3">
-              {detalles.map((detalle, index) => (
-                <div key={index} className="flex gap-3 items-center bg-background p-3.5 rounded-2xl border border-border">
-                  <select value={detalle.materialId}
-                    onChange={e => updateDetalle(index, 'materialId', e.target.value)}
-                    className="flex-1 bg-card text-card-foreground border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent transition-all cursor-pointer" required>
-                    <option value="" className="bg-card">Material...</option>
-                    {materiales.map(m => (
-                      <option key={m.id} value={m.id} className="bg-card">{m.nombre} ({m.sku})</option>
-                    ))}
-                  </select>
-                  <input type="number" step="1" min="1" placeholder="Cantidad"
-                    value={detalle.cantidadSolicitada}
-                    onChange={e => updateDetalle(index, 'cantidadSolicitada', e.target.value)}
-                    onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
-                    className="w-full sm:w-28 bg-card text-card-foreground border border-border rounded-xl px-4 py-2.5 text-sm placeholder-muted-foreground/50 focus:outline-none focus:border-accent transition-all font-bold" required />
-                  <button type="button" onClick={() => removeDetalle(index)}
-                    disabled={detalles.length === 1}
-                    className="text-[#EF4444] hover:text-[#EF4444]/80 disabled:opacity-30 p-2 rounded-xl transition-colors cursor-pointer">
-                    <Trash2 size={18} />
-                  </button>
+            <div className="space-y-2">
+              {detalles.map((det, i) => (
+                <div key={i} className="flex gap-2 items-center">
+                  <div className="flex-1">
+                    <SmartCombobox
+                      options={materialOptions}
+                      value={det.materialId > 0 ? materialOptions.find(m => m.id === det.materialId) || null : null}
+                      onChange={(opt) => updateDetalle(i, 'materialId', Number(opt.id))}
+                      placeholder="Buscar material..."
+                    />
+                  </div>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="Cant."
+                    value={det.cantidadSolicitada}
+                    onChange={(e) => updateDetalle(i, 'cantidadSolicitada', e.target.value)}
+                    className="w-24 px-3 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm text-center focus:outline-none focus:border-accent transition-all"
+                  />
+                  {detalles.length > 1 && (
+                    <button onClick={() => removeDetalle(i)} className="text-danger hover:text-danger/80 transition-colors p-1 cursor-pointer">
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-border">
-            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)} className="bg-secondary hover:bg-black/10 dark:hover:bg-white/10 text-card-foreground border border-border px-5 py-2.5 rounded-xl font-medium transition-all cursor-pointer">Cancelar</Button>
-            <Button type="submit" disabled={crear.isPending} className="bg-accent hover:bg-accent/80 text-white font-bold px-6 py-2.5 rounded-xl border border-border transition-all shadow-lg shadow-accent/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
-              {crear.isPending ? 'Guardando...' : 'Crear Requerimiento'}
-            </Button>
+          <div className="flex justify-end gap-3 pt-4 border-t border-border-subtle">
+            <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSubmit} loading={crear.isPending}>Crear Requerimiento</Button>
           </div>
-        </form>
+        </div>
       </Modal>
-
-      <ConfirmDialog
-        open={!!statusAction}
-        onClose={() => setStatusAction(null)}
-        onConfirm={handleStatusConfirm}
-        title="Cambiar estado"
-        message={statusAction ? `¿Confirmás que querés ${statusAction.label} el requerimiento REQ-${statusAction.requirement.id}?` : ''}
-        loading={actualizarEstado.isPending}
-        confirmLabel={statusAction?.estado === 'APROBADO' ? 'Aprobar' : statusAction?.estado === 'RECHAZADO' ? 'Rechazar' : statusAction?.estado === 'ATENDIDO' ? 'Marcar Atendido' : 'Confirmar'}
-        loadingLabel={statusAction?.estado === 'APROBADO' ? 'Aprobando...' : statusAction?.estado === 'RECHAZADO' ? 'Rechazando...' : statusAction?.estado === 'ATENDIDO' ? 'Procesando...' : 'Procesando...'}
-        variant={statusAction?.estado === 'APROBADO' ? 'success' : 'danger'}
-      />
-
-      <ConfirmDialog
-        open={!!deleting}
-        onClose={() => setDeleting(null)}
-        onConfirm={handleDelete}
-        title="Eliminar requerimiento"
-        message={deleting ? `¿Estás seguro de eliminar el requerimiento REQ-${deleting.id}? Esta acción no se puede deshacer.` : ''}
-        loading={eliminar.isPending}
-      />
     </div>
   );
 }

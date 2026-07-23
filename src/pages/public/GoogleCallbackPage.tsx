@@ -43,10 +43,10 @@ export default function GoogleCallbackPage() {
     }, [searchParams, loginWithToken]);
 
     return (
-        <div className="min-h-screen bg-[#0A1128] flex items-center justify-center">
+        <div className="min-h-screen bg-base flex items-center justify-center">
             <div className="text-center">
-                <div className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-[#10B981] border-r-transparent mb-4"></div>
-                <p className="text-[#94A3B8] text-sm">Autenticando con Google...</p>
+                <div className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-success border-r-transparent mb-4"></div>
+                <p className="text-text-muted text-sm">Autenticando con Google...</p>
             </div>
         </div>
     );

@@ -1,22 +1,21 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import type { UserRole } from '../types/index';
+import { AccessDeniedPage } from '../pages/private/AccessDeniedPage';
 
-interface ProtectedRouteProps {
-    allowedRoles?: UserRole[];
+interface Props {
+  allowedRoles?: string[];
 }
 
-export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
-    const { isAuthenticated, hasRole } = useAuth();
-    const location = useLocation();
+export const ProtectedRoute = ({ allowedRoles }: Props) => {
+  const { user, isAuthenticated } = useAuth();
 
-    if (!isAuthenticated) {
-        return <Navigate to="/login" state={{ from: location }} replace />;
-    }
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
-    if (allowedRoles && allowedRoles.length > 0 && !hasRole(allowedRoles)) {
-        return <Navigate to="/dashboard" replace />;
-    }
+  if (allowedRoles && allowedRoles.length > 0 && user && !allowedRoles.includes(user.rol)) {
+    return <AccessDeniedPage />;
+  }
 
-    return <Outlet />;
-}
+  return <Outlet />;
+};

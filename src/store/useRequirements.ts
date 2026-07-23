@@ -30,10 +30,24 @@ export function useRequirements() {
       requirementsApi.updateStatus(id, { estado }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['requirements'] });
+      queryClient.invalidateQueries({ queryKey: ['traspasos'] });
       toast.success('Estado actualizado exitosamente');
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Error al actualizar estado');
+    },
+  });
+
+  const evaluarItem = useMutation({
+    mutationFn: ({ reqId, detalleId, accion }: { reqId: number; detalleId: number; accion: string }) =>
+      requirementsApi.evaluarItem(reqId, detalleId, accion),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['requirements'] });
+      queryClient.invalidateQueries({ queryKey: ['traspasos'] });
+      toast.success('Item evaluado correctamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al evaluar item');
     },
   });
 
@@ -48,5 +62,5 @@ export function useRequirements() {
     },
   });
 
-  return { requirements, isLoading, crear, actualizarEstado, eliminar };
+  return { requirements, isLoading, crear, actualizarEstado, evaluarItem, eliminar };
 }

@@ -11,13 +11,14 @@ export interface User {
   fotoPerfil?: string;
   googleId?: string;
   avatarUrl?: string;
+  bodegaAsignadaId?: number | null;
+  bodegaAsignada?: { id: number; nombre: string } | null;
 }
 
 export interface CreateUserDto {
-  username: string;
+  nombre: string;
   email: string;
   password: string;
   rol: UserRole;
-  is_active?: boolean;
-  bodega_id?: number;
+  bodegaAsignadaId?: number;
 }

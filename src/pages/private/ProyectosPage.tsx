@@ -7,6 +7,7 @@ import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { getBadgeStyle } from '../../lib/design-tokens';
 
 const emptyForm = { nombre: '', codigoProyecto: '', fechaInicio: '', estado: 'ACTIVO' as EstadoProyecto };
 
@@ -71,16 +72,14 @@ export default function ProyectosPage() {
       key: 'nombre',
       header: 'Nombre',
       sortable: true,
-      render: (item: Proyecto) => (
-        <span className="font-bold text-card-foreground">{item.nombre}</span>
-      )
+      render: (item: Proyecto) => <span className="text-text-primary font-bold">{item.nombre}</span>
     },
     {
       key: 'codigoProyecto',
       header: 'Código',
       sortable: true,
       render: (item: Proyecto) => (
-        <span className="font-mono text-xs text-card-foreground px-2.5 py-1 rounded-lg border border-[#303357]/30 font-bold">
+        <span className="font-mono text-xs bg-success-bg text-success px-2.5 py-1 rounded-lg border border-success/20 font-semibold">
           {item.codigoProyecto || '-'}
         </span>
       )
@@ -91,7 +90,7 @@ export default function ProyectosPage() {
       sortable: true,
       sortValue: (item: Proyecto) => item.fechaInicio ?? '',
       render: (item: Proyecto) => (
-        <span className="font-semibold text-card-foreground">
+        <span className="text-text-secondary">
           {item.fechaInicio ? new Date(item.fechaInicio).toLocaleDateString() : '-'}
         </span>
       ),
@@ -100,10 +99,7 @@ export default function ProyectosPage() {
       key: 'estado',
       header: 'Estado',
       render: (item: Proyecto) => (
-        <span className={`inline-block px-3 py-1 rounded-xl text-xs font-bold border ${item.estado === 'ACTIVO'
-            ? 'bg-primary/20 text-primary border-primary/50'
-            : 'bg-red-500/20 text-red-400 border-red-500/40'
-          }`}>
+        <span className={`inline-block px-2.5 py-1 rounded-xl text-xs font-semibold border ${getBadgeStyle(item.estado)}`}>
           {item.estado}
         </span>
       ),
@@ -133,31 +129,20 @@ export default function ProyectosPage() {
   ];
 
   return (
-    <div className="space-y-10 animate-fade-in">
-      {/* Header de la sección */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-card-foreground mb-4" style={{ fontFamily: "var(--font-heading)" }}>Proyectos</h1>
-          <p className="text-muted-foreground text-sm">Gestiona obras, centros de costos y bodegas asociadas.</p>
+          <h1 className="text-2xl font-bold text-text-primary">Proyectos</h1>
+          <p className="text-sm text-text-secondary mt-1">Gestiona obras, centros de costos y bodegas asociadas.</p>
         </div>
         {isAdmin && (
-          <Button
-            onClick={openCreate}
-            className="bg-accent hover:bg-accent/80 text-white font-extrabold px-5 py-3 rounded-xl border border-accent transition-all shadow-lg shadow-accent/30 hover:scale-105 active:scale-95 cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
-          >
-            <Plus size={18} /> Nuevo Proyecto
+          <Button onClick={openCreate} className="gap-1.5">
+            <Plus size={16} /> Nuevo Proyecto
           </Button>
         )}
       </div>
 
-      {/* Tabla con letras en color #303357 */}
-      <div className="bg-card backdrop-blur-lg rounded-3xl border border-border p-6 shadow-2xl overflow-hidden
-        text-card-foreground
-        [&_table]:w-full [&_table]:text-card-foreground
-        [&_th]:text-card-foreground [&_th]:font-extrabold [&_th]:bg-background [&_th]:border-b [&_th]:border-border [&_th]:p-4
-        [&_td]:text-card-foreground [&_td]:border-b [&_td]:border-border/60 [&_td]:p-4
-        [&_input]:text-card-foreground [&_input]:bg-background [&_input]:border-border [&_input]:placeholder-[#303357]/60 [&_input]:font-semibold">
-        
+      <div className="bg-surface rounded-xl border border-border-subtle p-6">
         <DataTable
           columns={columns}
           data={proyectos}
@@ -167,76 +152,65 @@ export default function ProyectosPage() {
         />
       </div>
 
-      {/* Modal de Crear / Editar */}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Proyecto' : 'Nuevo Proyecto'}>
-        <form onSubmit={handleSubmit} className="space-y-5 p-1">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-bold text-card-foreground mb-1.5">Nombre</label>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">Nombre</label>
             <input
               placeholder="Ej: Construcción Torre Norte"
               value={form.nombre}
               onChange={e => setForm({ ...form, nombre: e.target.value })}
-              className="w-full bg-background text-card-foreground border border-border rounded-xl px-4 py-3 text-sm placeholder-muted-foreground/50 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all font-semibold"
+              className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-card-foreground mb-1.5">Código de proyecto (opcional)</label>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">Código de proyecto (opcional)</label>
             <input
               placeholder="Ej: PROY-2026-001 (Automático si se deja vacío)"
               value={form.codigoProyecto}
               onChange={e => setForm({ ...form, codigoProyecto: e.target.value })}
-              className="w-full bg-background text-card-foreground border border-border rounded-xl px-4 py-3 text-sm placeholder-muted-foreground/50 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all font-mono font-semibold"
+              className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all font-mono"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-card-foreground mb-1.5">Fecha de inicio</label>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">Fecha de inicio</label>
             <input
               type="date"
               value={form.fechaInicio}
               onChange={e => setForm({ ...form, fechaInicio: e.target.value })}
-              className="w-full bg-background text-card-foreground border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all cursor-pointer font-semibold [color-scheme:dark]"
+              className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all cursor-pointer [color-scheme:dark]"
               required
             />
           </div>
 
           {editing && (
             <div>
-              <label className="block text-sm font-bold text-card-foreground mb-1.5">Estado</label>
+              <label className="block text-sm font-medium text-text-primary mb-1.5">Estado</label>
               <select
                 value={form.estado}
                 onChange={e => setForm({ ...form, estado: e.target.value as EstadoProyecto })}
-                className="w-full bg-background text-card-foreground border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all cursor-pointer font-semibold"
+                className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent transition-all"
               >
-                <option value="ACTIVO" className="bg-background text-primary">ACTIVO</option>
-                <option value="CERRADO" className="bg-background text-red-400">CERRADO</option>
+                <option value="ACTIVO">ACTIVO</option>
+                <option value="CERRADO">CERRADO</option>
               </select>
             </div>
           )}
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-border">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setModalOpen(false)}
-              className="bg-secondary hover:bg-slate-200 dark:hover:bg-slate-800 text-card-foreground border border-border px-5 py-2.5 rounded-xl font-bold transition-all cursor-pointer"
-            >
+          <div className="flex justify-end gap-3 pt-4 border-t border-border-subtle">
+            <Button variant="secondary" type="button" onClick={() => setModalOpen(false)}>
               Cancelar
             </Button>
-            <Button
-              type="submit"
-              disabled={crear.isPending || actualizar.isPending}
-              className="bg-accent hover:bg-accent/80 text-white font-extrabold px-6 py-2.5 rounded-xl border border-accent transition-all shadow-lg shadow-accent/20 disabled:opacity-50 cursor-pointer"
-            >
-              {editing ? (actualizar.isPending ? 'Guardando...' : 'Actualizar') : (crear.isPending ? 'Creando...' : 'Crear')}
+            <Button type="submit" disabled={crear.isPending || actualizar.isPending} loading={crear.isPending || actualizar.isPending}>
+              {editing ? 'Actualizar' : 'Crear'}
             </Button>
           </div>
         </form>
       </Modal>
 
-      {/* Confirmación de Eliminación */}
       <ConfirmDialog
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}

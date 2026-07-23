@@ -1,212 +1,168 @@
-import { useState, useMemo } from 'react';
 import type { ReactNode } from 'react';
-import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Search, Inbox } from 'lucide-react';
 
-interface Column<T> {
+export interface Column<T> {
   key: string;
   header: string;
   render?: (item: T) => ReactNode;
   sortable?: boolean;
-  sortValue?: (item: T) => string | number;
 }
 
 interface DataTableProps<T> {
   columns: Column<T>[];
   data: T[];
-  onEdit?: (item: T) => void;
-  onDelete?: (item: T) => void;
   loading?: boolean;
-  pageSize?: number;
   searchable?: boolean;
+  searchPlaceholder?: string;
+  onSearch?: (term: string) => void;
   searchKeys?: string[];
+  emptyMessage?: string;
+  children?: ReactNode;
 }
 
-export function DataTable<T extends { id: any }>({
+function getNestedValue(obj: any, path: string): string {
+  return path.split('.').reduce((acc, part) => acc?.[part] ?? '', obj) ?? '';
+}
+
+export function DataTable<T extends { id?: any }>({
   columns,
   data,
-  onEdit,
-  onDelete,
-  loading,
-  pageSize = 10,
+  loading = false,
   searchable = false,
-  searchKeys,
+  searchPlaceholder = 'Buscar...',
+  searchKeys = [],
+  onSearch,
+  emptyMessage = 'No se encontraron registros',
 }: DataTableProps<T>) {
-  const [page, setPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortKey, setSortKey] = useState<string | null>(null);
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [localSearch, setLocalSearch] = useState('');
 
-  const handleSort = (key: string) => {
-    if (sortKey === key) {
-      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+  const searchTerm = onSearch ? undefined : localSearch;
+
+  const filteredData = useMemo(() => {
+    if (!searchable || !searchTerm || searchKeys.length === 0) return data;
+    const term = searchTerm.toLowerCase();
+    return data.filter(item =>
+      searchKeys.some(key => {
+        const val = getNestedValue(item, key);
+        return val.toString().toLowerCase().includes(term);
+      })
+    );
+  }, [data, searchTerm, searchKeys, searchable]);
+
+  const displayData = onSearch ? data : filteredData;
+
+  const handleSearch = (value: string) => {
+    if (onSearch) {
+      onSearch(value);
     } else {
-      setSortKey(key);
-      setSortDir('asc');
+      setLocalSearch(value);
     }
   };
 
-  const filteredData = useMemo(() => {
-    if (!searchable || !searchTerm) return data;
-    return data.filter(item =>
-      (searchKeys || columns.map(c => c.key)).some(key => {
-        const val = (item as any)[key];
-        return val !== null && val !== undefined && String(val).toLowerCase().includes(searchTerm.toLowerCase());
-      })
-    );
-  }, [data, searchTerm, searchable, searchKeys, columns]);
-
-  const sortedData = useMemo(() => {
-    if (!sortKey) return filteredData;
-    const col = columns.find(c => c.key === sortKey);
-    return [...filteredData].sort((a, b) => {
-      let aVal: string | number;
-      let bVal: string | number;
-      if (col?.sortValue) {
-        aVal = col.sortValue(a);
-        bVal = col.sortValue(b);
-      } else {
-        aVal = String((a as any)[sortKey] ?? '').toLowerCase();
-        bVal = String((b as any)[sortKey] ?? '').toLowerCase();
-      }
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
-      }
-      const cmp = String(aVal).localeCompare(String(bVal), 'es', { numeric: true });
-      return sortDir === 'asc' ? cmp : -cmp;
-    });
-  }, [filteredData, sortKey, sortDir, columns]);
-
-  const totalPages = Math.ceil(sortedData.length / pageSize);
-  const start = (page - 1) * pageSize;
-  const paginatedData = sortedData.slice(start, start + pageSize);
-
-  if (loading) {
+  if (loading && data.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow p-12 text-center">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-r-transparent"></div>
-        <p className="mt-2 text-sm text-gray-500">Cargando...</p>
-      </div>
-    );
-  }
-
-  if (!data.length) {
-    return (
-      <div className="bg-white rounded-lg shadow p-12 text-center text-gray-500">
-        No hay registros
+      <div className="space-y-4">
+        {searchable && (
+          <div className="h-10 bg-elevated rounded-xl animate-pulse w-72" />
+        )}
+        <div className="space-y-2">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="h-14 bg-elevated rounded-xl animate-pulse" style={{ animationDelay: `${i * 50}ms` }} />
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="space-y-4">
       {searchable && (
-        <div className="mb-3">
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
           <input
             type="text"
-            placeholder="Buscar..."
-            value={searchTerm}
-            onChange={e => { setSearchTerm(e.target.value); setPage(1); }}
-            className="w-full sm:w-72 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            placeholder={searchPlaceholder}
+            value={onSearch ? undefined : localSearch}
+            onChange={e => handleSearch(e.target.value)}
+            className="w-full bg-elevated text-text-primary border border-border-subtle rounded-xl pl-10 pr-4 py-2.5 text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
           />
         </div>
       )}
 
-      <div className="overflow-x-auto bg-white rounded-lg shadow">
+      {/* Mobile cards */}
+      <div className="grid grid-cols-1 gap-3 md:hidden">
+        {displayData.length === 0 ? (
+          <EmptyState message={emptyMessage} />
+        ) : (
+          displayData.map((item, i) => (
+            <div key={item.id ?? i} className="bg-elevated rounded-xl border border-border-subtle p-4 space-y-2.5">
+              {columns.map((col, colIndex) => (
+                <div key={col.key} className={`flex justify-between items-center ${colIndex !== columns.length - 1 ? 'border-b border-border-subtle/50 pb-2' : ''}`}>
+                  <span className="text-xs font-medium text-text-muted">{col.header}</span>
+                  <div className="text-sm text-text-primary text-right">
+                    {col.render ? col.render(item) : String((item as any)[col.key] ?? '')}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden md:block overflow-x-auto bg-elevated rounded-xl border border-border-subtle">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
-            <tr>
+          <thead>
+            <tr className="border-b border-border-subtle">
               {columns.map(col => (
-                <th
-                  key={col.key}
-                  className={`px-4 py-3 text-left font-medium text-gray-600 ${col.sortable ? 'cursor-pointer hover:bg-gray-100 select-none' : ''}`}
-                  onClick={() => col.sortable && handleSort(col.key)}
-                >
-                  <span className="flex items-center gap-1">
+                <th key={col.key} className="px-5 py-3.5 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
+                  <span className="flex items-center gap-1.5">
                     {col.header}
-                    {col.sortable && (
-                      sortKey === col.key
-                        ? (sortDir === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />)
-                        : <ArrowUpDown size={14} className="text-gray-300" />
-                    )}
+                    {col.sortable && <ArrowUpDown size={12} className="text-border-default" />}
                   </span>
                 </th>
               ))}
-              {(onEdit || onDelete) && (
-                <th className="px-4 py-3 text-right font-medium text-gray-600">Acciones</th>
-              )}
             </tr>
           </thead>
-          <tbody className="divide-y">
-            {paginatedData.map((item, i) => (
-              <tr key={item.id ?? i} className="hover:bg-gray-50 transition-colors">
-                {columns.map(col => (
-                  <td key={col.key} className="px-4 py-3">
-                    {col.render ? col.render(item) : String((item as any)[col.key] ?? '')}
-                  </td>
-                ))}
-                {(onEdit || onDelete) && (
-                  <td className="px-4 py-3 text-right space-x-2">
-                    {onEdit && (
-                      <button onClick={() => onEdit(item)} className="text-blue-600 hover:underline text-xs font-medium">
-                        Editar
-                      </button>
-                    )}
-                    {onDelete && (
-                      <button onClick={() => onDelete(item)} className="text-red-600 hover:underline text-xs font-medium">
-                        Eliminar
-                      </button>
-                    )}
-                  </td>
-                )}
+          <tbody className="divide-y divide-border-subtle">
+            {displayData.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length}>
+                  <EmptyState message={emptyMessage} />
+                </td>
               </tr>
-            ))}
+            ) : (
+              displayData.map((item, i) => (
+                <tr key={item.id ?? i} className="hover:bg-white/[0.02] transition-colors">
+                  {columns.map(col => (
+                    <td key={col.key} className="px-5 py-3.5 text-text-primary">
+                      {col.render ? col.render(item) : String((item as any)[col.key] ?? '')}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-3 px-1">
-          <p className="text-xs text-gray-500">
-            {sortedData.length} registro{sortedData.length !== 1 ? 's' : ''} · Página {page} de {totalPages}
-          </p>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="p-1.5 rounded border border-gray-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
-            >
-              <ChevronLeft size={14} />
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
-              .reduce<(number | string)[]>((acc, p, i, arr) => {
-                if (i > 0 && (arr[i - 1] as number) !== p - 1) acc.push('...');
-                acc.push(p);
-                return acc;
-              }, [])
-              .map((p, i) =>
-                typeof p === 'string' ? (
-                  <span key={`dots-${i}`} className="px-1 text-gray-400 text-xs">...</span>
-                ) : (
-                  <button
-                    key={p}
-                    onClick={() => setPage(p)}
-                    className={`w-7 h-7 rounded text-xs font-medium ${page === p ? 'bg-blue-600 text-white' : 'border border-gray-300 hover:bg-gray-100'}`}
-                  >
-                    {p}
-                  </button>
-                )
-              )}
-            <button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="p-1.5 rounded border border-gray-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
-            >
-              <ChevronRight size={14} />
-            </button>
-          </div>
+      {loading && data.length > 0 && (
+        <div className="fixed inset-0 bg-base/30 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-xl pointer-events-none">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent border-r-transparent" />
         </div>
       )}
+    </div>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="w-12 h-12 rounded-xl bg-elevated border border-border-subtle flex items-center justify-center mb-3">
+        <Inbox size={20} className="text-text-muted" />
+      </div>
+      <p className="text-sm text-text-muted font-medium">{message}</p>
     </div>
   );
 }

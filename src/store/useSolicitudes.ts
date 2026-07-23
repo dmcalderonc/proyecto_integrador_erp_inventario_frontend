@@ -47,5 +47,38 @@ export function useSolicitudes(filtros?: { estado?: string; proyectoId?: string 
     },
   });
 
-  return { solicitudes, isLoading, crear, actualizar };
+  const cotizar = useMutation({
+    mutationFn: (id: number) => solicitudesApi.cotizar(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['solicitudes'] });
+      toast.success('Solicitud marcada como cotizando');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al cambiar estado');
+    },
+  });
+
+  const aprobar = useMutation({
+    mutationFn: (id: number) => solicitudesApi.aprobar(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['solicitudes'] });
+      toast.success('Solicitud aprobada exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al aprobar solicitud');
+    },
+  });
+
+  const procesar = useMutation({
+    mutationFn: (id: number) => solicitudesApi.procesar(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['solicitudes'] });
+      toast.success('Solicitud procesada exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al procesar solicitud');
+    },
+  });
+
+  return { solicitudes, isLoading, crear, actualizar, cotizar, aprobar, procesar };
 }

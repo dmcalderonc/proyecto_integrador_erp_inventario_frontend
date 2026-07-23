@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { User, LoginRequest, LoginResponse, UserRole } from '../types';
 import { authApi } from '../api/auth.api';
@@ -12,10 +12,22 @@ interface AuthContextType {
     updateProfile: (fotoPerfil: string | null) => void;
     updateGoogleId: (googleId: string | null, avatarUrl?: string | null) => void;
     hasRole: (allowedRoles: UserRole[]) => boolean;
+    hasAnyRole: (roles: UserRole[]) => boolean;
+    refreshUser: (newToken?: string) => void;
     isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+function isTokenExpired(token: string): boolean {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (!payload.exp) return false;
+        return payload.exp * 1000 < Date.now();
+    } catch {
+        return true;
+    }
+}
 
 function parseUserFromToken(token: string): User | null {
     try {
@@ -25,7 +37,7 @@ function parseUserFromToken(token: string): User | null {
             nombre: payload.nombre || payload.email,
             email: payload.email || '',
             rol: payload.rol,
-            estado: true,
+            estado: payload.estado ?? true,
             fechaCreacion: '',
             fechaActualizacion: '',
             fotoPerfil: payload.fotoPerfil || undefined,
@@ -39,15 +51,34 @@ function parseUserFromToken(token: string): User | null {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(() => {
-        const savedUser = localStorage.getItem('user');
-        return savedUser ? JSON.parse(savedUser) : null;
+        try {
+            const savedUser = localStorage.getItem('user');
+            if (!savedUser) return null;
+            const parsed = JSON.parse(savedUser) as User;
+            const savedToken = localStorage.getItem('token');
+            if (savedToken && isTokenExpired(savedToken)) {
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                return null;
+            }
+            return parsed;
+        } catch {
+            localStorage.removeItem('user');
+            return null;
+        }
     });
 
     const [token, setToken] = useState<string | null>(() => {
-        return localStorage.getItem('token');
+        const saved = localStorage.getItem('token');
+        if (saved && isTokenExpired(saved)) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            return null;
+        }
+        return saved;
     });
 
-    const login = async (credentials: LoginRequest) => {
+    const login = useCallback(async (credentials: LoginRequest) => {
         const { data } = await authApi.login(credentials) as { data: LoginResponse };
 
         setToken(data.data.access_token);
@@ -55,8 +86,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const rawUser = data.data.user;
         const userData: User = {
             id: rawUser.id,
-            nombre: (rawUser as any).nombre ?? rawUser.username,
-            email: (rawUser as any).email ?? '',
+            nombre: rawUser.nombre,
+            email: rawUser.email,
             rol: rawUser.rol,
             estado: true,
             fechaCreacion: '',
@@ -69,9 +100,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         localStorage.setItem('token', data.data.access_token);
         localStorage.setItem('user', JSON.stringify(userData));
-    };
+    }, []);
 
-    const loginWithToken = (accessToken: string) => {
+    const loginWithToken = useCallback((accessToken: string) => {
+        if (isTokenExpired(accessToken)) return;
         setToken(accessToken);
         localStorage.setItem('token', accessToken);
 
@@ -80,33 +112,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(userData);
             localStorage.setItem('user', JSON.stringify(userData));
         }
-    };
+    }, []);
 
-    const logout = () => {
+    const logout = useCallback(() => {
         setUser(null);
         setToken(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-    };
+    }, []);
 
-    const updateProfile = (fotoPerfil: string | null) => {
-        if (!user) return;
-        const updated = { ...user, fotoPerfil: fotoPerfil ?? undefined };
-        setUser(updated);
-        localStorage.setItem('user', JSON.stringify(updated));
-    };
+    const updateProfile = useCallback((fotoPerfil: string | null) => {
+        setUser(prev => {
+            if (!prev) return prev;
+            const updated = { ...prev, fotoPerfil: fotoPerfil ?? undefined };
+            localStorage.setItem('user', JSON.stringify(updated));
+            return updated;
+        });
+    }, []);
 
-    const updateGoogleId = (googleId: string | null, avatarUrl?: string | null) => {
-        if (!user) return;
-        const updated = { ...user, googleId: googleId ?? undefined, avatarUrl: avatarUrl ?? undefined };
-        setUser(updated);
-        localStorage.setItem('user', JSON.stringify(updated));
-    };
+    const updateGoogleId = useCallback((googleId: string | null, avatarUrl?: string | null) => {
+        setUser(prev => {
+            if (!prev) return prev;
+            const updated = { ...prev, googleId: googleId ?? undefined, avatarUrl: avatarUrl ?? undefined };
+            localStorage.setItem('user', JSON.stringify(updated));
+            return updated;
+        });
+    }, []);
 
-    const hasRole = (allowedRoles: UserRole[]) => {
+    const hasRole = useCallback((allowedRoles: UserRole[]) => {
         if (!user) return false;
         return allowedRoles.includes(user.rol);
-    };
+    }, [user]);
+
+    const hasAnyRole = useCallback((roles: UserRole[]) => {
+        if (!user) return false;
+        return roles.includes(user.rol);
+    }, [user]);
+
+    const refreshUser = useCallback((newToken?: string) => {
+        const tokenToUse = newToken || token;
+        if (!tokenToUse) return;
+        if (isTokenExpired(tokenToUse)) {
+            logout();
+            return;
+        }
+        if (newToken) {
+            setToken(newToken);
+            localStorage.setItem('token', newToken);
+        }
+        const userData = parseUserFromToken(tokenToUse);
+        if (userData) {
+            setUser(userData);
+            localStorage.setItem('user', JSON.stringify(userData));
+        }
+    }, [token, logout]);
 
     return (
         <AuthContext.Provider value={{
@@ -118,6 +177,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             updateProfile,
             updateGoogleId,
             hasRole,
+            hasAnyRole,
+            refreshUser,
             isAuthenticated: !!token
         }}>
             {children}

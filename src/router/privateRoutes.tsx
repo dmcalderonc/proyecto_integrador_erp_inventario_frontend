@@ -11,12 +11,13 @@ import SolicitudesPage from '../pages/private/SolicitudesPage';
 import DashboardPage from '../pages/private/DashboardPage';
 import MaterialesPage from '../pages/private/MaterialesPage';
 import UnidadesMedidaPage from '../pages/private/UnidadesMedidaPage';
-import InventarioPage from '../pages/private/InventarioPage';
 import ProyectosPage from '../pages/private/ProyectosPage';
 import RequirementsPage from '../pages/private/RequirementsPage';
 import type { JSX } from 'react/jsx-runtime';
 import DespachosPage from '../pages/private/DespachosPage';
 import ProfilePage from '../pages/private/ProfilePage';
+import TraspasosPage from '../pages/private/TraspasosPage';
+import { PERMISSIONS } from '../lib/permissions';
 
 interface PrivateRoute {
   path: string;
@@ -25,25 +26,21 @@ interface PrivateRoute {
 }
 
 export const privateRoutes: PrivateRoute[] = [
-  { path: '/dashboard', element: <DashboardPage />, allowedRoles: [] },
-  { path: '/profile', element: <ProfilePage />, allowedRoles: [] },
-  { path: '/users', element: <UsersPage />, allowedRoles: ['ADMIN'] },
-  { path: '/proveedores', element: <ProveedoresPage />, allowedRoles: ['ADMIN', 'COMPRADOR'] },
-  { path: '/categorias', element: <CategoriasPage />, allowedRoles: ['ADMIN'] },
-  { path: '/unidades-medida', element: <UnidadesMedidaPage />, allowedRoles: ['ADMIN'] },
-  { path: '/bodegas', element: <BodegasPage />, allowedRoles: ['ADMIN', 'BODEGUERO'] },
-
-
-  { path: '/materiales', element: <MaterialesPage />, allowedRoles: ['ADMIN', 'BODEGUERO', 'COMPRADOR'] },
-  { path: '/inventario', element: <InventarioPage />, allowedRoles: ['ADMIN', 'BODEGUERO'] },
-
-
-  { path: '/requirements', element: <RequirementsPage />, allowedRoles: ['ADMIN', 'SOLICITANTE', 'BODEGUERO'] },
-  { path: '/compras', element: <ComprasPage />, allowedRoles: ['ADMIN', 'BODEGUERO'] },
-  { path: '/movimientos', element: <MovimientosPage />, allowedRoles: ['ADMIN', 'BODEGUERO'] },
-  { path: '/ajustes-inventario', element: <AjustesPage />, allowedRoles: ['ADMIN', 'BODEGUERO'] },
-  { path: '/cotizaciones', element: <CotizacionesPage />, allowedRoles: ['ADMIN', 'COMPRADOR'] },
-  { path: '/solicitudes', element: <SolicitudesPage />, allowedRoles: ['ADMIN', 'BODEGUERO', 'COMPRADOR', 'SOLICITANTE'] },
-  { path: '/proyectos', element: <ProyectosPage />, allowedRoles: ['ADMIN', 'SOLICITANTE'] },
-  { path: '/despachos', element: <DespachosPage />, allowedRoles: ['ADMIN', 'BODEGUERO'] },
+  { path: '/dashboard', element: <DashboardPage />, allowedRoles: PERMISSIONS.CAN_ACCESS_DASHBOARD },
+  { path: '/profile', element: <ProfilePage />, allowedRoles: PERMISSIONS.CAN_ACCESS_DASHBOARD },
+  { path: '/users', element: <UsersPage />, allowedRoles: PERMISSIONS.CAN_MANAGE_USERS },
+  { path: '/proveedores', element: <ProveedoresPage />, allowedRoles: PERMISSIONS.CAN_MANAGE_PROVEEDORES },
+  { path: '/categorias', element: <CategoriasPage />, allowedRoles: PERMISSIONS.CAN_MANAGE_CATEGORIAS },
+  { path: '/unidades-medida', element: <UnidadesMedidaPage />, allowedRoles: PERMISSIONS.CAN_MANAGE_UNIDADES },
+  { path: '/bodegas', element: <BodegasPage />, allowedRoles: PERMISSIONS.CAN_MANAGE_BODEGAS },
+  { path: '/materiales', element: <MaterialesPage />, allowedRoles: PERMISSIONS.CAN_VIEW_MATERIALES },
+  { path: '/requirements', element: <RequirementsPage />, allowedRoles: PERMISSIONS.CAN_VIEW_REQUIREMENTS },
+  { path: '/compras', element: <ComprasPage />, allowedRoles: PERMISSIONS.CAN_MANAGE_COMPRAS },
+  { path: '/movimientos', element: <MovimientosPage />, allowedRoles: PERMISSIONS.CAN_MANAGE_MOVIMIENTOS },
+  { path: '/ajustes-inventario', element: <AjustesPage />, allowedRoles: PERMISSIONS.CAN_MANAGE_AJUSTES },
+  { path: '/cotizaciones', element: <CotizacionesPage />, allowedRoles: PERMISSIONS.CAN_MANAGE_COTIZACIONES },
+  { path: '/solicitudes', element: <SolicitudesPage />, allowedRoles: PERMISSIONS.CAN_VIEW_SOLICITUDES },
+  { path: '/proyectos', element: <ProyectosPage />, allowedRoles: PERMISSIONS.CAN_MANAGE_PROYECTOS },
+  { path: '/despachos', element: <DespachosPage />, allowedRoles: PERMISSIONS.CAN_MANAGE_DESPACHOS },
+  { path: '/traspasos', element: <TraspasosPage />, allowedRoles: PERMISSIONS.CAN_MANAGE_TRASPASOS },
 ];

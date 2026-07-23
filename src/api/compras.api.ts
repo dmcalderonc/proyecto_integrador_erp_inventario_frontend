@@ -7,6 +7,7 @@ export const comprasApi = {
   create: (dto: CrearCompraDto) => api.post<OrdenCompra>('/compras', dto),
   update: (id: number, dto: Partial<CrearCompraDto>) => api.patch<OrdenCompra>(`/compras/${id}`, dto),
   delete: (id: number) => api.delete(`/compras/${id}`),
+  aprobar: (id: number) => api.patch<OrdenCompra>(`/compras/${id}/aprobar`),
   recibir: (id: number) => api.patch(`/compras/${id}/recibir`),
   downloadPdf: async (id: number) => {
     const token = localStorage.getItem('token');

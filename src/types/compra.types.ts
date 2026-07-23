@@ -6,6 +6,7 @@ export interface DetalleCompra {
   materialId: number;
   cantidad: number;
   precioUnitario: number;
+  requerimientoDetalleId?: number;
 }
 
 export interface CreateCompraDto {

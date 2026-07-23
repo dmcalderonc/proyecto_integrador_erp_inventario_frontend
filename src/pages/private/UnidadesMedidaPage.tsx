@@ -42,18 +42,18 @@ export default function UnidadesMedidaPage() {
   };
 
   const columns = [
-    { 
-      key: 'nombre', 
-      header: 'Nombre', 
+    {
+      key: 'nombre',
+      header: 'Nombre',
       sortable: true,
-      render: (item: UnidadMedida) => <span className="text-card-foreground font-bold">{item.nombre}</span>
+      render: (item: UnidadMedida) => <span className="text-text-primary font-bold">{item.nombre}</span>
     },
-    { 
-      key: 'simbolo', 
-      header: 'Símbolo', 
+    {
+      key: 'simbolo',
+      header: 'Símbolo',
       sortable: true,
       render: (item: UnidadMedida) => (
-        <span className="font-mono text-xs bg-background text-accent px-3 py-1 rounded-xl border border-border font-semibold">
+        <span className="font-mono text-xs bg-info-bg text-info px-2.5 py-1 rounded-lg border border-info/30 font-semibold">
           {item.simbolo}
         </span>
       )
@@ -61,92 +61,68 @@ export default function UnidadesMedidaPage() {
   ];
 
   return (
-    <div className="space-y-10 animate-fade-in">
-      {/* Header de la sección */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-card-foreground mb-4" style={{ fontFamily: "var(--font-heading)" }}>Unidades de Medida</h1>
-          <p className="text-muted-foreground text-sm">Gestiona las unidades para la métrica e inventario de materiales.</p>
+          <h1 className="text-2xl font-bold text-text-primary">Unidades de Medida</h1>
+          <p className="text-sm text-text-secondary mt-1">Gestiona las unidades para la métrica e inventario de materiales.</p>
         </div>
-        <Button 
-          onClick={openCreate}
-          className="bg-accent hover:bg-accent/80 text-white font-bold px-5 py-3 rounded-xl border border-border transition-all shadow-lg shadow-accent/20 hover:scale-105 active:scale-95 cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
-        >
-          <Plus size={18} /> Nueva Unidad
+        <Button onClick={openCreate} className="gap-1.5">
+          <Plus size={16} /> Nueva Unidad
         </Button>
       </div>
 
-      {/* Tabla de Unidades de Medida */}
-      <div className="bg-card backdrop-blur-lg rounded-3xl border border-border p-6 shadow-2xl overflow-hidden">
-        <DataTable 
-          columns={columns} 
-          data={unidades} 
-          loading={isLoading} 
-          onEdit={openEdit} 
-          onDelete={openDelete} 
-          searchable 
-          searchKeys={["nombre", "simbolo"]} 
-        />
+      <div className="bg-surface rounded-xl border border-border-subtle p-6">
+        <DataTable columns={columns} data={unidades} loading={isLoading} onEdit={openEdit} onDelete={openDelete} searchable searchKeys={["nombre", "simbolo"]} />
       </div>
 
-      {/* Modal de Crear / Editar */}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Unidad' : 'Nueva Unidad'}>
-        <form onSubmit={handleSubmit} className="space-y-5 text-muted-foreground p-1">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-card-foreground mb-1.5">Nombre</label>
-            <input 
-              placeholder="Ej: Kilogramo" 
+            <label className="block text-sm font-medium text-text-primary mb-1.5">Nombre</label>
+            <input
+              placeholder="Ej: Kilogramo"
               value={form.nombre}
               onChange={e => setForm({ ...form, nombre: e.target.value })}
-              className="w-full bg-background text-card-foreground border border-border rounded-xl px-4 py-3 text-sm placeholder-muted-foreground/50 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all" 
-              required 
+              className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
+              required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-card-foreground mb-1.5">Símbolo</label>
-            <input 
-              placeholder="Ej: KG" 
+            <label className="block text-sm font-medium text-text-primary mb-1.5">Símbolo</label>
+            <input
+              placeholder="Ej: KG"
               value={form.simbolo}
               onChange={e => setForm({ ...form, simbolo: e.target.value })}
-              className="w-full bg-background text-card-foreground border border-border rounded-xl px-4 py-3 text-sm placeholder-muted-foreground/50 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all uppercase font-mono" 
-              maxLength={10} 
-              required 
+              className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all uppercase font-mono"
+              maxLength={10}
+              required
             />
-            <p className="text-xs text-muted-foreground/80 mt-2 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
+            <p className="text-xs text-text-muted mt-2 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-info"></span>
               Máximo 10 caracteres.
             </p>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-border">
-            <Button 
-              type="button" 
-              variant="secondary" 
-              onClick={() => setModalOpen(false)}
-              className="bg-secondary hover:bg-black/10 dark:hover:bg-white/10 text-card-foreground border border-border px-5 py-2.5 rounded-xl font-medium transition-all cursor-pointer"
-            >
+          <div className="flex justify-end gap-3 pt-4 border-t border-border-subtle">
+            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
               Cancelar
             </Button>
-            <Button 
-              type="submit" 
-              disabled={crear.isPending || actualizar.isPending}
-              className="bg-accent hover:bg-accent/80 text-white font-bold px-6 py-2.5 rounded-xl border border-border transition-all shadow-lg shadow-accent/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            >
+            <Button type="submit" disabled={crear.isPending || actualizar.isPending}>
               {editing ? (actualizar.isPending ? 'Guardando...' : 'Actualizar') : (crear.isPending ? 'Creando...' : 'Crear')}
             </Button>
           </div>
         </form>
       </Modal>
 
-      {/* Confirmación de Eliminación */}
       <ConfirmDialog
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleDelete}
         title="Eliminar unidad de medida"
         message={`¿Estás seguro de eliminar la unidad "${deleting?.nombre}"? Si tiene materiales asociados, no se podrá eliminar.`}
-        loading={eliminar.isPending} 
+        loading={eliminar.isPending}
       />
     </div>
   );

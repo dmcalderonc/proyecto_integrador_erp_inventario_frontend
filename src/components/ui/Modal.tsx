@@ -7,9 +7,16 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-export function Modal({ open, onClose, title, children }: ModalProps) {
+const sizes = {
+  sm: 'max-w-md',
+  md: 'max-w-lg',
+  lg: 'max-w-2xl',
+};
+
+export function Modal({ open, onClose, title, children, size = 'md' }: ModalProps) {
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -18,12 +25,19 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
   }, [open]);
 
   return (
-    <dialog ref={ref} onClose={onClose} className="rounded-2xl shadow-2xl backdrop:bg-black/60 p-0 w-full max-w-lg m-auto bg-card border border-border max-h-[90vh] overflow-y-auto">
-      <div className="p-4 sm:p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold text-card-foreground dark:text-[#303357]" style={{ fontFamily: "var(--font-heading)" }}>{title}</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-card-foreground dark:hover:text-[#303357] transition-colors">
-            <X size={20} />
+    <dialog
+      ref={ref}
+      onClose={onClose}
+      className={`rounded-2xl bg-overlay border border-border-subtle shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm p-0 w-full ${sizes[size]} mx-4 sm:mx-auto max-h-[90vh] overflow-y-auto animate-scale-in`}
+    >
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-5 pb-4 border-b border-border-subtle">
+          <h2 className="text-lg font-bold text-text-primary">{title}</h2>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-elevated transition-colors cursor-pointer"
+          >
+            <X size={18} />
           </button>
         </div>
         {children}

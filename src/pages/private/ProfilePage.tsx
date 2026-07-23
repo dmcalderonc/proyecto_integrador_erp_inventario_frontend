@@ -3,7 +3,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import api from '../../api/http';
 import { authApi } from '../../api/auth.api';
-import { User, Mail, Shield, Calendar, CheckCircle, XCircle, Camera, X, Link2, Unlink, Sun, Moon } from 'lucide-react';
+import { User, Mail, Shield, Calendar, CheckCircle, XCircle, Camera, X, Link2, Unlink } from 'lucide-react';
+import { getBadgeStyle } from '../../lib/design-tokens';
 import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -80,28 +81,18 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-10 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold text-card-foreground dark:text-white mb-4" style={{ fontFamily: "var(--font-heading)" }}>Mi Perfil</h1>
-          <p className="text-muted-foreground text-sm">Información detallada y credenciales de tu cuenta de usuario.</p>
-        </div>
-        <button
-          onClick={toggleTheme}
-          className="flex items-center gap-2 px-4 py-2.5 bg-card dark:bg-card border border-border rounded-xl text-sm font-semibold text-card-foreground dark:text-white hover:bg-secondary dark:hover:bg-secondary transition-all cursor-pointer shadow-sm self-start"
-        >
-          {theme === 'dark' ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-indigo-400" />}
-          {theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}
-        </button>
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-text-primary">Mi Perfil</h1>
+        <p className="text-sm text-text-secondary mt-1">Información detallada y credenciales de tu cuenta de usuario.</p>
       </div>
 
       {/* Tarjeta de Perfil */}
-      <div className="bg-card backdrop-blur-lg rounded-3xl border border-border p-6 sm:p-8 shadow-2xl space-y-8">
+      <div className="bg-surface rounded-xl border border-border-subtle p-6 sm:p-8 space-y-8">
         {/* Cabecera del usuario */}
-        <div className="flex items-center gap-5 pb-6 border-b border-border">
+        <div className="flex items-center gap-5 pb-6 border-b border-border-subtle">
           <div className="relative group shrink-0">
-            <div className="w-20 h-20 rounded-2xl bg-background border border-border flex items-center justify-center text-accent overflow-hidden shadow-inner">
+            <div className="w-20 h-20 rounded-2xl bg-base border border-border-subtle flex items-center justify-center text-accent overflow-hidden shadow-inner">
               {displayImage ? (
                 <img src={displayImage} alt={user.nombre} className="w-full h-full object-cover" />
               ) : (
@@ -123,8 +114,8 @@ export default function ProfilePage() {
             )}
           </div>
           <div>
-            <h2 className="text-2xl font-extrabold text-card-foreground dark:text-white">{user.nombre}</h2>
-            <span className={`inline-block mt-2 px-3.5 py-1 rounded-xl text-xs font-bold border ${rolColors[user.rol] || 'bg-background text-muted-foreground border-border'}`}>
+            <h2 className="text-2xl font-bold text-text-primary">{user.nombre}</h2>
+            <span className={`inline-block mt-2 px-3 py-1 rounded-xl text-xs font-bold border ${getBadgeStyle(user.rol)}`}>
               {user.rol}
             </span>
           </div>
@@ -132,18 +123,18 @@ export default function ProfilePage() {
 
         {/* URL de imagen */}
         <div>
-          <label className="block text-xs font-medium text-muted-foreground mb-1.5">O pegar URL de imagen</label>
+          <label className="block text-xs font-medium text-text-muted mb-1.5">O pegar URL de imagen</label>
           <input
             type="text"
             placeholder="https://ejemplo.com/foto.jpg"
             defaultValue={displayImage?.startsWith('data:') ? '' : (displayImage || '')}
             onBlur={e => handleImageUrl(e.target.value)}
-            className="w-full bg-background text-card-foreground dark:text-white border border-border rounded-xl px-4 py-2.5 text-sm placeholder-muted-foreground/50 focus:outline-none focus:border-accent transition-all"
+            className="w-full bg-base text-text-primary border border-border-subtle rounded-xl px-4 py-2.5 text-sm placeholder-text-muted focus:outline-none focus:border-accent transition-all"
           />
         </div>
 
         {/* Vinculación con Google */}
-        <div className="p-4 bg-background rounded-2xl border border-border">
+        <div className="p-4 bg-base rounded-2xl border border-border-subtle">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#4285F4]/10 border border-[#4285F4]/30 flex items-center justify-center shrink-0">
@@ -155,8 +146,8 @@ export default function ProfilePage() {
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-bold text-card-foreground dark:text-white">Google</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm font-bold text-text-primary">Google</p>
+                <p className="text-xs text-text-muted">
                   {user.googleId ? 'Cuenta vinculada' : 'No vinculada'}
                 </p>
               </div>
@@ -191,50 +182,50 @@ export default function ProfilePage() {
         </div>
 
         {/* Lista de Detalles */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="flex items-center gap-3.5 p-4 bg-background rounded-2xl border border-border">
-            <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/30 flex items-center justify-center text-accent shrink-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex items-center gap-3.5 p-4 bg-base rounded-xl border border-border-subtle">
+            <div className="w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
               <Mail size={18} />
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">Correo electrónico</p>
-              <p className="text-sm font-bold text-card-foreground dark:text-white truncate">{user.email}</p>
+              <p className="text-xs text-text-muted">Correo electrónico</p>
+              <p className="text-sm font-bold text-text-primary truncate">{user.email}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3.5 p-4 bg-background rounded-2xl border border-border">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 dark:text-purple-400 shrink-0">
+          <div className="flex items-center gap-3.5 p-4 bg-base rounded-xl border border-border-subtle">
+            <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
               <Shield size={18} />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Rol asignado</p>
-              <p className="text-sm font-bold text-card-foreground dark:text-white">{user.rol}</p>
+              <p className="text-xs text-text-muted">Rol asignado</p>
+              <p className="text-sm font-bold text-text-primary">{user.rol}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3.5 p-4 bg-background rounded-2xl border border-border">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
-              user.estado 
-                ? 'bg-primary/10 text-primary border-primary/30' 
-                : 'bg-red-500/10 text-red-400 border-red-500/30'
+          <div className="flex items-center gap-3.5 p-4 bg-base rounded-xl border border-border-subtle">
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border ${
+              user.estado
+                ? 'bg-success/10 text-success border-success/20'
+                : 'bg-danger/10 text-danger border-danger/20'
             }`}>
               {user.estado ? <CheckCircle size={18} /> : <XCircle size={18} />}
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Estado de la cuenta</p>
-              <p className={`text-sm font-bold ${user.estado ? 'text-primary' : 'text-red-400'}`}>
+              <p className="text-xs text-text-muted">Estado de la cuenta</p>
+              <p className={`text-sm font-bold ${user.estado ? 'text-success' : 'text-danger'}`}>
                 {user.estado ? 'Activo' : 'Inactivo'}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3.5 p-4 bg-background rounded-2xl border border-border">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 dark:text-amber-400 shrink-0">
+          <div className="flex items-center gap-3.5 p-4 bg-base rounded-xl border border-border-subtle">
+            <div className="w-10 h-10 rounded-lg bg-warning/10 border border-warning/20 flex items-center justify-center text-warning shrink-0">
               <Calendar size={18} />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Usuario desde</p>
-              <p className="text-sm font-bold text-card-foreground dark:text-white">
+              <p className="text-xs text-text-muted">Usuario desde</p>
+              <p className="text-sm font-bold text-text-primary">
                 {user.fechaCreacion
                   ? new Date(user.fechaCreacion).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })
                   : 'No disponible'}

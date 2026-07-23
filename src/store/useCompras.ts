@@ -48,6 +48,17 @@ export function useCompras() {
     },
   });
 
+  const aprobar = useMutation({
+    mutationFn: (id: number) => comprasApi.aprobar(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['compras'] });
+      toast.success('Compra aprobada exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al aprobar compra');
+    },
+  });
+
   const recibir = useMutation({
     mutationFn: (id: number) => comprasApi.recibir(id),
     onSuccess: () => {
@@ -59,5 +70,5 @@ export function useCompras() {
     },
   });
 
-  return { compras, isLoading, crear, actualizar, eliminar, recibir };
+  return { compras, isLoading, crear, actualizar, eliminar, aprobar, recibir };
 }
