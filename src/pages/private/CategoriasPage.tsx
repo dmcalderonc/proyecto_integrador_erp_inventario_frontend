@@ -19,14 +19,6 @@ export default function CategoriasPage() {
 
   const openCreate = () => { setEditing(null); setForm(emptyForm); setModalOpen(true); };
 
-  const openEdit = (item: Categoria) => {
-    setEditing(item);
-    setForm({ nombre: item.nombre, prefijo: item.prefijo });
-    setModalOpen(true);
-  };
-
-  const openDelete = (item: Categoria) => { setDeleting(item); setConfirmOpen(true); };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editing) { await actualizar.mutateAsync({ id: editing.id, dto: form }); }

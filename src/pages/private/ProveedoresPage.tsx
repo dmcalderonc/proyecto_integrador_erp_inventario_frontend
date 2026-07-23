@@ -19,14 +19,6 @@ export default function ProveedoresPage() {
 
   const openCreate = () => { setEditing(null); setForm(emptyForm); setModalOpen(true); };
 
-  const openEdit = (item: Proveedor) => {
-    setEditing(item);
-    setForm({ ruc: item.ruc, razon_social: item.razon_social, email: item.email, telefono: item.telefono || '', direccion: item.direccion || '' });
-    setModalOpen(true);
-  };
-
-  const openDelete = (item: Proveedor) => { setDeleting(item); setConfirmOpen(true); };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editing) { await actualizar.mutateAsync({ id: editing.id, dto: form }); }

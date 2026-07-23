@@ -19,14 +19,6 @@ export default function BodegasPage() {
 
   const openCreate = () => { setEditing(null); setForm(emptyForm); setModalOpen(true); };
 
-  const openEdit = (item: Bodega) => {
-    setEditing(item);
-    setForm({ nombre: item.nombre, ubicacion: item.ubicacion, isPrincipal: item.isPrincipal });
-    setModalOpen(true);
-  };
-
-  const openDelete = (item: Bodega) => { setDeleting(item); setConfirmOpen(true); };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editing) { await actualizar.mutateAsync({ id: editing.id, dto: form }); }

@@ -19,14 +19,6 @@ export default function UnidadesMedidaPage() {
 
   const openCreate = () => { setEditing(null); setForm(emptyForm); setModalOpen(true); };
 
-  const openEdit = (item: UnidadMedida) => {
-    setEditing(item);
-    setForm({ nombre: item.nombre, simbolo: item.simbolo });
-    setModalOpen(true);
-  };
-
-  const openDelete = (item: UnidadMedida) => { setDeleting(item); setConfirmOpen(true); };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editing) { await actualizar.mutateAsync({ id: editing.id, dto: form }); }

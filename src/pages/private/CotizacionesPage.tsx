@@ -37,23 +37,6 @@ export default function CotizacionesPage() {
     setModalOpen(true);
   };
 
-  const openEdit = (item: Cotizacion) => {
-    setEditing(item);
-    setForm({
-      solicitudId: item.solicitudId,
-      proveedorId: item.proveedorId,
-      precioOfertadoTotal: Number(item.precioOfertadoTotal),
-      archivoRespaldoUrl: item.archivoRespaldoUrl ?? '',
-      estado: item.estado,
-    });
-    setModalOpen(true);
-  };
-
-  const openDelete = (item: Cotizacion) => {
-    setDeleting(item);
-    setConfirmOpen(true);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const dto: CreateCotizacionDto = {

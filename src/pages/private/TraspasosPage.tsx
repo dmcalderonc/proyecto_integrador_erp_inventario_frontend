@@ -244,7 +244,7 @@ export default function TraspasosPage() {
                     <SmartCombobox
                       options={materialOptions}
                       value={det.materialId > 0 ? materialOptions.find(m => m.id === det.materialId) || null : null}
-                      onChange={(opt) => updateDetalle(i, 'materialId', Number(opt.id))}
+                      onChange={(opt) => { if (!opt) return; updateDetalle(i, 'materialId', Number(opt.id)); }}
                       placeholder="Buscar material..."
                     />
                   </div>

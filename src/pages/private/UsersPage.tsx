@@ -53,24 +53,6 @@ export default function UsersPage() {
     setModalOpen(true);
   };
 
-  const openEdit = (item: User) => {
-    setEditing(item);
-    setForm({
-      nombre: item.nombre,
-      email: item.email,
-      password: '',
-      rol: item.rol,
-      estado: !!item.estado,
-      bodegaAsignadaId: item.bodegaAsignadaId ?? 0,
-    });
-    setModalOpen(true);
-  };
-
-  const openDelete = (item: User) => {
-    setDeleting(item);
-    setConfirmOpen(true);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
