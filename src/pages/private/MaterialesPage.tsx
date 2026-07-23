@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMateriales } from '../../store/useMateriales';
 import { useCategorias } from '../../store/useCategorias';
@@ -86,14 +86,17 @@ export default function MaterialesPage() {
   const grouped = useMemo(() => {
     const map = new Map<number, Material[]>();
     categorias.forEach(c => map.set(c.id, []));
+    const q = search.toLowerCase().trim();
     materiales.forEach(m => {
+      const matchesSearch = !q || m.nombre.toLowerCase().includes(q);
+      if (!matchesSearch) return;
       const catId = m.categoria?.id;
       if (catId && map.has(catId)) {
         map.get(catId)!.push(m);
       }
     });
     return map;
-  }, [materiales, categorias]);
+  }, [materiales, categorias, search]);
 
   const handleSearchSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();

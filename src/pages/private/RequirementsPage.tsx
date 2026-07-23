@@ -153,13 +153,21 @@ export default function RequirementsPage() {
 
   const handleStatusConfirm = async () => {
     if (!statusAction) return;
-    await actualizarEstado.mutateAsync({ id: statusAction.requirement.id, estado: statusAction.estado });
+    try {
+      await actualizarEstado.mutateAsync({ id: statusAction.requirement.id, estado: statusAction.estado });
+    } catch {
+      // Error manejado por onError en useRequirements
+    }
     setStatusAction(null);
   };
 
   const handleDelete = async () => {
     if (!deleting) return;
-    await eliminar.mutateAsync(deleting.id);
+    try {
+      await eliminar.mutateAsync(deleting.id);
+    } catch {
+      // Error manejado por onError en useRequirements
+    }
     setDeleting(null);
   };
 

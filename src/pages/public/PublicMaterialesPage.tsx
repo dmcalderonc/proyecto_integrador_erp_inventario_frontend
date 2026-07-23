@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Search, ChevronLeft, ChevronRight, Package } from 'lucide-react';
@@ -11,12 +11,28 @@ export default function PublicMaterialesPage() {
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState('nombre');
   const [order, setOrder] = useState<'ASC' | 'DESC'>('ASC');
+  const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
   const limit = 10;
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['publicMateriales', search, page, sort, order],
+  const { data: categorias } = useQuery({
+    queryKey: ['publicCategorias'],
     queryFn: async () => {
-      const res = await publicMaterialesApi.getAll({ search: search || undefined, page, limit, sort, order });
+      const res = await publicMaterialesApi.getCategorias();
+      return res.data;
+    },
+  });
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['publicMateriales', search, page, sort, order, categoryFilter],
+    queryFn: async () => {
+      const res = await publicMaterialesApi.getAll({
+        search: search || undefined,
+        categoria: categoryFilter ?? undefined,
+        page,
+        limit,
+        sort,
+        order,
+      });
       return res.data;
     },
   });
@@ -43,6 +59,14 @@ export default function PublicMaterialesPage() {
               className="w-full pl-11 pr-4 py-3 bg-surface text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
             />
           </div>
+          <select
+            value={categoryFilter ?? ''}
+            onChange={e => { setCategoryFilter(e.target.value ? Number(e.target.value) : null); setPage(1); }}
+            className="bg-surface text-text-primary border border-border-subtle rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 cursor-pointer transition-all"
+          >
+            <option value="">Todas las categorías</option>
+            {categorias?.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+          </select>
           <select
             value={`${sort}-${order}`}
             onChange={e => {

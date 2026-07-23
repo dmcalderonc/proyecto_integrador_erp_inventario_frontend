@@ -8,6 +8,9 @@ export interface User {
   estado: boolean;
   fechaCreacion: string;
   fechaActualizacion: string;
+  fotoPerfil?: string;
+  googleId?: string;
+  avatarUrl?: string;
 }
 
 export interface CreateUserDto {

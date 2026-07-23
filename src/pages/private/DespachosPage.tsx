@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useDespachos } from '../../store/useDespachos';
 import { useCompras } from '../../store/useCompras';
 import { useRequirements } from '../../store/useRequirements';
@@ -203,9 +203,12 @@ export default function DespachosPage() {
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleConfirm}
-        title="Confirmar Entrega Directa"
+        title="Confirmar Registro"
         message="¿Confirmar entrega directa? Se creará un ingreso automático a la bodega del proyecto y el requerimiento cambiará a DESPACHADO."
         loading={isExecuting}
+        confirmLabel="Registrar"
+        loadingLabel="Registrando..."
+        variant="success"
       />
     </div>
   );

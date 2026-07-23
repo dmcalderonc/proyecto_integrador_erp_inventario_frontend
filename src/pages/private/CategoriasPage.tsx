@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useCategorias } from '../../store/useCategorias';
 import type { Categoria } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';

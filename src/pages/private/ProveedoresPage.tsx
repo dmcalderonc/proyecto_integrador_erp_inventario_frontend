@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useProveedores } from '../../store/useProveedores';
 import type { Proveedor } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';

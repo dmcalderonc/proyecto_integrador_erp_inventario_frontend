@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../../api/http';
 import { Button } from '../../components/ui/Button';
@@ -24,6 +24,7 @@ type RegisterFormInputs = z.infer<typeof registerSchema>;
 
 export function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormInputs>({
     resolver: zodResolver(registerSchema),
@@ -32,13 +33,16 @@ export function RegisterPage() {
   const onSubmit = async (data: RegisterFormInputs) => {
     setIsLoading(true);
     try {
-      await api.post('/auth/register', {
-        nombre: data.nombre,
+      const res = await api.post('/auth/register', {
+        username: data.nombre,
         email: data.email,
         password: data.password,
       });
-      toast.success('Cuenta creada. Ahora inicia sesión.');
-      window.location.replace('/login');
+      const { access_token, user } = res.data;
+      localStorage.setItem('token', access_token);
+      localStorage.setItem('user', JSON.stringify(user));
+      toast.success('Cuenta creada exitosamente');
+      navigate('/');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Error al registrar');
     } finally {

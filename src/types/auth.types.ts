@@ -29,6 +29,9 @@ export interface LoginResponse {
       nombre: string;
       email: string;
       rol: UserRole;
+      fotoPerfil?: string;
+      googleId?: string;
+      avatarUrl?: string;
     };
   };
 }

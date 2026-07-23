@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useProyectos } from '../../store/useProyectos';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Proyecto, EstadoProyecto } from '../../types';
@@ -6,7 +6,7 @@ import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { Plus } from 'lucide-react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { getBadgeStyle } from '../../lib/design-tokens';
 
 const emptyForm = { nombre: '', codigoProyecto: '', fechaInicio: '', estado: 'ACTIVO' as EstadoProyecto };
@@ -104,6 +104,28 @@ export default function ProyectosPage() {
         </span>
       ),
     },
+    ...(isAdmin ? [{
+      key: 'acciones',
+      header: 'Acciones',
+      render: (item: Proyecto) => (
+        <div className="flex items-center gap-2">
+          {/* Botón Editar - Azul */}
+          <button
+            onClick={() => openEdit(item)}
+            className="flex items-center gap-1 bg-[#06B6D4]/20 text-[#06B6D4] hover:bg-[#06B6D4] hover:text-white px-3 py-1.5 rounded-lg border border-[#06B6D4]/50 transition-all font-bold text-xs cursor-pointer"
+          >
+            <Edit2 size={14} /> Editar
+          </button>
+          {/* Botón Eliminar - Rojo */}
+          <button
+            onClick={() => openDelete(item)}
+            className="flex items-center gap-1 bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg border border-red-500/50 transition-all font-bold text-xs cursor-pointer"
+          >
+            <Trash2 size={14} /> Eliminar
+          </button>
+        </div>
+      )
+    }] : [])
   ];
 
   return (
@@ -125,8 +147,6 @@ export default function ProyectosPage() {
           columns={columns}
           data={proyectos}
           loading={isLoading}
-          onEdit={isAdmin ? openEdit : undefined}
-          onDelete={isAdmin ? openDelete : undefined}
           searchable
           searchKeys={["nombre", "estado"]}
         />
@@ -148,7 +168,7 @@ export default function ProyectosPage() {
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1.5">Código de proyecto (opcional)</label>
             <input
-              placeholder="Ej: PROY-2026-001"
+              placeholder="Ej: PROY-2026-001 (Automático si se deja vacío)"
               value={form.codigoProyecto}
               onChange={e => setForm({ ...form, codigoProyecto: e.target.value })}
               className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all font-mono"
