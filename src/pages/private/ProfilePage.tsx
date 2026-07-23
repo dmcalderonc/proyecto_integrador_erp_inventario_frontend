@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import api from '../../api/http';
 import { authApi } from '../../api/auth.api';
 import { User, Mail, Shield, Calendar, CheckCircle, XCircle, Camera, X, Link2, Unlink } from 'lucide-react';
@@ -10,6 +11,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function ProfilePage() {
   const { user, updateProfile, updateGoogleId } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [uploading, setUploading] = useState(false);
   const [linkingGoogle, setLinkingGoogle] = useState(false);
 
@@ -18,10 +20,10 @@ export default function ProfilePage() {
   const displayImage = user.fotoPerfil || user.avatarUrl || null;
 
   const rolColors: Record<string, string> = {
-    ADMIN: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-    BODEGUERO: 'bg-[#06B6D4]/10 text-[#06B6D4] border-[#06B6D4]/30',
-    COMPRADOR: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-    SOLICITANTE: 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/30',
+    ADMIN: 'bg-purple-500/10 text-purple-400 dark:text-purple-400 border-purple-500/30',
+    BODEGUERO: 'bg-accent/10 text-accent border-accent/30',
+    COMPRADOR: 'bg-amber-500/10 text-amber-400 dark:text-amber-400 border-amber-500/30',
+    SOLICITANTE: 'bg-primary/10 text-primary border-primary/30',
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

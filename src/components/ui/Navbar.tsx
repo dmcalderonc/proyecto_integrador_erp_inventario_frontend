@@ -1,16 +1,10 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Package, LogIn, LogOut, Menu, X } from 'lucide-react';
+import { LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
-
-const publicLinks = [
-  { to: '/', label: 'Inicio' },
-  { to: '/materiales', label: 'Catálogo' },
-];
 
 export function Navbar() {
   const { isAuthenticated, logout } = useAuth();
-  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -64,6 +58,8 @@ export function Navbar() {
               </Link>
             )}
           </div>
+          <span className="text-xl font-bold text-white tracking-tight">stockly</span>
+        </Link>
 
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -106,6 +102,29 @@ export function Navbar() {
           </div>
         )}
       </div>
+
+      {mobileOpen && (
+        <div className="md:hidden bg-card border-t border-border px-6 py-5 flex flex-col gap-3 shadow-xl">
+          {isAuthenticated ? (
+            <>
+              <Link 
+                to="/dashboard" 
+                onClick={() => setMobileOpen(false)} 
+                className="block px-3 py-2.5 rounded-xl text-sm font-medium text-white bg-secondary border border-border text-center"
+              >
+                Dashboard
+              </Link>
+              <button 
+                onClick={() => { logout(); window.location.replace('/'); setMobileOpen(false); }} 
+                className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors"
+              >
+                <LogOut size={16} />
+                Cerrar Sesión
+              </button>
+            </>
+          ) : null}
+        </div>
+      )}
     </nav>
   );
 }

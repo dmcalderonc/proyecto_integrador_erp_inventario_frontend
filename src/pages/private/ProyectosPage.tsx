@@ -112,14 +112,14 @@ export default function ProyectosPage() {
           {/* Botón Editar - Azul */}
           <button
             onClick={() => openEdit(item)}
-            className="flex items-center gap-1 bg-[#06B6D4]/20 text-[#06B6D4] hover:bg-[#06B6D4] hover:text-white px-3 py-1.5 rounded-lg border border-[#06B6D4]/50 transition-all font-bold text-xs cursor-pointer"
+            className="flex items-center gap-1 bg-accent/20 text-accent hover:bg-accent hover:text-white px-3 py-1.5 rounded-lg border border-accent/50 transition-all font-bold text-xs cursor-pointer"
           >
             <Edit2 size={14} /> Editar
           </button>
           {/* Botón Eliminar - Rojo */}
           <button
             onClick={() => openDelete(item)}
-            className="flex items-center gap-1 bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg border border-red-500/50 transition-all font-bold text-xs cursor-pointer"
+            className="flex items-center gap-1 bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-card-foreground px-3 py-1.5 rounded-lg border border-red-500/50 transition-all font-bold text-xs cursor-pointer"
           >
             <Trash2 size={14} /> Eliminar
           </button>
