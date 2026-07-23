@@ -1,4 +1,6 @@
+import { useState, useMemo } from 'react';
 import { useInventario } from '../../store/useInventario';
+import { useBodegas } from '../../store/useBodegas';
 import { Package } from 'lucide-react';
 import type { Inventario } from '../../types';
 import { cn } from '../../lib/utils';
@@ -6,7 +8,14 @@ import { DataTable } from '../../components/ui/DataTable';
 import type { Column } from '../../components/ui/DataTable';
 
 export default function InventarioPage() {
+    const [filterBodega, setFilterBodega] = useState<number | null>(null);
     const { inventario, isLoading } = useInventario();
+    const { bodegas } = useBodegas();
+
+    const filteredInventario = useMemo(() => {
+        if (!filterBodega) return inventario;
+        return inventario.filter(item => item.bodega_id === filterBodega);
+    }, [inventario, filterBodega]);
 
     const columns: Column<Inventario>[] = [
         {
@@ -64,15 +73,27 @@ export default function InventarioPage() {
                     <h1 className="text-2xl font-bold text-text-primary">Inventario Consolidado</h1>
                     <p className="text-sm text-text-secondary mt-1">Visualización global y disponibilidad de existencias por bodega.</p>
                 </div>
+                <div className="flex items-center gap-3">
+                    <select
+                        value={filterBodega ?? ''}
+                        onChange={e => setFilterBodega(e.target.value ? Number(e.target.value) : null)}
+                        className="px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent transition-all"
+                    >
+                        <option value="">Todas las bodegas</option>
+                        {bodegas.map(b => (
+                            <option key={b.id} value={b.id}>{b.nombre}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             <div className="bg-surface rounded-xl border border-border-subtle p-6">
                 <DataTable
                     columns={columns}
-                    data={inventario}
+                    data={filteredInventario}
                     loading={isLoading}
                     searchable
-                    searchKeys={["material", "sku"]}
+                    searchKeys={["material.nombre", "material.sku"]}
                 />
             </div>
         </div>

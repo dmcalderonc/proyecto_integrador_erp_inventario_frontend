@@ -10,6 +10,8 @@ export interface Material {
   unidadMedida?: UnidadMedida;
   categoria_id?: number;
   categoria?: Categoria;
+  stockDisponible?: number;
+  stockReservado?: number;
 }
 
 export interface CreateMaterialDto {

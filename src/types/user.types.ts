@@ -11,6 +11,8 @@ export interface User {
   fotoPerfil?: string;
   googleId?: string;
   avatarUrl?: string;
+  bodegaAsignadaId?: number | null;
+  bodegaAsignada?: { id: number; nombre: string } | null;
 }
 
 export interface CreateUserDto {
@@ -18,4 +20,5 @@ export interface CreateUserDto {
   email: string;
   password: string;
   rol: UserRole;
+  bodegaAsignadaId?: number;
 }

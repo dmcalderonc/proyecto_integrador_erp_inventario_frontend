@@ -4,6 +4,7 @@ import { useCompras } from '../../store/useCompras';
 import { useRequirements } from '../../store/useRequirements';
 import { useProyectos } from '../../store/useProyectos';
 import { useMateriales } from '../../store/useMateriales';
+import { useAuth } from '../../contexts/AuthContext';
 import type { CreateEntregaDirectaDto } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
@@ -15,6 +16,7 @@ type DetalleForm = { materialId: string; cantidad: string };
 const emptyDetalle = (): DetalleForm => ({ materialId: '', cantidad: '' });
 
 export default function DespachosPage() {
+  const { hasRole } = useAuth();
   const { ejecutar, isExecuting } = useDespachos();
   const { compras } = useCompras();
   const { requirements } = useRequirements();
@@ -192,9 +194,11 @@ export default function DespachosPage() {
           </div>
 
           <div className="border-t border-border-subtle pt-6 flex justify-end">
-            <Button type="submit" loading={isExecuting} size="lg">
-              Registrar Despacho
-            </Button>
+            {hasRole(['ADMIN', 'BODEGUERO']) && (
+              <Button type="submit" loading={isExecuting} size="lg">
+                Registrar Despacho
+              </Button>
+            )}
           </div>
         </form>
       </div>

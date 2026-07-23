@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useCompras } from '../../store/useCompras';
 import { useMateriales } from '../../store/useMateriales';
+import { useAuth } from '../../contexts/AuthContext';
 import type { OrdenCompra, CrearCompraDto, DetalleCompra } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
@@ -18,7 +19,8 @@ const emptyForm: CrearCompraDto = {
 };
 
 export default function ComprasPage() {
-  const { compras, isLoading, crear, actualizar, recibir } = useCompras();
+  const { hasRole } = useAuth();
+  const { compras, isLoading, crear, actualizar, aprobar, recibir } = useCompras();
   const { materiales } = useMateriales();
   const { proveedores } = useProveedores();
 
@@ -78,11 +80,15 @@ export default function ComprasPage() {
     e.preventDefault();
     const detallesNumeros = (form.detalles ?? [])
       .filter((d: DetalleCompra) => d.materialId !== 0)
-      .map((d: DetalleCompra) => ({
-        materialId: Number(d.materialId),
-        cantidad: Number(d.cantidad),
-        precioUnitario: Number(d.precioUnitario),
-      }));
+      .map((d: DetalleCompra) => {
+        const item: Record<string, unknown> = {
+          materialId: Number(d.materialId),
+          cantidad: Number(d.cantidad),
+          precioUnitario: Number(d.precioUnitario),
+        };
+        if (d.requerimientoDetalleId) item.requerimientoDetalleId = d.requerimientoDetalleId;
+        return item;
+      });
     const dto: CrearCompraDto = {
       proveedorId: Number(form.proveedorId),
       subtotal: subtotalCalc,
@@ -168,15 +174,24 @@ export default function ComprasPage() {
           </Button>
           {(item.estado === 'BORRADOR' || item.estado === 'PENDIENTE') && (
             <>
-              <Button variant="secondary" size="sm" onClick={() => openEdit(item)}>
-                <Edit size={14} className="text-warning" /> Editar
-              </Button>
-              <Button variant="primary" size="sm" onClick={() => handleRecibir(item.id)}>
-                <CheckCircle size={14} /> Recibir
-              </Button>
+              {hasRole(['ADMIN']) && item.estado === 'BORRADOR' && (
+                <Button variant="primary" size="sm" onClick={() => aprobar.mutateAsync(item.id)}>
+                  <CheckCircle size={14} /> Aprobar OC
+                </Button>
+              )}
+              {hasRole(['ADMIN', 'COMPRADOR']) && (
+                <Button variant="secondary" size="sm" onClick={() => openEdit(item)}>
+                  <Edit size={14} className="text-warning" /> Editar
+                </Button>
+              )}
+              {hasRole(['ADMIN', 'BODEGUERO']) && (
+                <Button variant="primary" size="sm" onClick={() => handleRecibir(item.id)}>
+                  <CheckCircle size={14} /> Recibir
+                </Button>
+              )}
             </>
           )}
-          {item.estado === 'EMITIDA' && (
+          {item.estado === 'EMITIDA' && hasRole(['ADMIN', 'BODEGUERO']) && (
             <Button variant="primary" size="sm" onClick={() => handleRecibir(item.id)}>
               <CheckCircle size={14} /> Recibir
             </Button>
@@ -193,9 +208,11 @@ export default function ComprasPage() {
           <h1 className="text-2xl font-bold text-text-primary">Órdenes de Compra</h1>
           <p className="text-sm text-text-secondary mt-1">Gestiona abastecimiento, cotizaciones y recepción de materiales.</p>
         </div>
-        <Button onClick={openCreate} className="gap-1.5">
-          <Plus size={16} /> Nueva Orden
-        </Button>
+        {hasRole(['ADMIN', 'COMPRADOR']) && (
+          <Button onClick={openCreate} className="gap-1.5">
+            <Plus size={16} /> Nueva Orden
+          </Button>
+        )}
       </div>
 
       <div className="bg-surface rounded-xl border border-border-subtle p-6">

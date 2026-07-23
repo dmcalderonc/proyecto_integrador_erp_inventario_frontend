@@ -7,7 +7,7 @@ import type { SolicitudCompra, UpdateSolicitudDto, EstadoSolicitud, NivelPriorid
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
-import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Plus, Trash2, CheckCircle } from 'lucide-react';
 import { getBadgeStyle } from '../../lib/design-tokens';
 
 interface DetalleForm {
@@ -23,7 +23,7 @@ export default function SolicitudesPage() {
   const [filtroEstado, setFiltroEstado] = useState<string>('');
   const [filtroProyecto, setFiltroProyecto] = useState<string>('');
 
-  const { solicitudes, isLoading, crear, actualizar } = useSolicitudes({
+  const { solicitudes, isLoading, crear, actualizar, cotizar, aprobar, procesar } = useSolicitudes({
     estado: filtroEstado || undefined,
     proyectoId: filtroProyecto || undefined,
   });
@@ -140,9 +140,26 @@ export default function SolicitudesPage() {
       key: 'acciones', header: 'Acciones',
       render: (item: SolicitudCompra) => (
         <div className="flex gap-1.5 justify-end">
-          <Button variant="secondary" size="sm" onClick={() => openEdit(item)}>
-            <Pencil size={14} className="text-warning" /> Editar
-          </Button>
+          {hasRole(['COMPRADOR']) && item.estado === 'PENDIENTE' && (
+            <Button variant="primary" size="sm" onClick={() => cotizar.mutateAsync(item.id)}>
+              Marcar como Cotizando
+            </Button>
+          )}
+          {hasRole(['ADMIN']) && item.estado === 'COTIZADO' && (
+            <Button variant="primary" size="sm" onClick={() => aprobar.mutateAsync(item.id)}>
+              <CheckCircle size={14} /> Aprobar
+            </Button>
+          )}
+          {hasRole(['ADMIN']) && item.estado === 'APROBADA' && (
+            <Button variant="primary" size="sm" onClick={() => procesar.mutateAsync(item.id)}>
+              <CheckCircle size={14} /> Procesar
+            </Button>
+          )}
+          {hasRole(['SOLICITANTE']) && item.estado === 'PENDIENTE' && item.usuarioSolicitanteId === user?.id && (
+            <Button variant="secondary" size="sm" onClick={() => openEdit(item)}>
+              <Pencil size={14} className="text-warning" /> Editar
+            </Button>
+          )}
           <Button variant="ghost" size="sm" onClick={() => openDetail(item)}>
             <Eye size={14} className="text-info" /> Ver
           </Button>
@@ -158,9 +175,11 @@ export default function SolicitudesPage() {
           <h1 className="text-2xl font-bold text-text-primary">Solicitudes de Compra</h1>
           <p className="text-sm text-text-secondary mt-1">Creación y seguimiento de requerimientos de abastecimiento.</p>
         </div>
-        <Button onClick={openCreate} className="gap-1.5">
-          <Plus size={16} /> Nueva Solicitud
-        </Button>
+        {hasRole(['SOLICITANTE']) && (
+          <Button onClick={openCreate} className="gap-1.5">
+            <Plus size={16} /> Nueva Solicitud
+          </Button>
+        )}
       </div>
 
       <div className="bg-surface rounded-xl border border-border-subtle p-4 flex flex-col sm:flex-row gap-4 items-end">

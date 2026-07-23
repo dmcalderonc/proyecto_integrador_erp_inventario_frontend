@@ -11,8 +11,16 @@ interface CreateSolicitudDto {
 export const solicitudesApi = {
   getAll: (params?: Record<string, string>) =>
     api.get<SolicitudCompra[]>('/solicitudes-compra', { params }),
+  getById: (id: number) =>
+    api.get<SolicitudCompra>(`/solicitudes-compra/${id}`),
   create: (dto: CreateSolicitudDto) =>
     api.post<SolicitudCompra>('/solicitudes-compra', dto),
   update: (id: number, dto: UpdateSolicitudDto) =>
     api.patch<SolicitudCompra>(`/solicitudes-compra/${id}`, dto),
+  cotizar: (id: number) =>
+    api.patch<SolicitudCompra>(`/solicitudes-compra/${id}/cotizar`),
+  aprobar: (id: number) =>
+    api.patch<SolicitudCompra>(`/solicitudes-compra/${id}/aprobar`),
+  procesar: (id: number) =>
+    api.patch<SolicitudCompra>(`/solicitudes-compra/${id}/procesar`),
 };

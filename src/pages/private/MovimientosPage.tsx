@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMovimientos } from '../../store/useMovimientos';
 import { useBodegas } from '../../store/useBodegas';
 import { useMateriales } from '../../store/useMateriales';
+import { useAuth } from '../../contexts/AuthContext';
 import type { Movimiento, CrearMovimientoDto, MovimientoDetalle, TipoMovimiento } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
@@ -27,6 +28,7 @@ const iconTipo: Record<string, React.ReactNode> = {
 };
 
 export default function MovimientosPage() {
+  const { hasRole } = useAuth();
   const { movimientos, isLoading, crear } = useMovimientos();
   const { bodegas } = useBodegas();
   const { materiales } = useMateriales();
@@ -135,9 +137,11 @@ export default function MovimientosPage() {
           <h1 className="text-2xl font-bold text-text-primary">Movimientos de Inventario</h1>
           <p className="text-sm text-text-secondary mt-1">Registro e historial de entradas, salidas y transferencias entre bodegas.</p>
         </div>
-        <Button onClick={openCreate} className="gap-1.5">
-          <Plus size={16} /> Nuevo Movimiento
-        </Button>
+        {hasRole(['ADMIN', 'BODEGUERO']) && (
+          <Button onClick={openCreate} className="gap-1.5">
+            <Plus size={16} /> Nuevo Movimiento
+          </Button>
+        )}
       </div>
 
       <div className="bg-surface rounded-xl border border-border-subtle p-6">

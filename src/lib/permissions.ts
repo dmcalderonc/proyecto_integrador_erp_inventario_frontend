@@ -1,3 +1,6 @@
+// Documentation-only reference for role/permission mapping.
+// Runtime checks use useAuth().hasRole() and useAuth().hasAnyRole().
+
 export const ROLES = {
   ADMIN: 'ADMIN',
   BODEGUERO: 'BODEGUERO',
@@ -33,9 +36,7 @@ export const PERMISSIONS = {
   
   // Proyectos
   CAN_MANAGE_PROYECTOS: [ROLES.ADMIN, ROLES.SOLICITANTE],
-};
-
-export const hasPermission = (userRole: string | undefined, allowedRoles: string[]) => {
-  if (!userRole) return false;
-  return allowedRoles.includes(userRole);
+  
+  // Traspasos
+  CAN_MANAGE_TRASPASOS: [ROLES.ADMIN, ROLES.BODEGUERO],
 };

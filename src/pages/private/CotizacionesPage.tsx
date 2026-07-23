@@ -8,7 +8,8 @@ import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { getBadgeStyle } from '../../lib/design-tokens';
-import { Plus, ExternalLink } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { Plus, ExternalLink, Check, X } from 'lucide-react';
 
 const emptyForm: CreateCotizacionDto = {
   solicitudId: 0,
@@ -19,7 +20,8 @@ const emptyForm: CreateCotizacionDto = {
 };
 
 export default function CotizacionesPage() {
-  const { cotizaciones, isLoading, crear, actualizar, eliminar } = useCotizaciones();
+  const { hasRole } = useAuth();
+  const { cotizaciones, isLoading, crear, actualizar, eliminar, seleccionar, descartar } = useCotizaciones();
   const { solicitudes } = useSolicitudes();
   const { proveedores } = useProveedores();
 
@@ -125,6 +127,23 @@ export default function CotizacionesPage() {
           </a>
         ) : <span className="text-text-muted">-</span>,
     },
+    {
+      key: 'acciones', header: '',
+      render: (item: Cotizacion) => (
+        <div className="flex gap-1.5 justify-end">
+          {hasRole(['ADMIN']) && item.estado === 'COTIZADO' && (
+            <>
+              <Button variant="primary" size="sm" onClick={() => seleccionar.mutateAsync(item.id)}>
+                <Check size={14} /> Seleccionar
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => descartar.mutateAsync(item.id)}>
+                <X size={14} className="text-danger" /> Descartar
+              </Button>
+            </>
+          )}
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -134,13 +153,15 @@ export default function CotizacionesPage() {
           <h1 className="text-2xl font-bold text-text-primary">Cotizaciones</h1>
           <p className="text-sm text-text-secondary mt-1">Gestiona y evalua las ofertas de precios enviadas por proveedores.</p>
         </div>
-        <Button onClick={openCreate} className="gap-1.5">
-          <Plus size={16} /> Nueva Cotizacion
-        </Button>
+        {hasRole(['COMPRADOR', 'ADMIN']) && (
+          <Button onClick={openCreate} className="gap-1.5">
+            <Plus size={16} /> Nueva Cotizacion
+          </Button>
+        )}
       </div>
 
       <div className="bg-surface rounded-xl border border-border-subtle p-6">
-        <DataTable columns={columns} data={cotizaciones} loading={isLoading} onEdit={openEdit} onDelete={openDelete} searchable searchKeys={["codigo", "estado"]} />
+        <DataTable columns={columns} data={cotizaciones} loading={isLoading} onEdit={hasRole(['COMPRADOR', 'ADMIN']) ? openEdit : undefined} onDelete={hasRole(['ADMIN']) ? openDelete : undefined} searchable searchKeys={["codigo", "estado"]} />
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Cotizacion' : 'Nueva Cotizacion'}>
@@ -206,6 +227,7 @@ export default function CotizacionesPage() {
               value={form.estado}
               onChange={e => setForm({ ...form, estado: e.target.value as EstadoCotizacion })}
               className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all cursor-pointer"
+              disabled={!hasRole(['ADMIN'])}
             >
               <option value="EN_EVALUACION">EN_EVALUACION</option>
               <option value="ELEGIDA">ELEGIDA</option>

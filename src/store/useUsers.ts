@@ -30,7 +30,6 @@ export function useUsers() {
       usersApi.update(id, dto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
-      toast.success('Usuario actualizado exitosamente');
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Error al actualizar usuario');

@@ -8,4 +8,6 @@ export const cotizacionesApi = {
   update: (id: number, dto: Partial<CreateCotizacionDto>) =>
     api.patch<Cotizacion>(`/cotizaciones/${id}`, dto),
   delete: (id: number) => api.delete(`/cotizaciones/${id}`),
+  seleccionar: (id: number) => api.patch<Cotizacion>(`/cotizaciones/${id}/seleccionar`),
+  descartar: (id: number) => api.patch<Cotizacion>(`/cotizaciones/${id}/descartar`),
 };

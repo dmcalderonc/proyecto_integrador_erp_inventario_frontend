@@ -48,5 +48,27 @@ export function useCotizaciones() {
     },
   });
 
-  return { cotizaciones, isLoading, crear, actualizar, eliminar };
+  const seleccionar = useMutation({
+    mutationFn: (id: number) => cotizacionesApi.seleccionar(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cotizaciones'] });
+      toast.success('Cotización seleccionada exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al seleccionar cotización');
+    },
+  });
+
+  const descartar = useMutation({
+    mutationFn: (id: number) => cotizacionesApi.descartar(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cotizaciones'] });
+      toast.success('Cotización descartada exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al descartar cotización');
+    },
+  });
+
+  return { cotizaciones, isLoading, crear, actualizar, eliminar, seleccionar, descartar };
 }

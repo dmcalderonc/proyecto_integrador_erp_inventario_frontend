@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Search, Inbox } from 'lucide-react';
 
 export interface Column<T> {
@@ -20,15 +21,44 @@ interface DataTableProps<T> {
   children?: ReactNode;
 }
 
+function getNestedValue(obj: any, path: string): string {
+  return path.split('.').reduce((acc, part) => acc?.[part] ?? '', obj) ?? '';
+}
+
 export function DataTable<T extends { id?: any }>({
   columns,
   data,
   loading = false,
   searchable = false,
   searchPlaceholder = 'Buscar...',
+  searchKeys = [],
   onSearch,
   emptyMessage = 'No se encontraron registros',
 }: DataTableProps<T>) {
+  const [localSearch, setLocalSearch] = useState('');
+
+  const searchTerm = onSearch ? undefined : localSearch;
+
+  const filteredData = useMemo(() => {
+    if (!searchable || !searchTerm || searchKeys.length === 0) return data;
+    const term = searchTerm.toLowerCase();
+    return data.filter(item =>
+      searchKeys.some(key => {
+        const val = getNestedValue(item, key);
+        return val.toString().toLowerCase().includes(term);
+      })
+    );
+  }, [data, searchTerm, searchKeys, searchable]);
+
+  const displayData = onSearch ? data : filteredData;
+
+  const handleSearch = (value: string) => {
+    if (onSearch) {
+      onSearch(value);
+    } else {
+      setLocalSearch(value);
+    }
+  };
 
   if (loading && data.length === 0) {
     return (
@@ -47,13 +77,14 @@ export function DataTable<T extends { id?: any }>({
 
   return (
     <div className="space-y-4">
-      {searchable && onSearch && (
+      {searchable && (
         <div className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
           <input
             type="text"
             placeholder={searchPlaceholder}
-            onChange={e => onSearch(e.target.value)}
+            value={onSearch ? undefined : localSearch}
+            onChange={e => handleSearch(e.target.value)}
             className="w-full bg-elevated text-text-primary border border-border-subtle rounded-xl pl-10 pr-4 py-2.5 text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
           />
         </div>
@@ -61,10 +92,10 @@ export function DataTable<T extends { id?: any }>({
 
       {/* Mobile cards */}
       <div className="grid grid-cols-1 gap-3 md:hidden">
-        {data.length === 0 ? (
+        {displayData.length === 0 ? (
           <EmptyState message={emptyMessage} />
         ) : (
-          data.map((item, i) => (
+          displayData.map((item, i) => (
             <div key={item.id ?? i} className="bg-elevated rounded-xl border border-border-subtle p-4 space-y-2.5">
               {columns.map((col, colIndex) => (
                 <div key={col.key} className={`flex justify-between items-center ${colIndex !== columns.length - 1 ? 'border-b border-border-subtle/50 pb-2' : ''}`}>
@@ -95,14 +126,14 @@ export function DataTable<T extends { id?: any }>({
             </tr>
           </thead>
           <tbody className="divide-y divide-border-subtle">
-            {data.length === 0 ? (
+            {displayData.length === 0 ? (
               <tr>
                 <td colSpan={columns.length}>
                   <EmptyState message={emptyMessage} />
                 </td>
               </tr>
             ) : (
-              data.map((item, i) => (
+              displayData.map((item, i) => (
                 <tr key={item.id ?? i} className="hover:bg-white/[0.02] transition-colors">
                   {columns.map(col => (
                     <td key={col.key} className="px-5 py-3.5 text-text-primary">

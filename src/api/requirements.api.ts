@@ -8,4 +8,6 @@ export const requirementsApi = {
   updateStatus: (id: number, dto: { estado: RequirementStatus }) =>
     api.patch<Requirement>(`/requirements/${id}/status`, dto),
   delete: (id: number) => api.delete(`/requirements/${id}`),
+  evaluarItem: (reqId: number, detalleId: number, accion: string) =>
+    api.patch(`/requirements/${reqId}/evaluar-item/${detalleId}`, { accion }),
 };

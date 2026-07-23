@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FolderOpen, ClipboardList, DollarSign, Activity, AlertTriangle, TrendingUp, Users, Tags, Package } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import api from '../../api/http';
+import { useAuth } from '../../contexts/AuthContext';
 import { getBadgeStyle } from '../../lib/design-tokens';
 
 interface DashboardKpis {
@@ -33,6 +34,7 @@ interface AlertaStock {
 const PIE_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
 export default function DashboardPage() {
+  const { hasRole } = useAuth();
   const { data: kpis, isLoading, isError } = useQuery({
     queryKey: ['dashboardKpis'],
     queryFn: async () => {
@@ -109,7 +111,7 @@ export default function DashboardPage() {
     );
   }
 
-  const kpiCards = [
+  const allKpiCards = [
     { label: 'Usuarios', value: kpis?.totalUsuarios ?? 0, icon: Users, color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
     { label: 'Categorías', value: kpis?.totalCategorias ?? 0, icon: Tags, color: 'text-accent bg-accent/10 border-accent/20' },
     { label: 'Materiales', value: kpis?.totalMateriales ?? 0, icon: Package, color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
@@ -117,6 +119,20 @@ export default function DashboardPage() {
     { label: 'Requerimientos Pend.', value: kpis?.requerimientosPendientes ?? 0, icon: ClipboardList, color: 'text-warning bg-warning-bg border-warning/20' },
     { label: 'Valorización Inventario', value: `$${(kpis?.valorizacionTotalInventario ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-success bg-success-bg border-success/20', isCurrency: true },
   ];
+
+  const kpiCards = hasRole(['ADMIN'])
+    ? allKpiCards
+    : hasRole(['SOLICITANTE'])
+      ? allKpiCards.filter(k => ['Proyectos Activos', 'Requerimientos Pend.'].includes(k.label))
+      : hasRole(['BODEGUERO'])
+        ? allKpiCards.filter(k => ['Requerimientos Pend.', 'Valorización Inventario'].includes(k.label))
+        : hasRole(['COMPRADOR'])
+          ? allKpiCards.filter(k => ['Materiales', 'Requerimientos Pend.'].includes(k.label))
+          : allKpiCards;
+
+  const showCharts = hasRole(['ADMIN']);
+  const showStockAlerts = hasRole(['ADMIN', 'BODEGUERO']);
+  const showRecentActivity = hasRole(['ADMIN', 'BODEGUERO']);
 
   return (
     <div className="space-y-6">
@@ -141,6 +157,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts */}
+      {showCharts && (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div className="bg-surface rounded-xl border border-border-subtle p-5">
           <div className="flex items-center gap-2.5 mb-5">
@@ -188,9 +205,11 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+      )}
 
       {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {showStockAlerts && (
         <div className="bg-surface rounded-xl border border-border-subtle p-5">
           <div className="flex items-center gap-2.5 mb-5">
             <div className="w-8 h-8 rounded-lg bg-warning-bg border border-warning/20 flex items-center justify-center text-warning">
@@ -216,7 +235,9 @@ export default function DashboardPage() {
             <div className="h-[260px] flex items-center justify-center text-sm text-text-muted">Sin alertas</div>
           )}
         </div>
+        )}
 
+        {showRecentActivity && (
         <div className="bg-surface rounded-xl border border-border-subtle p-5">
           <div className="flex items-center gap-2.5 mb-5">
             <div className="w-8 h-8 rounded-lg bg-success-bg border border-success/20 flex items-center justify-center text-success">
@@ -241,6 +262,7 @@ export default function DashboardPage() {
             <div className="h-[260px] flex items-center justify-center text-sm text-text-muted">Sin actividad</div>
           )}
         </div>
+        )}
       </div>
     </div>
   );

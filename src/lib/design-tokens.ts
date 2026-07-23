@@ -27,6 +27,12 @@ export const badgeStyles: Record<string, { bg: string; text: string; border: str
   ALTA:        { bg: 'bg-danger-bg', text: 'text-danger', border: 'border-danger/30' },
   MEDIA:       { bg: 'bg-warning-bg', text: 'text-warning', border: 'border-warning/30' },
   BAJA:        { bg: 'bg-elevated', text: 'text-text-muted', border: 'border-border-default' },
+  EN_TRASLADO: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/20' },
+  APROBADO_BODEGA: { bg: 'bg-success-bg', text: 'text-success', border: 'border-success/20' },
+  EN_TRANSITO: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/20' },
+  RECIBIDO:    { bg: 'bg-success-bg', text: 'text-success', border: 'border-success/20' },
+  EN_COMPRAS:  { bg: 'bg-warning-bg', text: 'text-warning', border: 'border-warning/20' },
+  PARCIALMENTE_ATENDIDO: { bg: 'bg-warning-bg', text: 'text-warning', border: 'border-warning/20' },
 };
 
 export function getBadgeStyle(estado: string): string {
