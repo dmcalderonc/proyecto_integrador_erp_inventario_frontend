@@ -52,7 +52,7 @@ export function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0A1128] text-[#94A3B8] flex flex-col justify-between overflow-hidden relative">
+        <div className="min-h-screen bg-background text-foreground flex flex-col justify-between overflow-x-hidden relative" style={{ fontFamily: "var(--font-sans)" }}>
             <Navbar />
 
             {/* Estilos de animación consistentes con la Landing Page */}
@@ -83,48 +83,48 @@ export function Login() {
                 .animate-slide-up { animation: slideUp 0.8s ease-out forwards; }
             `}</style>
 
-            {/* Fondo con degradado animado y patrón de rejilla */}
+            {/* Fondo con degradado y rejilla */}
             <div
-                className="absolute inset-0 animate-gradient"
+                className="absolute inset-0 animate-gradient pointer-events-none"
                 style={{
                     background: 'linear-gradient(135deg, #0A1128, #111D4A, #1E293B, #111D4A, #0A1128)',
                     backgroundSize: '400% 400%',
                 }}
             />
             <div
-                className="absolute inset-0 opacity-[0.03]"
+                className="absolute inset-0 opacity-[0.03] pointer-events-none"
                 style={{
                     backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
                     backgroundSize: '40px 40px',
                 }}
             />
 
-            {/* Formas flotantes decorativas */}
-            <FloatingShape className="w-72 h-72 bg-[#10B981] top-10 -left-20 animate-float" />
-            <FloatingShape className="w-48 h-48 bg-[#06B6D4] bottom-1/3 right-10 animate-float-slow" style={{ animationDelay: '1.5s' }} />
-            <FloatingShape className="w-32 h-32 bg-[#10B981] bottom-10 left-1/4 animate-float" style={{ animationDelay: '2s' }} />
+            {/* Formas flotantes */}
+            <FloatingShape className="w-72 h-72 bg-[#10B981] top-20 -left-20 animate-float pointer-events-none" />
+            <FloatingShape className="w-48 h-48 bg-[#06B6D4] bottom-1/3 right-10 animate-float-slow pointer-events-none" style={{ animationDelay: '1.5s' }} />
 
-            {/* Contenido Central */}
-            <div className="relative z-10 flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-md w-full space-y-8 bg-[#111D4A] backdrop-blur-lg p-8 sm:p-10 rounded-3xl border border-[#334155] shadow-2xl animate-slide-up">
-                    <div className="text-center">
-                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/30 mb-4 text-[#10B981]">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                            </svg>
+            {/* Contenido Central con estructura limpia y sin superposiciones */}
+            <div className="relative z-10 flex-1 flex items-center justify-center py-24 px-6 w-full">
+                <div className="max-w-md w-full bg-card/90 backdrop-blur-xl p-8 sm:p-10 rounded-3xl border border-border shadow-2xl animate-slide-up flex flex-col">
+
+                    {/* Cabecera del formulario */}
+                    <div className="flex flex-col items-center text-center mb-8">
+                        <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 border border-primary/30 mb-4 shadow-lg shadow-primary/20 text-primary">
+                            <img src="/favicon.png" alt="Stockly" className="w-7 h-7 object-contain" />
                         </div>
-                        <h2 className="text-3xl font-extrabold text-[#FFFFFF]">
+                        <h2 className="text-3xl font-black text-white tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
                             Iniciar Sesión
                         </h2>
-                        <p className="mt-2 text-sm text-[#94A3B8]">
-                            Ingresa a tu cuenta de <span className="text-[#10B981] font-semibold">Stockly</span>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                            Ingresa a tu cuenta de <span className="text-primary font-semibold">Stockly</span>
                         </p>
                     </div>
 
-                    <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-                        <div className="space-y-5">
-                            <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-[#FFFFFF] mb-1.5">
+                    {/* Inputs y Botones */}
+                    <form className="flex flex-col gap-5 w-full" onSubmit={handleSubmit(onSubmit)}>
+                        <div className="flex flex-col gap-4 w-full">
+                            <div className="w-full">
+                                <label htmlFor="email" className="block text-sm font-medium text-white mb-2" style={{ fontFamily: "var(--font-heading)" }}>
                                     Correo Electrónico
                                 </label>
                                 <input
@@ -132,8 +132,8 @@ export function Login() {
                                     type="email"
                                     autoComplete="email"
                                     placeholder="usuario@empresa.com"
-                                    className={`appearance-none block w-full px-4 py-3 bg-[#0A1128] text-[#FFFFFF] border ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-[#334155] focus:border-[#06B6D4]'
-                                        } rounded-xl shadow-sm placeholder-[#94A3B8]/50 focus:outline-none focus:ring-2 focus:ring-[#06B6D4]/20 text-sm transition-all`}
+                                    className={`w-full px-4 py-3 bg-secondary text-white border ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-border focus:border-primary'
+                                        } rounded-xl shadow-sm placeholder-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm transition-all`}
                                     {...register('email')}
                                 />
                                 {errors.email && (
@@ -141,8 +141,8 @@ export function Login() {
                                 )}
                             </div>
 
-                            <div>
-                                <label htmlFor="password" className="block text-sm font-medium text-[#FFFFFF] mb-1.5">
+                            <div className="w-full">
+                                <label htmlFor="password" className="block text-sm font-medium text-white mb-2" style={{ fontFamily: "var(--font-heading)" }}>
                                     Contraseña
                                 </label>
                                 <input
@@ -150,8 +150,8 @@ export function Login() {
                                     type="password"
                                     autoComplete="current-password"
                                     placeholder="••••••••"
-                                    className={`appearance-none block w-full px-4 py-3 bg-[#0A1128] text-[#FFFFFF] border ${errors.password ? 'border-red-500 focus:ring-red-500' : 'border-[#334155] focus:border-[#06B6D4]'
-                                        } rounded-xl shadow-sm placeholder-[#94A3B8]/50 focus:outline-none focus:ring-2 focus:ring-[#06B6D4]/20 text-sm transition-all`}
+                                    className={`w-full px-4 py-3 bg-secondary text-white border ${errors.password ? 'border-red-500 focus:ring-red-500' : 'border-border focus:border-primary'
+                                        } rounded-xl shadow-sm placeholder-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm transition-all`}
                                     {...register('password')}
                                 />
                                 {errors.password && (
@@ -160,11 +160,12 @@ export function Login() {
                             </div>
                         </div>
 
-                        <div>
+                        <div className="pt-2 w-full">
                             <Button
                                 type="submit"
                                 variant="primary"
-                                className="w-full flex justify-center py-3.5 px-4 bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 hover:shadow-[#0284C7]/40 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 cursor-pointer"
+                                className="w-full flex justify-center items-center py-3.5 px-4 bg-primary text-primary-foreground font-bold rounded-xl border border-border/40 transition-all shadow-lg shadow-primary/25 hover:opacity-90 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 cursor-pointer text-sm"
+                                style={{ fontFamily: "var(--font-heading)" }}
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
@@ -178,20 +179,21 @@ export function Login() {
                             </Button>
                         </div>
 
-                        <div className="relative my-4">
+                        <div className="relative my-2 w-full">
                             <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-[#334155]"></div>
+                                <div className="w-full border-t border-border"></div>
                             </div>
-                            <div className="relative flex justify-center text-sm">
-                                <span className="bg-[#111D4A] px-3 text-[#94A3B8]">o continúa con</span>
+                            <div className="relative flex justify-center text-xs" style={{ fontFamily: "var(--font-mono)" }}>
+                                <span className="bg-card px-3 text-muted-foreground">o continúa con</span>
                             </div>
                         </div>
 
                         <a
                             href={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/auth/google`}
-                            className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-xl border border-gray-300 transition-all hover:shadow-lg hover:scale-[1.02] active:scale-95 cursor-pointer"
+                            className="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-white hover:bg-gray-100 text-gray-800 font-semibold rounded-xl border border-gray-300 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 cursor-pointer text-sm"
+                            style={{ fontFamily: "var(--font-heading)" }}
                         >
-                            <svg className="w-5 h-5" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
                                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -201,9 +203,9 @@ export function Login() {
                         </a>
 
                         <div className="text-center pt-2">
-                            <p className="text-sm text-[#94A3B8]">
+                            <p className="text-sm text-muted-foreground">
                                 ¿No tienes una cuenta?{' '}
-                                <Link to="/register" className="font-semibold text-[#10B981] hover:text-[#10B981]/80 hover:underline transition-colors">
+                                <Link to="/register" className="font-semibold text-primary hover:opacity-80 hover:underline transition-colors">
                                     Registrarse
                                 </Link>
                             </p>
@@ -216,4 +218,3 @@ export function Login() {
         </div>
     );
 }
-

@@ -61,7 +61,7 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A1128] text-[#94A3B8] flex flex-col justify-between overflow-hidden relative">
+    <div className="min-h-screen bg-background text-foreground flex flex-col justify-between overflow-x-hidden relative" style={{ fontFamily: "var(--font-sans)" }}>
       <Navbar />
 
       {/* Estilos de animación consistentes */}
@@ -94,14 +94,14 @@ export function RegisterPage() {
 
       {/* Fondo degradado y rejilla */}
       <div
-        className="absolute inset-0 animate-gradient"
+        className="absolute inset-0 animate-gradient pointer-events-none"
         style={{
           background: 'linear-gradient(135deg, #0A1128, #111D4A, #1E293B, #111D4A, #0A1128)',
           backgroundSize: '400% 400%',
         }}
       />
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{
           backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
           backgroundSize: '40px 40px',
@@ -109,31 +109,29 @@ export function RegisterPage() {
       />
 
       {/* Formas flotantes */}
-      <FloatingShape className="w-72 h-72 bg-[#10B981] top-10 -left-20 animate-float" />
-      <FloatingShape className="w-48 h-48 bg-[#06B6D4] bottom-1/3 right-10 animate-float-slow" style={{ animationDelay: '1.5s' }} />
-      <FloatingShape className="w-32 h-32 bg-[#10B981] bottom-10 left-1/4 animate-float" style={{ animationDelay: '2s' }} />
+      <FloatingShape className="w-72 h-72 bg-[#10B981] top-20 -left-20 animate-float pointer-events-none" />
+      <FloatingShape className="w-48 h-48 bg-[#06B6D4] bottom-1/3 right-10 animate-float-slow pointer-events-none" style={{ animationDelay: '1.5s' }} />
 
-      {/* Contenido principal */}
-      <div className="relative z-10 flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8 bg-[#111D4A] backdrop-blur-lg p-8 sm:p-10 rounded-3xl border border-[#334155] shadow-2xl animate-slide-up">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/30 mb-4 text-[#10B981]">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
+      {/* Contenido principal con distribución limpia */}
+      <div className="relative z-10 flex-1 flex items-center justify-center py-24 px-6 w-full">
+        <div className="max-w-md w-full bg-card/90 backdrop-blur-xl p-8 sm:p-10 rounded-3xl border border-border shadow-2xl animate-slide-up flex flex-col">
+          
+          <div className="flex flex-col items-center text-center mb-8">
+            <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 border border-primary/30 mb-4 shadow-lg shadow-primary/20 text-primary">
+              <img src="/favicon.png" alt="Stockly" className="w-7 h-7 object-contain" />
             </div>
-            <h2 className="text-3xl font-extrabold text-[#FFFFFF]">
+            <h2 className="text-3xl font-black text-white tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
               Crear Cuenta
             </h2>
-            <p className="mt-2 text-sm text-[#94A3B8]">
-              Regístrate para acceder al sistema <span className="text-[#10B981] font-semibold">Stockly</span>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Regístrate para acceder al sistema <span className="text-primary font-semibold">Stockly</span>
             </p>
           </div>
 
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-[#FFFFFF] mb-1.5">
+          <form className="flex flex-col gap-5 w-full" onSubmit={handleSubmit(onSubmit)}>
+            <div className="flex flex-col gap-4 w-full">
+              <div className="w-full">
+                <label htmlFor="username" className="block text-sm font-medium text-white mb-2" style={{ fontFamily: "var(--font-heading)" }}>
                   Nombre completo
                 </label>
                 <input
@@ -141,9 +139,9 @@ export function RegisterPage() {
                   type="text"
                   autoComplete="name"
                   placeholder="Ej: Juan Pérez"
-                  className={`appearance-none block w-full px-4 py-3 bg-[#0A1128] text-[#FFFFFF] border ${
-                    errors.username ? 'border-red-500 focus:ring-red-500' : 'border-[#334155] focus:border-[#06B6D4]'
-                  } rounded-xl shadow-sm placeholder-[#94A3B8]/50 focus:outline-none focus:ring-2 focus:ring-[#06B6D4]/20 text-sm transition-all`}
+                  className={`w-full px-4 py-3 bg-secondary text-white border ${
+                    errors.username ? 'border-red-500 focus:ring-red-500' : 'border-border focus:border-primary'
+                  } rounded-xl shadow-sm placeholder-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm transition-all`}
                   {...register('username')}
                 />
                 {errors.username && (
@@ -151,8 +149,8 @@ export function RegisterPage() {
                 )}
               </div>
 
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-[#FFFFFF] mb-1.5">
+              <div className="w-full">
+                <label htmlFor="email" className="block text-sm font-medium text-white mb-2" style={{ fontFamily: "var(--font-heading)" }}>
                   Correo Electrónico
                 </label>
                 <input
@@ -160,9 +158,9 @@ export function RegisterPage() {
                   type="email"
                   autoComplete="email"
                   placeholder="correo@ejemplo.com"
-                  className={`appearance-none block w-full px-4 py-3 bg-[#0A1128] text-[#FFFFFF] border ${
-                    errors.email ? 'border-red-500 focus:ring-red-500' : 'border-[#334155] focus:border-[#06B6D4]'
-                  } rounded-xl shadow-sm placeholder-[#94A3B8]/50 focus:outline-none focus:ring-2 focus:ring-[#06B6D4]/20 text-sm transition-all`}
+                  className={`w-full px-4 py-3 bg-secondary text-white border ${
+                    errors.email ? 'border-red-500 focus:ring-red-500' : 'border-border focus:border-primary'
+                  } rounded-xl shadow-sm placeholder-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm transition-all`}
                   {...register('email')}
                 />
                 {errors.email && (
@@ -170,8 +168,8 @@ export function RegisterPage() {
                 )}
               </div>
 
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-[#FFFFFF] mb-1.5">
+              <div className="w-full">
+                <label htmlFor="password" className="block text-sm font-medium text-white mb-2" style={{ fontFamily: "var(--font-heading)" }}>
                   Contraseña
                 </label>
                 <input
@@ -179,9 +177,9 @@ export function RegisterPage() {
                   type="password"
                   autoComplete="new-password"
                   placeholder="Mínimo 6 caracteres"
-                  className={`appearance-none block w-full px-4 py-3 bg-[#0A1128] text-[#FFFFFF] border ${
-                    errors.password ? 'border-red-500 focus:ring-red-500' : 'border-[#334155] focus:border-[#06B6D4]'
-                  } rounded-xl shadow-sm placeholder-[#94A3B8]/50 focus:outline-none focus:ring-2 focus:ring-[#06B6D4]/20 text-sm transition-all`}
+                  className={`w-full px-4 py-3 bg-secondary text-white border ${
+                    errors.password ? 'border-red-500 focus:ring-red-500' : 'border-border focus:border-primary'
+                  } rounded-xl shadow-sm placeholder-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm transition-all`}
                   {...register('password')}
                 />
                 {errors.password && (
@@ -189,8 +187,8 @@ export function RegisterPage() {
                 )}
               </div>
 
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#FFFFFF] mb-1.5">
+              <div className="w-full">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-white mb-2" style={{ fontFamily: "var(--font-heading)" }}>
                   Confirmar Contraseña
                 </label>
                 <input
@@ -198,9 +196,9 @@ export function RegisterPage() {
                   type="password"
                   autoComplete="new-password"
                   placeholder="Repite tu contraseña"
-                  className={`appearance-none block w-full px-4 py-3 bg-[#0A1128] text-[#FFFFFF] border ${
-                    errors.confirmPassword ? 'border-red-500 focus:ring-red-500' : 'border-[#334155] focus:border-[#06B6D4]'
-                  } rounded-xl shadow-sm placeholder-[#94A3B8]/50 focus:outline-none focus:ring-2 focus:ring-[#06B6D4]/20 text-sm transition-all`}
+                  className={`w-full px-4 py-3 bg-secondary text-white border ${
+                    errors.confirmPassword ? 'border-red-500 focus:ring-red-500' : 'border-border focus:border-primary'
+                  } rounded-xl shadow-sm placeholder-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm transition-all`}
                   {...register('confirmPassword')}
                 />
                 {errors.confirmPassword && (
@@ -209,11 +207,12 @@ export function RegisterPage() {
               </div>
             </div>
 
-            <div>
+            <div className="pt-2 w-full">
               <Button
                 type="submit"
                 variant="primary"
-                className="w-full flex justify-center py-3.5 px-4 bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 hover:shadow-[#0284C7]/40 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 cursor-pointer"
+                className="w-full flex justify-center items-center py-3.5 px-4 bg-primary text-primary-foreground font-bold rounded-xl border border-border/40 transition-all shadow-lg shadow-primary/25 hover:opacity-90 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 cursor-pointer text-sm"
+                style={{ fontFamily: "var(--font-heading)" }}
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -228,9 +227,9 @@ export function RegisterPage() {
             </div>
 
             <div className="text-center pt-2">
-              <p className="text-sm text-[#94A3B8]">
+              <p className="text-sm text-muted-foreground">
                 ¿Ya tienes una cuenta?{' '}
-                <Link to="/login" className="font-semibold text-[#10B981] hover:text-[#10B981]/80 hover:underline transition-colors">
+                <Link to="/login" className="font-semibold text-primary hover:opacity-80 hover:underline transition-colors">
                   Iniciar sesión
                 </Link>
               </p>

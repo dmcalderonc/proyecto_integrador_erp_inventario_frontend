@@ -72,7 +72,7 @@ export default function ProyectosPage() {
       header: 'Nombre',
       sortable: true,
       render: (item: Proyecto) => (
-        <span className="font-bold text-[#303357]">{item.nombre}</span>
+        <span className="font-bold text-card-foreground">{item.nombre}</span>
       )
     },
     {
@@ -80,7 +80,7 @@ export default function ProyectosPage() {
       header: 'Código',
       sortable: true,
       render: (item: Proyecto) => (
-        <span className="font-mono text-xs text-[#303357] px-2.5 py-1 rounded-lg border border-[#303357]/30 font-bold">
+        <span className="font-mono text-xs text-card-foreground px-2.5 py-1 rounded-lg border border-[#303357]/30 font-bold">
           {item.codigoProyecto || '-'}
         </span>
       )
@@ -91,7 +91,7 @@ export default function ProyectosPage() {
       sortable: true,
       sortValue: (item: Proyecto) => item.fechaInicio ?? '',
       render: (item: Proyecto) => (
-        <span className="font-semibold text-[#303357]">
+        <span className="font-semibold text-card-foreground">
           {item.fechaInicio ? new Date(item.fechaInicio).toLocaleDateString() : '-'}
         </span>
       ),
@@ -101,7 +101,7 @@ export default function ProyectosPage() {
       header: 'Estado',
       render: (item: Proyecto) => (
         <span className={`inline-block px-3 py-1 rounded-xl text-xs font-bold border ${item.estado === 'ACTIVO'
-            ? 'bg-[#10B981]/20 text-[#10B981] border-[#10B981]/50'
+            ? 'bg-primary/20 text-primary border-primary/50'
             : 'bg-red-500/20 text-red-400 border-red-500/40'
           }`}>
           {item.estado}
@@ -116,14 +116,14 @@ export default function ProyectosPage() {
           {/* Botón Editar - Azul */}
           <button
             onClick={() => openEdit(item)}
-            className="flex items-center gap-1 bg-[#06B6D4]/20 text-[#06B6D4] hover:bg-[#06B6D4] hover:text-white px-3 py-1.5 rounded-lg border border-[#06B6D4]/50 transition-all font-bold text-xs cursor-pointer"
+            className="flex items-center gap-1 bg-accent/20 text-accent hover:bg-accent hover:text-white px-3 py-1.5 rounded-lg border border-accent/50 transition-all font-bold text-xs cursor-pointer"
           >
             <Edit2 size={14} /> Editar
           </button>
           {/* Botón Eliminar - Rojo */}
           <button
             onClick={() => openDelete(item)}
-            className="flex items-center gap-1 bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg border border-red-500/50 transition-all font-bold text-xs cursor-pointer"
+            className="flex items-center gap-1 bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-card-foreground px-3 py-1.5 rounded-lg border border-red-500/50 transition-all font-bold text-xs cursor-pointer"
           >
             <Trash2 size={14} /> Eliminar
           </button>
@@ -133,17 +133,17 @@ export default function ProyectosPage() {
   ];
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-10 animate-fade-in">
       {/* Header de la sección */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#FFFFFF] mb-2">Proyectos</h1>
-          <p className="text-[#94A3B8] text-sm">Gestiona obras, centros de costos y bodegas asociadas.</p>
+          <h1 className="text-3xl font-extrabold text-card-foreground mb-4" style={{ fontFamily: "var(--font-heading)" }}>Proyectos</h1>
+          <p className="text-muted-foreground text-sm">Gestiona obras, centros de costos y bodegas asociadas.</p>
         </div>
         {isAdmin && (
           <Button
             onClick={openCreate}
-            className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-extrabold px-5 py-3 rounded-xl border border-[#06B6D4] transition-all shadow-lg shadow-[#06B6D4]/30 hover:scale-105 active:scale-95 cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
+            className="bg-accent hover:bg-accent/80 text-white font-extrabold px-5 py-3 rounded-xl border border-accent transition-all shadow-lg shadow-accent/30 hover:scale-105 active:scale-95 cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
           >
             <Plus size={18} /> Nuevo Proyecto
           </Button>
@@ -151,12 +151,12 @@ export default function ProyectosPage() {
       </div>
 
       {/* Tabla con letras en color #303357 */}
-      <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl overflow-hidden
-        text-[#303357]
-        [&_table]:w-full [&_table]:text-[#303357]
-        [&_th]:text-[#303357] [&_th]:font-extrabold [&_th]:bg-[#0A1128] [&_th]:border-b [&_th]:border-[#334155] [&_th]:p-4
-        [&_td]:text-[#303357] [&_td]:border-b [&_td]:border-[#334155]/60 [&_td]:p-4
-        [&_input]:text-[#303357] [&_input]:bg-[#0A1128] [&_input]:border-[#334155] [&_input]:placeholder-[#303357]/60 [&_input]:font-semibold">
+      <div className="bg-card backdrop-blur-lg rounded-3xl border border-border p-6 shadow-2xl overflow-hidden
+        text-card-foreground
+        [&_table]:w-full [&_table]:text-card-foreground
+        [&_th]:text-card-foreground [&_th]:font-extrabold [&_th]:bg-background [&_th]:border-b [&_th]:border-border [&_th]:p-4
+        [&_td]:text-card-foreground [&_td]:border-b [&_td]:border-border/60 [&_td]:p-4
+        [&_input]:text-card-foreground [&_input]:bg-background [&_input]:border-border [&_input]:placeholder-[#303357]/60 [&_input]:font-semibold">
         
         <DataTable
           columns={columns}
@@ -171,64 +171,64 @@ export default function ProyectosPage() {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Proyecto' : 'Nuevo Proyecto'}>
         <form onSubmit={handleSubmit} className="space-y-5 p-1">
           <div>
-            <label className="block text-sm font-bold text-[#FFFFFF] mb-1.5">Nombre</label>
+            <label className="block text-sm font-bold text-card-foreground mb-1.5">Nombre</label>
             <input
               placeholder="Ej: Construcción Torre Norte"
               value={form.nombre}
               onChange={e => setForm({ ...form, nombre: e.target.value })}
-              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all font-semibold"
+              className="w-full bg-background text-card-foreground border border-border rounded-xl px-4 py-3 text-sm placeholder-muted-foreground/50 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all font-semibold"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-[#FFFFFF] mb-1.5">Código de proyecto (opcional)</label>
+            <label className="block text-sm font-bold text-card-foreground mb-1.5">Código de proyecto (opcional)</label>
             <input
               placeholder="Ej: PROY-2026-001 (Automático si se deja vacío)"
               value={form.codigoProyecto}
               onChange={e => setForm({ ...form, codigoProyecto: e.target.value })}
-              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all font-mono font-semibold"
+              className="w-full bg-background text-card-foreground border border-border rounded-xl px-4 py-3 text-sm placeholder-muted-foreground/50 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all font-mono font-semibold"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-[#FFFFFF] mb-1.5">Fecha de inicio</label>
+            <label className="block text-sm font-bold text-card-foreground mb-1.5">Fecha de inicio</label>
             <input
               type="date"
               value={form.fechaInicio}
               onChange={e => setForm({ ...form, fechaInicio: e.target.value })}
-              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer font-semibold [color-scheme:dark]"
+              className="w-full bg-background text-card-foreground border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all cursor-pointer font-semibold [color-scheme:dark]"
               required
             />
           </div>
 
           {editing && (
             <div>
-              <label className="block text-sm font-bold text-[#FFFFFF] mb-1.5">Estado</label>
+              <label className="block text-sm font-bold text-card-foreground mb-1.5">Estado</label>
               <select
                 value={form.estado}
                 onChange={e => setForm({ ...form, estado: e.target.value as EstadoProyecto })}
-                className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer font-semibold"
+                className="w-full bg-background text-card-foreground border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all cursor-pointer font-semibold"
               >
-                <option value="ACTIVO" className="bg-[#0A1128] text-[#10B981]">ACTIVO</option>
-                <option value="CERRADO" className="bg-[#0A1128] text-red-400">CERRADO</option>
+                <option value="ACTIVO" className="bg-background text-primary">ACTIVO</option>
+                <option value="CERRADO" className="bg-background text-red-400">CERRADO</option>
               </select>
             </div>
           )}
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-[#334155]">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <Button
               type="button"
               variant="secondary"
               onClick={() => setModalOpen(false)}
-              className="bg-[#1E293B] hover:bg-slate-800 text-[#FFFFFF] border border-[#334155] px-5 py-2.5 rounded-xl font-bold transition-all cursor-pointer"
+              className="bg-secondary hover:bg-slate-200 dark:hover:bg-slate-800 text-card-foreground border border-border px-5 py-2.5 rounded-xl font-bold transition-all cursor-pointer"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={crear.isPending || actualizar.isPending}
-              className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-extrabold px-6 py-2.5 rounded-xl border border-[#06B6D4] transition-all shadow-lg shadow-[#06B6D4]/20 disabled:opacity-50 cursor-pointer"
+              className="bg-accent hover:bg-accent/80 text-white font-extrabold px-6 py-2.5 rounded-xl border border-accent transition-all shadow-lg shadow-accent/20 disabled:opacity-50 cursor-pointer"
             >
               {editing ? (actualizar.isPending ? 'Guardando...' : 'Actualizar') : (crear.isPending ? 'Creando...' : 'Crear')}
             </Button>

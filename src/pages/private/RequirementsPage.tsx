@@ -16,7 +16,7 @@ const badgeColors: Record<RequirementStatus, string> = {
   PENDIENTE: 'bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30',
   APROBADO: 'bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/30',
   PARCIALMENTE_ATENDIDO: 'bg-[#F97316]/10 text-[#F97316] border border-[#F97316]/30',
-  ATENDIDO: 'bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/30',
+  ATENDIDO: 'bg-primary/10 text-primary border border-primary/30',
   RECHAZADO: 'bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/30',
 };
 
@@ -117,7 +117,7 @@ export default function RequirementsPage() {
       sortable: true,
       sortValue: (item: Requirement) => item.id,
       render: (item: Requirement) => (
-        <span className="font-mono text-xs bg-[#111D4A] text-[#94A3B8] px-2.5 py-1 rounded-md border border-[#334155] font-semibold">
+        <span className="font-mono text-xs bg-card text-muted-foreground px-2.5 py-1 rounded-md border border-border font-semibold">
           REQ-{item.id}
         </span>
       ),
@@ -126,19 +126,19 @@ export default function RequirementsPage() {
       key: 'proyecto', header: 'Proyecto',
       sortable: true,
       sortValue: (item: Requirement) => item.proyecto?.nombre ?? '',
-      render: (item: Requirement) => <span className="text-[#303357] font-bold">{item.proyecto?.nombre ?? '-'}</span>,
+      render: (item: Requirement) => <span className="text-card-foreground font-bold">{item.proyecto?.nombre ?? '-'}</span>,
     },
     {
       key: 'usuarioSolicitante', header: 'Solicitante',
       sortable: true,
       sortValue: (item: Requirement) => item.usuarioSolicitante?.nombre ?? '',
-      render: (item: Requirement) => <span className="text-[#94A3B8]">{item.usuarioSolicitante?.nombre ?? '-'}</span>,
+      render: (item: Requirement) => <span className="text-muted-foreground">{item.usuarioSolicitante?.nombre ?? '-'}</span>,
     },
     {
       key: 'fechaSolicitud', header: 'Fecha',
       sortable: true,
       sortValue: (item: Requirement) => item.fechaSolicitud ?? '',
-      render: (item: Requirement) => <span className="text-[#94A3B8]">{item.fechaSolicitud ? new Date(item.fechaSolicitud).toLocaleDateString() : '-'}</span>,
+      render: (item: Requirement) => <span className="text-muted-foreground">{item.fechaSolicitud ? new Date(item.fechaSolicitud).toLocaleDateString() : '-'}</span>,
     },
     {
       key: 'estado', header: 'Estado',
@@ -163,7 +163,7 @@ export default function RequirementsPage() {
           {canChangeStatus && item.estado === 'APROBADO' && (
             <button
               onClick={() => setStatusAction({ requirement: item, estado: 'ATENDIDO', label: 'marcar como atendido' })}
-              className="text-[#10B981] hover:text-[#10B981]/80 text-xs font-medium cursor-pointer"
+              className="text-primary hover:text-primary/80 text-xs font-medium cursor-pointer"
             >
               Marcar Atendido
             </button>
@@ -179,7 +179,7 @@ export default function RequirementsPage() {
           {isAdmin && (
             <button
               onClick={() => setDeleting(item)}
-              className="text-[#94A3B8] hover:text-[#303357] text-xs font-medium cursor-pointer"
+              className="text-muted-foreground hover:text-card-foreground text-xs font-medium cursor-pointer"
             >
               Eliminar
             </button>
@@ -190,60 +190,60 @@ export default function RequirementsPage() {
   ];
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-10 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#FFFFFF]">Requerimientos</h1>
-          <p className="text-[#94A3B8] mt-1 text-sm">Gestioná las solicitudes de materiales para tus proyectos.</p>
+          <h1 className="text-3xl font-extrabold text-card-foreground mb-4" style={{ fontFamily: "var(--font-heading)" }}>Requerimientos</h1>
+          <p className="text-muted-foreground mt-2 text-sm">Gestioná las solicitudes de materiales para tus proyectos.</p>
         </div>
         {canCreate && (
-          <Button onClick={openCreate} className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold px-6 py-2 rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 hover:scale-105 active:scale-95 cursor-pointer flex items-center">
+          <Button onClick={openCreate} className="bg-accent hover:bg-accent/80 text-white font-bold px-6 py-2 rounded-xl border border-border transition-all shadow-lg shadow-accent/20 hover:scale-105 active:scale-95 cursor-pointer flex items-center">
             <Plus size={18} className="mr-1.5" /> Nuevo Requerimiento
           </Button>
         )}
       </div>
 
-      <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl overflow-hidden">
+      <div className="bg-card backdrop-blur-lg rounded-3xl border border-border p-6 shadow-2xl overflow-hidden">
         <DataTable columns={columns} data={requirements} loading={isLoading} searchable searchKeys={["codigo", "estado"]} />
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo Requerimiento">
-        <form onSubmit={handleSubmit} className="space-y-5 text-[#94A3B8] p-1">
+        <form onSubmit={handleSubmit} className="space-y-5 text-muted-foreground p-1">
           <div>
-            <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Proyecto</label>
+            <label className="block text-sm font-medium text-card-foreground mb-1.5">Proyecto</label>
             <select value={proyectoId} onChange={e => setProyectoId(e.target.value)}
-              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all cursor-pointer" required>
-              <option value="" className="bg-[#0A1128]">Seleccioná un proyecto</option>
+              className="w-full bg-background text-card-foreground border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all cursor-pointer" required>
+              <option value="" className="bg-background">Seleccioná un proyecto</option>
               {proyectos.map(p => (
-                <option key={p.id} value={p.id} className="bg-[#0A1128]">{p.codigoProyecto} - {p.nombre}</option>
+                <option key={p.id} value={p.id} className="bg-background">{p.codigoProyecto} - {p.nombre}</option>
               ))}
             </select>
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-3">
-              <label className="block text-sm font-medium text-[#FFFFFF]">Materiales</label>
-              <button type="button" onClick={addDetalle} className="text-[#06B6D4] hover:text-[#06B6D4]/80 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer">
+              <label className="block text-sm font-medium text-card-foreground">Materiales</label>
+              <button type="button" onClick={addDetalle} className="text-accent hover:text-accent/80 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer">
                 <Plus size={14} /> Agregar material
               </button>
             </div>
 
             <div className="space-y-3">
               {detalles.map((detalle, index) => (
-                <div key={index} className="flex gap-3 items-center bg-[#0A1128] p-3.5 rounded-2xl border border-[#334155]">
+                <div key={index} className="flex gap-3 items-center bg-background p-3.5 rounded-2xl border border-border">
                   <select value={detalle.materialId}
                     onChange={e => updateDetalle(index, 'materialId', e.target.value)}
-                    className="flex-1 bg-[#111D4A] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#06B6D4] transition-all cursor-pointer" required>
-                    <option value="" className="bg-[#111D4A]">Material...</option>
+                    className="flex-1 bg-card text-card-foreground border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent transition-all cursor-pointer" required>
+                    <option value="" className="bg-card">Material...</option>
                     {materiales.map(m => (
-                      <option key={m.id} value={m.id} className="bg-[#111D4A]">{m.nombre} ({m.sku})</option>
+                      <option key={m.id} value={m.id} className="bg-card">{m.nombre} ({m.sku})</option>
                     ))}
                   </select>
                   <input type="number" step="1" min="1" placeholder="Cantidad"
                     value={detalle.cantidadSolicitada}
                     onChange={e => updateDetalle(index, 'cantidadSolicitada', e.target.value)}
                     onKeyDown={e => { if (['.', ',', 'e', '+', '-'].includes(e.key)) e.preventDefault(); }}
-                    className="w-full sm:w-28 bg-[#111D4A] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-2.5 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] transition-all font-bold" required />
+                    className="w-full sm:w-28 bg-card text-card-foreground border border-border rounded-xl px-4 py-2.5 text-sm placeholder-muted-foreground/50 focus:outline-none focus:border-accent transition-all font-bold" required />
                   <button type="button" onClick={() => removeDetalle(index)}
                     disabled={detalles.length === 1}
                     className="text-[#EF4444] hover:text-[#EF4444]/80 disabled:opacity-30 p-2 rounded-xl transition-colors cursor-pointer">
@@ -254,9 +254,9 @@ export default function RequirementsPage() {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-[#334155]">
-            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)} className="bg-[#1E293B] hover:bg-white/10 text-[#FFFFFF] border border-[#334155] px-5 py-2.5 rounded-xl font-medium transition-all cursor-pointer">Cancelar</Button>
-            <Button type="submit" disabled={crear.isPending} className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold px-6 py-2.5 rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)} className="bg-secondary hover:bg-black/10 dark:hover:bg-white/10 text-card-foreground border border-border px-5 py-2.5 rounded-xl font-medium transition-all cursor-pointer">Cancelar</Button>
+            <Button type="submit" disabled={crear.isPending} className="bg-accent hover:bg-accent/80 text-white font-bold px-6 py-2.5 rounded-xl border border-border transition-all shadow-lg shadow-accent/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
               {crear.isPending ? 'Guardando...' : 'Crear Requerimiento'}
             </Button>
           </div>

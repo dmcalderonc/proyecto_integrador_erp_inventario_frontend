@@ -46,14 +46,14 @@ export default function UnidadesMedidaPage() {
       key: 'nombre', 
       header: 'Nombre', 
       sortable: true,
-      render: (item: UnidadMedida) => <span className="text-[#303357] font-bold">{item.nombre}</span>
+      render: (item: UnidadMedida) => <span className="text-card-foreground font-bold">{item.nombre}</span>
     },
     { 
       key: 'simbolo', 
       header: 'Símbolo', 
       sortable: true,
       render: (item: UnidadMedida) => (
-        <span className="font-mono text-xs bg-[#0A1128] text-[#06B6D4] px-3 py-1 rounded-xl border border-[#334155] font-semibold">
+        <span className="font-mono text-xs bg-background text-accent px-3 py-1 rounded-xl border border-border font-semibold">
           {item.simbolo}
         </span>
       )
@@ -61,23 +61,23 @@ export default function UnidadesMedidaPage() {
   ];
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-10 animate-fade-in">
       {/* Header de la sección */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#FFFFFF] mb-2">Unidades de Medida</h1>
-          <p className="text-[#94A3B8] text-sm">Gestiona las unidades para la métrica e inventario de materiales.</p>
+          <h1 className="text-3xl font-extrabold text-card-foreground mb-4" style={{ fontFamily: "var(--font-heading)" }}>Unidades de Medida</h1>
+          <p className="text-muted-foreground text-sm">Gestiona las unidades para la métrica e inventario de materiales.</p>
         </div>
         <Button 
           onClick={openCreate}
-          className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold px-5 py-3 rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 hover:scale-105 active:scale-95 cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
+          className="bg-accent hover:bg-accent/80 text-white font-bold px-5 py-3 rounded-xl border border-border transition-all shadow-lg shadow-accent/20 hover:scale-105 active:scale-95 cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
         >
           <Plus size={18} /> Nueva Unidad
         </Button>
       </div>
 
       {/* Tabla de Unidades de Medida */}
-      <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl overflow-hidden">
+      <div className="bg-card backdrop-blur-lg rounded-3xl border border-border p-6 shadow-2xl overflow-hidden">
         <DataTable 
           columns={columns} 
           data={unidades} 
@@ -91,47 +91,47 @@ export default function UnidadesMedidaPage() {
 
       {/* Modal de Crear / Editar */}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Unidad' : 'Nueva Unidad'}>
-        <form onSubmit={handleSubmit} className="space-y-5 text-[#94A3B8] p-1">
+        <form onSubmit={handleSubmit} className="space-y-5 text-muted-foreground p-1">
           <div>
-            <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Nombre</label>
+            <label className="block text-sm font-medium text-card-foreground mb-1.5">Nombre</label>
             <input 
               placeholder="Ej: Kilogramo" 
               value={form.nombre}
               onChange={e => setForm({ ...form, nombre: e.target.value })}
-              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all" 
+              className="w-full bg-background text-card-foreground border border-border rounded-xl px-4 py-3 text-sm placeholder-muted-foreground/50 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all" 
               required 
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#FFFFFF] mb-1.5">Símbolo</label>
+            <label className="block text-sm font-medium text-card-foreground mb-1.5">Símbolo</label>
             <input 
               placeholder="Ej: KG" 
               value={form.simbolo}
               onChange={e => setForm({ ...form, simbolo: e.target.value })}
-              className="w-full bg-[#0A1128] text-[#FFFFFF] border border-[#334155] rounded-xl px-4 py-3 text-sm placeholder-[#94A3B8]/50 focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[#06B6D4]/20 transition-all uppercase font-mono" 
+              className="w-full bg-background text-card-foreground border border-border rounded-xl px-4 py-3 text-sm placeholder-muted-foreground/50 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all uppercase font-mono" 
               maxLength={10} 
               required 
             />
-            <p className="text-xs text-[#94A3B8]/80 mt-2 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#06B6D4]"></span>
+            <p className="text-xs text-muted-foreground/80 mt-2 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
               Máximo 10 caracteres.
             </p>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-[#334155]">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <Button 
               type="button" 
               variant="secondary" 
               onClick={() => setModalOpen(false)}
-              className="bg-[#1E293B] hover:bg-white/10 text-[#FFFFFF] border border-[#334155] px-5 py-2.5 rounded-xl font-medium transition-all cursor-pointer"
+              className="bg-secondary hover:bg-black/10 dark:hover:bg-white/10 text-card-foreground border border-border px-5 py-2.5 rounded-xl font-medium transition-all cursor-pointer"
             >
               Cancelar
             </Button>
             <Button 
               type="submit" 
               disabled={crear.isPending || actualizar.isPending}
-              className="bg-[#06B6D4] hover:bg-[#0284C7] text-white font-bold px-6 py-2.5 rounded-xl border border-[#334155] transition-all shadow-lg shadow-[#06B6D4]/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="bg-accent hover:bg-accent/80 text-white font-bold px-6 py-2.5 rounded-xl border border-border transition-all shadow-lg shadow-accent/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {editing ? (actualizar.isPending ? 'Guardando...' : 'Actualizar') : (crear.isPending ? 'Creando...' : 'Crear')}
             </Button>

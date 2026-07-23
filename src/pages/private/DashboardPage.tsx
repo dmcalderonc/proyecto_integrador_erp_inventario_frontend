@@ -88,14 +88,14 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-extrabold text-[#FFFFFF]">Dashboard</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="space-y-8">
+        <h1 className="text-3xl font-extrabold text-card-foreground" style={{ fontFamily: "var(--font-heading)" }}>Dashboard</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="bg-[#111D4A] rounded-3xl border border-[#334155] p-6 animate-pulse shadow-2xl">
-              <div className="h-10 w-10 bg-[#1E293B] rounded-xl mb-4"></div>
-              <div className="h-4 bg-[#1E293B] rounded-lg w-1/2 mb-2"></div>
-              <div className="h-8 bg-[#1E293B] rounded-xl w-1/3"></div>
+            <div key={i} className="bg-card rounded-3xl border border-border py-8 px-6 animate-pulse shadow-2xl">
+              <div className="h-10 w-10 bg-secondary rounded-xl mb-4"></div>
+              <div className="h-4 bg-secondary rounded-lg w-1/2 mb-2"></div>
+              <div className="h-8 bg-secondary rounded-xl w-1/3"></div>
             </div>
           ))}
         </div>
@@ -105,96 +105,98 @@ export default function DashboardPage() {
 
   if (isError) {
     return (
-      <div className="bg-red-500/10 text-red-400 p-6 rounded-3xl text-center border border-red-500/30">
+      <div className="bg-red-500/10 text-red-400 py-8 px-6 rounded-3xl text-center border border-red-500/30">
         <p className="font-semibold text-lg">Error al cargar los datos del dashboard.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-12 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-extrabold text-[#FFFFFF] mb-2">Dashboard</h1>
-        <p className="text-[#94A3B8] text-sm">Resumen general y métricas clave de tu sistema de inventario.</p>
+        <h1 className="text-3xl font-extrabold text-card-foreground mb-4" style={{ fontFamily: "var(--font-heading)" }}>Dashboard</h1>
+        <p className="text-muted-foreground text-sm">Resumen general y métricas clave de tu sistema de inventario.</p>
       </div>
 
       {/* KPI Cards - Row 1 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl p-6 border border-[#334155] shadow-2xl flex items-center gap-4 hover:border-[#334155]/80 transition-all">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="bg-card backdrop-blur-lg rounded-3xl py-8 px-6 border border-border shadow-2xl flex items-center gap-4 hover:border-border/80 transition-all">
           <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
             <Users size={24} />
           </div>
           <div>
-            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Total Usuarios</p>
-            <p className="text-3xl font-extrabold text-[#FFFFFF] mt-1">{kpis?.totalUsuarios ?? 0}</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Usuarios</p>
+            <p className="text-3xl font-extrabold text-card-foreground mt-1">{kpis?.totalUsuarios ?? 0}</p>
           </div>
         </div>
 
-        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl p-6 border border-[#334155] shadow-2xl flex items-center gap-4 hover:border-[#334155]/80 transition-all">
-          <div className="w-12 h-12 rounded-2xl bg-[#06B6D4]/10 border border-[#06B6D4]/30 flex items-center justify-center text-[#06B6D4] shrink-0">
+        <div className="bg-card backdrop-blur-lg rounded-3xl py-8 px-6 border border-border shadow-2xl flex items-center gap-4 hover:border-border/80 transition-all">
+          <div className="w-12 h-12 rounded-2xl bg-accent/10 border border-accent/30 flex items-center justify-center text-accent shrink-0">
             <Tags size={24} />
           </div>
           <div>
-            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Categorías</p>
-            <p className="text-3xl font-extrabold text-[#FFFFFF] mt-1">{kpis?.totalCategorias ?? 0}</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Categorías</p>
+            <p className="text-3xl font-extrabold text-card-foreground mt-1">{kpis?.totalCategorias ?? 0}</p>
           </div>
         </div>
 
-        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl p-6 border border-[#334155] shadow-2xl flex items-center gap-4 hover:border-[#334155]/80 transition-all">
+        <div className="bg-card backdrop-blur-lg rounded-3xl py-8 px-6 border border-border shadow-2xl flex items-center gap-4 hover:border-border/80 transition-all">
           <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
             <Package size={24} />
           </div>
           <div>
-            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Total Materiales</p>
-            <p className="text-3xl font-extrabold text-[#FFFFFF] mt-1">{kpis?.totalMateriales ?? 0}</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Materiales</p>
+            <p className="text-3xl font-extrabold text-card-foreground mt-1">{kpis?.totalMateriales ?? 0}</p>
           </div>
         </div>
       </div>
+      <br />
 
       {/* KPI Cards - Row 2 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl p-6 border border-[#334155] shadow-2xl flex items-center gap-4 hover:border-[#334155]/80 transition-all">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="bg-card backdrop-blur-lg rounded-3xl py-8 px-6 border border-border shadow-2xl flex items-center gap-4 hover:border-border/80 transition-all">
           <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
             <FolderOpen size={24} />
           </div>
           <div>
-            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Proyectos Activos</p>
-            <p className="text-3xl font-extrabold text-[#FFFFFF] mt-1">{kpis?.proyectosActivos ?? 0}</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Proyectos Activos</p>
+            <p className="text-3xl font-extrabold text-card-foreground mt-1">{kpis?.proyectosActivos ?? 0}</p>
           </div>
         </div>
 
-        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl p-6 border border-[#334155] shadow-2xl flex items-center gap-4 hover:border-[#334155]/80 transition-all">
+        <div className="bg-card backdrop-blur-lg rounded-3xl py-8 px-6 border border-border shadow-2xl flex items-center gap-4 hover:border-border/80 transition-all">
           <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
             <ClipboardList size={24} />
           </div>
           <div>
-            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Requerimientos Pendientes</p>
-            <p className="text-3xl font-extrabold text-[#FFFFFF] mt-1">{kpis?.requerimientosPendientes ?? 0}</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Requerimientos Pendientes</p>
+            <p className="text-3xl font-extrabold text-card-foreground mt-1">{kpis?.requerimientosPendientes ?? 0}</p>
           </div>
         </div>
 
-        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl p-6 border border-[#334155] shadow-2xl flex items-center gap-4 hover:border-[#334155]/80 transition-all">
-          <div className="w-12 h-12 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/30 flex items-center justify-center text-[#10B981] shrink-0">
+        <div className="bg-card backdrop-blur-lg rounded-3xl py-8 px-6 border border-border shadow-2xl flex items-center gap-4 hover:border-border/80 transition-all">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shrink-0">
             <DollarSign size={24} />
           </div>
           <div>
-            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Valorización Inventario</p>
-            <p className="text-3xl font-extrabold text-[#10B981] mt-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Valorización Inventario</p>
+            <p className="text-3xl font-extrabold text-primary mt-1">
               ${(kpis?.valorizacionTotalInventario ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </p>
           </div>
         </div>
       </div>
+      <br />
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Bar Chart - Actividad por Módulo */}
-        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl">
+        <div className="bg-card backdrop-blur-lg rounded-3xl border border-border py-8 px-6 shadow-2xl">
           <div className="flex items-center gap-2.5 mb-6">
-            <div className="w-8 h-8 rounded-xl bg-[#06B6D4]/10 border border-[#06B6D4]/30 flex items-center justify-center text-[#06B6D4]">
+            <div className="w-8 h-8 rounded-xl bg-accent/10 border border-accent/30 flex items-center justify-center text-accent">
               <TrendingUp size={18} />
             </div>
-            <h2 className="font-bold text-[#FFFFFF] text-lg">Actividad por Módulo</h2>
+            <h2 className="font-bold text-card-foreground text-lg">Actividad por Módulo</h2>
           </div>
           {modulosData.length > 0 ? (
             <ResponsiveContainer width="100%" height={260}>
@@ -210,17 +212,17 @@ export default function DashboardPage() {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-[260px] flex items-center justify-center text-sm text-[#94A3B8]">Sin datos disponibles</div>
+            <div className="h-[260px] flex items-center justify-center text-sm text-muted-foreground">Sin datos disponibles</div>
           )}
         </div>
 
         {/* Pie Chart - Acciones Recientes */}
-        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl">
+        <div className="bg-card backdrop-blur-lg rounded-3xl border border-border py-8 px-6 shadow-2xl">
           <div className="flex items-center gap-2.5 mb-6">
             <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
               <Activity size={18} />
             </div>
-            <h2 className="font-bold text-[#FFFFFF] text-lg">Tipos de Acción</h2>
+            <h2 className="font-bold text-card-foreground text-lg">Tipos de Acción</h2>
           </div>
           {accionesData.length > 0 ? (
             <ResponsiveContainer width="100%" height={260}>
@@ -245,28 +247,29 @@ export default function DashboardPage() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-[260px] flex items-center justify-center text-sm text-[#94A3B8]">Sin datos disponibles</div>
+            <div className="h-[260px] flex items-center justify-center text-sm text-muted-foreground">Sin datos disponibles</div>
           )}
         </div>
       </div>
+      <br />
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Alertas de Stock Bajo */}
-        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl">
+        <div className="bg-card backdrop-blur-lg rounded-3xl border border-border py-8 px-6 shadow-2xl">
           <div className="flex items-center gap-2.5 mb-6">
             <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
               <AlertTriangle size={18} />
             </div>
-            <h2 className="font-bold text-[#FFFFFF] text-lg">Alertas de Stock Bajo</h2>
+            <h2 className="font-bold text-card-foreground text-lg">Alertas de Stock Bajo</h2>
           </div>
           {alertas.length > 0 ? (
             <div className="space-y-3 max-h-[280px] overflow-y-auto pr-1">
               {alertas.map(a => (
-                <div key={a.id} className="flex items-center justify-between p-4 bg-[#0A1128] rounded-2xl border border-amber-500/30">
+                <div key={a.id} className="flex items-center justify-between p-4 bg-background rounded-2xl border border-amber-500/30">
                   <div>
-                    <p className="text-sm font-bold text-[#FFFFFF]">{a.material?.nombre || 'N/A'}</p>
-                    <p className="text-xs text-[#94A3B8] mt-0.5">{a.bodega?.nombre || 'N/A'} · SKU: {a.material?.sku}</p>
+                    <p className="text-sm font-bold text-card-foreground">{a.material?.nombre || 'N/A'}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{a.bodega?.nombre || 'N/A'} · SKU: {a.material?.sku}</p>
                   </div>
                   <span className="text-xs font-extrabold bg-amber-500/10 text-amber-400 px-3 py-1.5 rounded-xl border border-amber-500/30">
                     {a.cantidad_disponible} uds
@@ -275,33 +278,33 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="h-[280px] flex items-center justify-center text-sm text-[#94A3B8]">No hay alertas de stock</div>
+            <div className="h-[280px] flex items-center justify-center text-sm text-muted-foreground">No hay alertas de stock</div>
           )}
         </div>
 
         {/* Actividad Reciente */}
-        <div className="bg-[#111D4A] backdrop-blur-lg rounded-3xl border border-[#334155] p-6 shadow-2xl">
+        <div className="bg-card backdrop-blur-lg rounded-3xl border border-border py-8 px-6 shadow-2xl">
           <div className="flex items-center gap-2.5 mb-6">
-            <div className="w-8 h-8 rounded-xl bg-[#10B981]/10 border border-[#10B981]/30 flex items-center justify-center text-[#10B981]">
+            <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary">
               <Activity size={18} />
             </div>
-            <h2 className="font-bold text-[#FFFFFF] text-lg">Actividad Reciente</h2>
+            <h2 className="font-bold text-card-foreground text-lg">Actividad Reciente</h2>
           </div>
           {timeline.length > 0 ? (
             <div className="space-y-3 max-h-[280px] overflow-y-auto pr-1">
               {timeline.map(log => (
-                <div key={log._id} className="flex items-start gap-3.5 p-3.5 bg-[#0A1128] rounded-2xl border border-[#334155]">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#06B6D4] mt-2 shrink-0 animate-pulse"></div>
+                <div key={log._id} className="flex items-start gap-3.5 p-3.5 bg-background rounded-2xl border border-border">
+                  <div className="w-2.5 h-2.5 rounded-full bg-accent mt-2 shrink-0 animate-pulse"></div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-[#FFFFFF] truncate">{log.accion?.replace(/_/g, ' ')}</p>
-                    <p className="text-xs text-[#94A3B8] mt-0.5">{log.modulo} · Usuario: {log.usuario_id}</p>
-                    <p className="text-[11px] text-[#94A3B8]/60 mt-1">{formatTime(log)}</p>
+                    <p className="text-sm font-bold text-card-foreground truncate">{log.accion?.replace(/_/g, ' ')}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{log.modulo} · Usuario: {log.usuario_id}</p>
+                    <p className="text-[11px] text-muted-foreground/60 mt-1">{formatTime(log)}</p>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="h-[280px] flex items-center justify-center text-sm text-[#94A3B8]">Sin actividad reciente</div>
+            <div className="h-[280px] flex items-center justify-center text-sm text-muted-foreground">Sin actividad reciente</div>
           )}
         </div>
       </div>
