@@ -2,21 +2,17 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import toast from 'react-hot-toast';
 import { materialesApi } from '../api/materiales.api';
 import type { CreateMaterialDto } from '../types';
-import type { PaginationParams } from '../types/common.types'; // El tipo que creamos en el paso anterior
+import type { MaterialesParams } from '../api/materiales.api';
 
-export function useMateriales(params: PaginationParams = {}) {
+export function useMateriales(params: MaterialesParams = {}) {
   const queryClient = useQueryClient();
 
-  // 1. Añadimos los parámetros a la queryKey para que reaccione a los cambios
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['materiales', params.page, params.limit, params.search, params.sort, params.order],
+    queryKey: ['materiales', params.page, params.limit, params.search, params.sort, params.order, params.categoriaId, params.bodegaId],
     queryFn: async () => {
-      // Pasamos los parámetros a la API
       const res = await materialesApi.getAll(params);
-      // Asumiendo que tu Axios ahora retorna directamente la interfaz PaginatedResponse
       return res; 
     },
-    // UX: Mantiene los datos anteriores en pantalla mientras trae la nueva página
     placeholderData: keepPreviousData,
   });
 

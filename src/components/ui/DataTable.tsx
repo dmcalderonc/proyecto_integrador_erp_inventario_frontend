@@ -19,6 +19,7 @@ interface DataTableProps<T> {
   searchKeys?: string[];
   emptyMessage?: string;
   children?: ReactNode;
+  onRowClick?: (item: T) => void;
 }
 
 function getNestedValue(obj: any, path: string): string {
@@ -34,6 +35,7 @@ export function DataTable<T extends { id?: any }>({
   searchKeys = [],
   onSearch,
   emptyMessage = 'No se encontraron registros',
+  onRowClick,
 }: DataTableProps<T>) {
   const [localSearch, setLocalSearch] = useState('');
 
@@ -96,7 +98,7 @@ export function DataTable<T extends { id?: any }>({
           <EmptyState message={emptyMessage} />
         ) : (
           displayData.map((item, i) => (
-            <div key={item.id ?? i} className="bg-elevated rounded-xl border border-border-subtle p-4 space-y-2.5">
+            <div key={item.id ?? i} className={`bg-elevated rounded-xl border border-border-subtle p-4 space-y-2.5 ${onRowClick ? 'cursor-pointer hover:border-accent/30 transition-colors' : ''}`} onClick={() => onRowClick?.(item)}>
               {columns.map((col, colIndex) => (
                 <div key={col.key} className={`flex justify-between items-center ${colIndex !== columns.length - 1 ? 'border-b border-border-subtle/50 pb-2' : ''}`}>
                   <span className="text-xs font-medium text-text-muted">{col.header}</span>
@@ -134,7 +136,7 @@ export function DataTable<T extends { id?: any }>({
               </tr>
             ) : (
               displayData.map((item, i) => (
-                <tr key={item.id ?? i} className="hover:bg-white/[0.02] transition-colors">
+                <tr key={item.id ?? i} className={`hover:bg-white/[0.02] transition-colors ${onRowClick ? 'cursor-pointer' : ''}`} onClick={() => onRowClick?.(item)}>
                   {columns.map(col => (
                     <td key={col.key} className="px-5 py-3.5 text-text-primary">
                       {col.render ? col.render(item) : String((item as any)[col.key] ?? '')}
