@@ -27,5 +27,6 @@ export interface CreateUserDto {
   email: string;
   password: string;
   rol: UserRole;
+  isActive?: boolean;
   bodegaIds?: number[];
 }
