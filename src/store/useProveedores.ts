@@ -3,13 +3,13 @@ import toast from 'react-hot-toast';
 import { proveedoresApi } from '../api/proveedores.api';
 import type { CreateProveedorDto } from '../types';
 
-export function useProveedores() {
+export function useProveedores(includeSuspended = false) {
   const queryClient = useQueryClient();
 
   const { data: proveedores = [], isLoading } = useQuery({
-    queryKey: ['proveedores'],
+    queryKey: ['proveedores', includeSuspended],
     queryFn: async () => {
-      const res = await proveedoresApi.getAll();
+      const res = await proveedoresApi.getAll(includeSuspended);
       return res.data;
     },
   });
@@ -26,7 +26,7 @@ export function useProveedores() {
   });
 
   const actualizar = useMutation({
-    mutationFn: ({ id, dto }: { id: number; dto: Partial<CreateProveedorDto> }) =>
+    mutationFn: ({ id, dto }: { id: number; dto: Partial<CreateProveedorDto> & { isActive?: boolean } }) =>
       proveedoresApi.update(id, dto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proveedores'] });

@@ -5,7 +5,7 @@ export interface Proveedor {
   email: string;
   telefono?: string;
   direccion?: string;
-  estado: boolean;
+  isActive: boolean;
 }
 
 export interface CreateProveedorDto {

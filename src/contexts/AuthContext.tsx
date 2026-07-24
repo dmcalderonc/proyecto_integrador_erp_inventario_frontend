@@ -38,11 +38,13 @@ function parseUserFromToken(token: string): User | null {
             email: payload.email || '',
             rol: payload.rol,
             estado: payload.estado ?? true,
+            isActive: payload.isActive ?? true,
             fechaCreacion: '',
             fechaActualizacion: '',
             fotoPerfil: payload.fotoPerfil || undefined,
             googleId: payload.googleId || undefined,
             avatarUrl: payload.avatarUrl || undefined,
+            bodegaIds: payload.bodegaIds || [],
         };
     } catch {
         return null;
@@ -90,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email: rawUser.email,
             rol: rawUser.rol,
             estado: true,
+            isActive: true,
             fechaCreacion: '',
             fechaActualizacion: '',
             fotoPerfil: (rawUser as any).fotoPerfil ?? undefined,

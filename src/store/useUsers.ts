@@ -36,6 +36,18 @@ export function useUsers() {
     },
   });
 
+  const asignarBodegas = useMutation({
+    mutationFn: ({ id, bodegaIds }: { id: string; bodegaIds: number[] }) =>
+      usersApi.updateBodegas(id, bodegaIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('Bodegas asignadas exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al asignar bodegas');
+    },
+  });
+
   const eliminar = useMutation({
     mutationFn: (id: string) => usersApi.delete(id),
     onSuccess: () => {
@@ -47,5 +59,5 @@ export function useUsers() {
     },
   });
 
-  return { users, isLoading, crear, actualizar, eliminar };
+  return { users, isLoading, crear, actualizar, asignarBodegas, eliminar };
 }

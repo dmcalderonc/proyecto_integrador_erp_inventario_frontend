@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useUsers } from '../../store/useUsers';
 import { useBodegas } from '../../store/useBodegas';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,7 +7,7 @@ import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { Plus, Shield } from 'lucide-react';
+import { Plus, Shield, Power, PowerOff } from 'lucide-react';
 import { getBadgeStyle } from '../../lib/design-tokens';
 import toast from 'react-hot-toast';
 
@@ -24,7 +24,8 @@ interface FormState {
   password: string;
   rol: UserRole;
   estado: boolean;
-  bodegaAsignadaId: number;
+  isActive: boolean;
+  bodegaIds: number[];
 }
 
 const emptyForm: FormState = {
@@ -33,7 +34,8 @@ const emptyForm: FormState = {
   password: '',
   rol: 'SOLICITANTE',
   estado: true,
-  bodegaAsignadaId: 0,
+  isActive: true,
+  bodegaIds: [],
 };
 
 export default function UsersPage() {
@@ -41,11 +43,16 @@ export default function UsersPage() {
   const { bodegas } = useBodegas();
   const { user: currentUser, refreshUser } = useAuth();
   const bodegaList = bodegas || [];
+  const [showSuspended, setShowSuspended] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editing, setEditing] = useState<User | null>(null);
   const [deleting, setDeleting] = useState<User | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
+
+  const filteredUsers = useMemo(() => {
+    return users.filter((u: User) => showSuspended ? u.isActive === false : u.isActive !== false);
+  }, [users, showSuspended]);
 
   const openCreate = () => {
     setEditing(null);
@@ -56,8 +63,8 @@ export default function UsersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (form.rol === 'BODEGUERO' && (!form.bodegaAsignadaId || form.bodegaAsignadaId === 0)) {
-      toast.error('Debes seleccionar una bodega para el rol Bodeguero');
+    if (form.rol === 'BODEGUERO' && form.bodegaIds.length === 0) {
+      toast.error('Debes seleccionar al menos una bodega para el rol Bodeguero');
       return;
     }
 
@@ -67,13 +74,10 @@ export default function UsersPage() {
         email: form.email,
         rol: form.rol,
         estado: form.estado,
+        isActive: form.isActive,
+        bodegaIds: form.rol === 'BODEGUERO' ? form.bodegaIds : [],
       };
       if (form.password) dto.password = form.password;
-      if (form.rol === 'BODEGUERO') {
-        dto.bodegaAsignadaId = form.bodegaAsignadaId;
-      } else {
-        dto.bodegaAsignadaId = null;
-      }
 
       const response = await actualizar.mutateAsync({ id: editing.id, dto: dto as any });
       const data = response?.data;
@@ -90,10 +94,8 @@ export default function UsersPage() {
         email: form.email,
         password: form.password,
         rol: form.rol,
+        bodegaIds: form.rol === 'BODEGUERO' ? form.bodegaIds : [],
       };
-      if (form.rol === 'BODEGUERO') {
-        payload.bodegaAsignadaId = form.bodegaAsignadaId;
-      }
       await crear.mutateAsync(payload as any);
     }
     setModalOpen(false);
@@ -110,6 +112,26 @@ export default function UsersPage() {
     await eliminar.mutateAsync(deleting.id);
     setConfirmOpen(false);
     setDeleting(null);
+  };
+
+  const handleToggleActive = async (item: User) => {
+    if (item.id === currentUser?.id) {
+      toast.error('No puedes suspender tu propia cuenta');
+      return;
+    }
+    await actualizar.mutateAsync({ id: item.id, dto: { isActive: !item.isActive } });
+  };
+
+  const toggleBodega = (bodegaId: number) => {
+    setForm(f => {
+      const exists = f.bodegaIds.includes(bodegaId);
+      return {
+        ...f,
+        bodegaIds: exists
+          ? f.bodegaIds.filter(id => id !== bodegaId)
+          : [...f.bodegaIds, bodegaId],
+      };
+    });
   };
 
   const columns = [
@@ -138,21 +160,51 @@ export default function UsersPage() {
       ),
     },
     {
-      key: 'bodegaAsignada',
-      header: 'Bodega',
+      key: 'bodegasAsignadas',
+      header: 'Bodegas',
       render: (item: User) => (
         <span className="text-xs text-text-secondary">
-          {item.rol === 'BODEGUERO' ? (item.bodegaAsignada?.nombre || `ID: ${item.bodegaAsignadaId}`) : '—'}
+          {item.rol === 'BODEGUERO'
+            ? (item.bodegasAsignadas && item.bodegasAsignadas.length > 0
+              ? item.bodegasAsignadas.map(b => b.nombre).join(', ')
+              : 'Sin bodega')
+            : '—'}
         </span>
       ),
     },
     {
-      key: 'estado',
+      key: 'isActive',
       header: 'Estado',
       render: (item: User) => (
-        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${getBadgeStyle(item.estado ? 'ACTIVO' : 'INACTIVO')}`}>
-          {item.estado ? 'Activo' : 'Inactivo'}
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${getBadgeStyle(item.isActive !== false ? 'ACTIVO' : 'INACTIVO')}`}>
+          {item.isActive !== false ? 'Activo' : 'Suspendido'}
         </span>
+      ),
+    },
+    {
+      key: 'acciones',
+      header: 'Acciones',
+      render: (item: User) => (
+        <div className="flex gap-2">
+          <button
+            onClick={() => { setEditing(item); setForm({ nombre: item.nombre, email: item.email, password: '', rol: item.rol, estado: item.estado ?? true, isActive: item.isActive !== false, bodegaIds: item.bodegasAsignadas?.map(b => b.id) || [] }); setModalOpen(true); }}
+            className="text-accent hover:text-accent/80 p-1.5 rounded-lg hover:bg-accent/10 transition-colors cursor-pointer"
+            title="Editar"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+          </button>
+          <button
+            onClick={() => handleToggleActive(item)}
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+              item.isActive !== false
+                ? 'text-warning hover:text-warning/80 hover:bg-warning/10'
+                : 'text-success hover:text-success/80 hover:bg-success/10'
+            }`}
+            title={item.isActive !== false ? 'Suspender' : 'Activar'}
+          >
+            {item.isActive !== false ? <PowerOff size={14} /> : <Power size={14} />}
+          </button>
+        </div>
       ),
     },
   ];
@@ -170,10 +222,28 @@ export default function UsersPage() {
       </div>
 
       <div className="bg-surface rounded-xl border border-border-subtle p-6">
-        <DataTable columns={columns} data={users} loading={isLoading} searchable searchKeys={['nombre', 'email', 'rol']} />
+        <div className="flex items-center gap-3 mb-4">
+          <button
+            onClick={() => setShowSuspended(false)}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
+              !showSuspended ? 'bg-accent/10 text-accent border border-accent/30' : 'text-text-secondary hover:bg-elevated border border-transparent'
+            }`}
+          >
+            Activos
+          </button>
+          <button
+            onClick={() => setShowSuspended(true)}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
+              showSuspended ? 'bg-danger/10 text-danger border border-danger/30' : 'text-text-secondary hover:bg-elevated border border-transparent'
+            }`}
+          >
+            Suspendidos
+          </button>
+        </div>
+        <DataTable columns={columns} data={filteredUsers} loading={isLoading} searchable searchKeys={['nombre', 'email', 'rol']} />
       </div>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Usuario' : 'Nuevo Usuario'}>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Usuario' : 'Nuevo Usuario'} size="lg">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1.5">Nombre</label>
@@ -222,7 +292,7 @@ export default function UsersPage() {
                 setForm(f => ({
                   ...f,
                   rol: newRol,
-                  bodegaAsignadaId: newRol !== 'BODEGUERO' ? 0 : f.bodegaAsignadaId,
+                  bodegaIds: newRol !== 'BODEGUERO' ? [] : f.bodegaIds,
                 }));
               }}
               className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all cursor-pointer"
@@ -234,33 +304,48 @@ export default function UsersPage() {
           </div>
 
           {form.rol === 'BODEGUERO' && (
-            <div className="animate-fade-in">
-              <label className="block text-sm font-medium text-text-primary mb-1.5">Bodega Asignada *</label>
-              <select
-                value={form.bodegaAsignadaId}
-                onChange={e => setForm(f => ({ ...f, bodegaAsignadaId: Number(e.target.value) }))}
-                className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent transition-all"
-                required
-              >
-                <option value={0}>Seleccionar bodega</option>
+            <div className="animate-fade-in space-y-2">
+              <label className="block text-sm font-medium text-text-primary">Bodegas Asignadas *</label>
+              <p className="text-xs text-text-muted">Selecciona una o más bodegas que este bodeguero podrá gestionar.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto bg-base p-3 rounded-xl border border-border-subtle">
                 {bodegaList.map((b: any) => (
-                  <option key={b.id} value={b.id}>{b.nombre}</option>
+                  <label
+                    key={b.id}
+                    className={`flex items-center gap-2.5 p-2.5 rounded-lg cursor-pointer transition-colors ${
+                      form.bodegaIds.includes(b.id)
+                        ? 'bg-accent/10 border border-accent/30'
+                        : 'hover:bg-elevated border border-transparent'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={form.bodegaIds.includes(b.id)}
+                      onChange={() => toggleBodega(b.id)}
+                      className="h-4 w-4 rounded border-border-default bg-elevated text-accent focus:ring-accent/30 cursor-pointer"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-text-primary">{b.nombre}</span>
+                      <span className="text-xs text-text-muted block">{b.ubicacion}</span>
+                    </div>
+                  </label>
                 ))}
-              </select>
-              <p className="text-xs text-text-muted mt-1.5">El bodeguero solo gestionará el inventario de esta bodega.</p>
+              </div>
+              {form.bodegaIds.length === 0 && (
+                <p className="text-xs text-danger">Debe seleccionar al menos una bodega.</p>
+              )}
             </div>
           )}
 
           <div className="flex items-center gap-3 bg-base p-3.5 rounded-xl border border-border-subtle">
             <input
               type="checkbox"
-              id="estado"
-              checked={form.estado}
-              onChange={e => setForm(f => ({ ...f, estado: e.target.checked }))}
+              id="isActive"
+              checked={form.isActive}
+              onChange={e => setForm(f => ({ ...f, isActive: e.target.checked }))}
               className="h-5 w-5 rounded-lg border-border-default bg-elevated text-success focus:ring-success/30 focus:ring-offset-0 transition-all cursor-pointer"
             />
-            <label htmlFor="estado" className="text-sm font-medium text-text-primary cursor-pointer">
-              Usuario activo
+            <label htmlFor="isActive" className="text-sm font-medium text-text-primary cursor-pointer">
+              Usuario activo (suspendido = no puede iniciar sesión)
             </label>
           </div>
 

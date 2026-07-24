@@ -5,12 +5,14 @@ import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { Plus } from 'lucide-react';
+import { Plus, Power, PowerOff } from 'lucide-react';
+import { getBadgeStyle } from '../../lib/design-tokens';
 
 const emptyForm = { ruc: '', razon_social: '', email: '', telefono: '', direccion: '' };
 
 export default function ProveedoresPage() {
-  const { proveedores, isLoading, crear, actualizar, eliminar } = useProveedores();
+  const [showSuspended, setShowSuspended] = useState(false);
+  const { proveedores, isLoading, crear, actualizar, eliminar } = useProveedores(showSuspended);
   const [modalOpen, setModalOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editing, setEditing] = useState<Proveedor | null>(null);
@@ -31,6 +33,10 @@ export default function ProveedoresPage() {
     await eliminar.mutateAsync(deleting.id);
     setConfirmOpen(false);
     setDeleting(null);
+  };
+
+  const handleToggleActive = async (item: Proveedor) => {
+    await actualizar.mutateAsync({ id: item.id, dto: { isActive: !item.isActive } });
   };
 
   const columns = [
@@ -62,9 +68,39 @@ export default function ProveedoresPage() {
       render: (item: Proveedor) => <span className="text-text-secondary">{item.telefono || '-'}</span>
     },
     {
-      key: 'direccion',
-      header: 'Dirección',
-      render: (item: Proveedor) => <span className="text-text-secondary text-xs">{item.direccion || '-'}</span>
+      key: 'isActive',
+      header: 'Estado',
+      render: (item: Proveedor) => (
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${getBadgeStyle(item.isActive ? 'ACTIVO' : 'INACTIVO')}`}>
+          {item.isActive ? 'Activo' : 'Suspendido'}
+        </span>
+      ),
+    },
+    {
+      key: 'acciones',
+      header: 'Acciones',
+      render: (item: Proveedor) => (
+        <div className="flex gap-2">
+          <button
+            onClick={() => { setEditing(item); setForm({ ruc: item.ruc, razon_social: item.razon_social, email: item.email, telefono: item.telefono || '', direccion: item.direccion || '' }); setModalOpen(true); }}
+            className="text-accent hover:text-accent/80 p-1.5 rounded-lg hover:bg-accent/10 transition-colors cursor-pointer"
+            title="Editar"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+          </button>
+          <button
+            onClick={() => handleToggleActive(item)}
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+              item.isActive
+                ? 'text-warning hover:text-warning/80 hover:bg-warning/10'
+                : 'text-success hover:text-success/80 hover:bg-success/10'
+            }`}
+            title={item.isActive ? 'Suspender' : 'Activar'}
+          >
+            {item.isActive ? <PowerOff size={14} /> : <Power size={14} />}
+          </button>
+        </div>
+      ),
     },
   ];
 
@@ -81,6 +117,24 @@ export default function ProveedoresPage() {
       </div>
 
       <div className="bg-surface rounded-xl border border-border-subtle p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <button
+            onClick={() => setShowSuspended(false)}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
+              !showSuspended ? 'bg-accent/10 text-accent border border-accent/30' : 'text-text-secondary hover:bg-elevated border border-transparent'
+            }`}
+          >
+            Activos
+          </button>
+          <button
+            onClick={() => setShowSuspended(true)}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
+              showSuspended ? 'bg-danger/10 text-danger border border-danger/30' : 'text-text-secondary hover:bg-elevated border border-transparent'
+            }`}
+          >
+            Suspendidos
+          </button>
+        </div>
         <DataTable columns={columns} data={proveedores} loading={isLoading} searchable searchKeys={["razon_social", "email", "telefono"]} />
       </div>
 
