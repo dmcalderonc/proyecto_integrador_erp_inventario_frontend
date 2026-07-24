@@ -3,13 +3,13 @@ import toast from 'react-hot-toast';
 import { categoriasApi } from '../api/categorias.api';
 import type { CreateCategoriaDto } from '../types';
 
-export function useCategorias() {
+export function useCategorias(includeSuspended = false) {
   const queryClient = useQueryClient();
 
   const { data: categorias = [], isLoading } = useQuery({
-    queryKey: ['categorias'],
+    queryKey: ['categorias', includeSuspended],
     queryFn: async () => {
-      const res = await categoriasApi.getAll();
+      const res = await categoriasApi.getAll(includeSuspended);
       return res.data;
     },
   });
@@ -26,7 +26,7 @@ export function useCategorias() {
   });
 
   const actualizar = useMutation({
-    mutationFn: ({ id, dto }: { id: number; dto: Partial<CreateCategoriaDto> }) =>
+    mutationFn: ({ id, dto }: { id: number; dto: Partial<CreateCategoriaDto> & { isActive?: boolean } }) =>
       categoriasApi.update(id, dto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] });

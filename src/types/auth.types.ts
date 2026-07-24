@@ -8,6 +8,8 @@ export interface User {
   email: string;
   rol: UserRole;
   estado: boolean;
+  isActive?: boolean;
+  bodegaIds?: number[];
 }
 
 export interface AuthResponse {

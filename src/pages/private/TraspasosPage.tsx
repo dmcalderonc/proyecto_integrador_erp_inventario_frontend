@@ -197,12 +197,12 @@ export default function TraspasosPage() {
             )}
 
             <div className="flex justify-end gap-3 pt-4 border-t border-border-subtle">
-              {selected.estado === 'PENDIENTE' && (user?.rol === 'ADMIN' || (user?.rol === 'BODEGUERO' && user?.bodegaAsignadaId === selected.bodegaOrigenId)) && (
+              {selected.estado === 'PENDIENTE' && (user?.rol === 'ADMIN' || (user?.rol === 'BODEGUERO' && (user as any).bodegaIds?.includes(selected.bodegaOrigenId))) && (
                 <Button onClick={() => { enviar.mutate(selected.id); setDetailOpen(false); }} loading={enviar.isPending} className="gap-1.5">
                   <Send size={16} /> Confirmar Envío
                 </Button>
               )}
-              {selected.estado === 'EN_TRANSITO' && (user?.rol === 'ADMIN' || (user?.rol === 'BODEGUERO' && user?.bodegaAsignadaId === selected.bodegaDestinoId)) && (
+              {selected.estado === 'EN_TRANSITO' && (user?.rol === 'ADMIN' || (user?.rol === 'BODEGUERO' && (user as any).bodegaIds?.includes(selected.bodegaDestinoId))) && (
                 <Button onClick={() => { recibir.mutate(selected.id); setDetailOpen(false); }} loading={recibir.isPending} className="gap-1.5">
                   <CheckCircle size={16} /> Confirmar Recepción
                 </Button>

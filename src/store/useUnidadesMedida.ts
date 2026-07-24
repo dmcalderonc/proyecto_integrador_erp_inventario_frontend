@@ -3,13 +3,13 @@ import toast from 'react-hot-toast';
 import { unidadesMedidaApi } from '../api/unidades-medida.api';
 import type { CreateUnidadMedidaDto } from '../types';
 
-export function useUnidadesMedida() {
+export function useUnidadesMedida(includeSuspended = false) {
   const queryClient = useQueryClient();
 
   const { data: unidades = [], isLoading } = useQuery({
-    queryKey: ['unidades-medida'],
+    queryKey: ['unidades-medida', includeSuspended],
     queryFn: async () => {
-      const res = await unidadesMedidaApi.getAll();
+      const res = await unidadesMedidaApi.getAll(includeSuspended);
       return res.data;
     },
   });
@@ -26,7 +26,7 @@ export function useUnidadesMedida() {
   });
 
   const actualizar = useMutation({
-    mutationFn: ({ id, dto }: { id: number; dto: Partial<CreateUnidadMedidaDto> }) =>
+    mutationFn: ({ id, dto }: { id: number; dto: Partial<CreateUnidadMedidaDto> & { isActive?: boolean } }) =>
       unidadesMedidaApi.update(id, dto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['unidades-medida'] });

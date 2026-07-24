@@ -3,6 +3,7 @@ export interface Bodega {
   nombre: string;
   ubicacion: string;
   isPrincipal: boolean;
+  isActive: boolean;
   proyectoId?: string;
 }
 

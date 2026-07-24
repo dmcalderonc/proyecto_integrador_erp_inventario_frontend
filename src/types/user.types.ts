@@ -6,13 +6,20 @@ export interface User {
   email: string;
   rol: UserRole;
   estado: boolean;
+  isActive: boolean;
   fechaCreacion: string;
   fechaActualizacion: string;
   fotoPerfil?: string;
   googleId?: string;
   avatarUrl?: string;
-  bodegaAsignadaId?: number | null;
-  bodegaAsignada?: { id: number; nombre: string } | null;
+  bodegasAsignadas?: BodegaRef[];
+  bodegaIds?: number[];
+}
+
+export interface BodegaRef {
+  id: number;
+  nombre: string;
+  ubicacion?: string;
 }
 
 export interface CreateUserDto {
@@ -20,5 +27,5 @@ export interface CreateUserDto {
   email: string;
   password: string;
   rol: UserRole;
-  bodegaAsignadaId?: number;
+  bodegaIds?: number[];
 }

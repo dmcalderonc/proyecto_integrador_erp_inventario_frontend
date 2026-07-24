@@ -3,13 +3,13 @@ import toast from 'react-hot-toast';
 import { bodegasApi } from '../api/bodegas.api';
 import type { CreateBodegaDto } from '../types';
 
-export function useBodegas() {
+export function useBodegas(includeSuspended = false) {
   const queryClient = useQueryClient();
 
   const { data: bodegas = [], isLoading } = useQuery({
-    queryKey: ['bodegas'],
+    queryKey: ['bodegas', includeSuspended],
     queryFn: async () => {
-      const res = await bodegasApi.getAll();
+      const res = await bodegasApi.getAll(includeSuspended);
       return res.data;
     },
   });
@@ -26,7 +26,7 @@ export function useBodegas() {
   });
 
   const actualizar = useMutation({
-    mutationFn: ({ id, dto }: { id: number; dto: Partial<CreateBodegaDto> }) =>
+    mutationFn: ({ id, dto }: { id: number; dto: Partial<CreateBodegaDto> & { isActive?: boolean } }) =>
       bodegasApi.update(id, dto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bodegas'] });
