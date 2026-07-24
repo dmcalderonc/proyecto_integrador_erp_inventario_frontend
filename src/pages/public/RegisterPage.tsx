@@ -38,11 +38,16 @@ export function RegisterPage() {
         email: data.email,
         password: data.password,
       });
-      const { access_token, user } = res.data;
+      const { access_token, user } = res.data.data;
       localStorage.setItem('token', access_token);
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('user', JSON.stringify({
+        id: user.id,
+        nombre: user.nombre,
+        email: user.email,
+        rol: user.rol,
+      }));
       toast.success('Cuenta creada exitosamente');
-      navigate('/');
+      window.location.replace('/dashboard');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Error al registrar');
     } finally {

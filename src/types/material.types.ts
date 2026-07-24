@@ -1,6 +1,15 @@
 import type { Categoria } from './categoria.types';
 import type { UnidadMedida } from './unidad-medida.types';
 
+export interface StockPorBodega {
+  bodegaId: number;
+  bodegaNombre: string;
+  ubicacion: string;
+  cantidad_disponible: number;
+  cantidad_reservada: number;
+  efectivo: number;
+}
+
 export interface Material {
   id: number;
   nombre: string;
@@ -12,6 +21,7 @@ export interface Material {
   categoria?: Categoria;
   stockDisponible?: number;
   stockReservado?: number;
+  isActive?: boolean;
 }
 
 export interface CreateMaterialDto {

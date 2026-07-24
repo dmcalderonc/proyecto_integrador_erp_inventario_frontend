@@ -3,13 +3,15 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useMateriales } from '../../store/useMateriales';
 import { useCategorias } from '../../store/useCategorias';
 import { useUnidadesMedida } from '../../store/useUnidadesMedida';
+import { useBodegas } from '../../store/useBodegas';
 import type { Material, CreateMaterialDto } from '../../types';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { DataTable } from '../../components/ui/DataTable';
 import type { Column } from '../../components/ui/DataTable';
-import { Plus, Edit2, Trash2, Package, ImagePlus, X } from 'lucide-react';
+import { MaterialDetailSlideOver } from '../../components/materials/MaterialDetailSlideOver';
+import { Plus, Edit2, Trash2, Package, ImagePlus, X, RotateCcw } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 
@@ -21,15 +23,28 @@ const emptyForm: CreateMaterialDto = {
   categoria_id: 0,
 };
 
+function getStockStatus(disponible: number): { label: string; className: string } {
+  if (disponible === 0) return { label: 'Agotado', className: 'bg-danger-bg text-danger border-danger/30' };
+  if (disponible <= 5) return { label: 'Bajo', className: 'bg-warning-bg text-warning border-warning/30' };
+  return { label: 'Normal', className: 'bg-success-bg text-success border-success/30' };
+}
+
 export default function MaterialesPage() {
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const [filterCategory, setFilterCategory] = useState<number | null>(null);
+  const [filterBodega, setFilterBodega] = useState<number | null>(null);
 
-  const { materiales, meta, isLoading, crear, actualizar, eliminar } = useMateriales({ page, limit, search });
+  const { materiales, meta, isLoading, crear, actualizar, eliminar } = useMateriales({
+    page, limit, search,
+    categoriaId: filterCategory ?? undefined,
+    bodegaId: filterBodega ?? undefined,
+  });
   const { categorias } = useCategorias();
   const { unidades: unidadesMedida } = useUnidadesMedida();
+  const { bodegas } = useBodegas();
   const { hasRole } = useAuth();
   const canEdit = hasRole(['ADMIN', 'BODEGUERO']);
 
@@ -39,11 +54,17 @@ export default function MaterialesPage() {
   const [deleting, setDeleting] = useState<Material | null>(null);
   const [form, setForm] = useState<CreateMaterialDto>(emptyForm);
   const [imagePreview, setImagePreview] = useState<string>('');
-  const [filterCategory, setFilterCategory] = useState<number | null>(null);
+  const [detailMaterial, setDetailMaterial] = useState<Material | null>(null);
 
-  const filteredMateriales = filterCategory
-    ? materiales.filter(m => m.categoria?.id === filterCategory)
-    : materiales;
+  const hasActiveFilters = filterCategory !== null || filterBodega !== null || search !== '';
+
+  const clearFilters = () => {
+    setFilterCategory(null);
+    setFilterBodega(null);
+    setSearch('');
+    setSearchInput('');
+    setPage(1);
+  };
 
   const openCreate = () => {
     setEditing(null);
@@ -63,6 +84,10 @@ export default function MaterialesPage() {
     });
     setImagePreview(item.imagen || '');
     setModalOpen(true);
+  };
+
+  const handleRowClick = (item: Material) => {
+    setDetailMaterial(item);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,6 +181,19 @@ export default function MaterialesPage() {
       ),
     },
     {
+      key: 'estado',
+      header: 'Estado',
+      render: (m: Material) => {
+        const disponible = m.stockDisponible ?? 0;
+        const status = getStockStatus(disponible);
+        return (
+          <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-lg font-bold text-xs border", status.className)}>
+            {status.label}
+          </span>
+        );
+      },
+    },
+    {
       key: 'stockDisponible',
       header: 'Stock Disp.',
       render: (m: Material) => {
@@ -195,14 +233,14 @@ export default function MaterialesPage() {
       render: (m: Material) => (
         <div className="flex gap-2">
           <button
-            onClick={() => openEdit(m)}
+            onClick={(e) => { e.stopPropagation(); openEdit(m); }}
             className="text-accent hover:text-accent/80 p-1.5 rounded-lg hover:bg-accent/10 transition-colors cursor-pointer"
             title="Editar"
           >
             <Edit2 size={14} />
           </button>
           <button
-            onClick={() => { setDeleting(m); setConfirmOpen(true); }}
+            onClick={(e) => { e.stopPropagation(); setDeleting(m); setConfirmOpen(true); }}
             className="text-danger hover:text-danger/80 p-1.5 rounded-lg hover:bg-danger/10 transition-colors cursor-pointer"
             title="Eliminar"
           >
@@ -239,6 +277,19 @@ export default function MaterialesPage() {
             <option value="">Todas las categorías</option>
             {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
           </select>
+          <select
+            value={filterBodega ?? ''}
+            onChange={e => { setFilterBodega(e.target.value ? Number(e.target.value) : null); setPage(1); }}
+            className="px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent transition-all"
+          >
+            <option value="">Todas las bodegas</option>
+            {bodegas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
+          </select>
+          {hasActiveFilters && (
+            <Button variant="ghost" onClick={clearFilters} className="gap-1.5 text-text-muted hover:text-text-primary">
+              <RotateCcw size={14} /> Limpiar
+            </Button>
+          )}
           {canEdit && (
             <Button onClick={openCreate} className="gap-1.5">
               <Plus size={16} /> Nuevo Material
@@ -250,9 +301,10 @@ export default function MaterialesPage() {
       <div className="bg-surface rounded-xl border border-border-subtle">
         <DataTable
           columns={columns}
-          data={filteredMateriales}
+          data={materiales}
           loading={isLoading}
           searchable={false}
+          onRowClick={handleRowClick}
         />
       </div>
 
@@ -368,6 +420,20 @@ export default function MaterialesPage() {
         message={`¿Estás seguro de eliminar "${deleting?.nombre}"? Esta acción no se puede deshacer.`}
         loading={eliminar.isPending}
       />
+
+      {detailMaterial && (
+        <MaterialDetailSlideOver
+          materialId={detailMaterial.id}
+          materialNombre={detailMaterial.nombre}
+          materialSku={detailMaterial.sku}
+          materialImagen={detailMaterial.imagen}
+          materialCategoria={detailMaterial.categoria?.nombre}
+          materialUnidad={detailMaterial.unidadMedida?.nombre}
+          materialDescripcion={detailMaterial.descripcion}
+          open={!!detailMaterial}
+          onClose={() => setDetailMaterial(null)}
+        />
+      )}
     </div>
   );
 }
