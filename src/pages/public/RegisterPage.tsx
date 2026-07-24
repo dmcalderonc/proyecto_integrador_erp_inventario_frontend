@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../../api/http';
 import { Button } from '../../components/ui/Button';
@@ -24,7 +24,6 @@ type RegisterFormInputs = z.infer<typeof registerSchema>;
 
 export function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormInputs>({
     resolver: zodResolver(registerSchema),
