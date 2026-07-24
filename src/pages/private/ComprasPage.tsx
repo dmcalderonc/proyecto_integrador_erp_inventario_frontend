@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCompras } from '../../store/useCompras';
 import { useMateriales } from '../../store/useMateriales';
 import { useAuth } from '../../contexts/AuthContext';
@@ -6,7 +7,7 @@ import type { OrdenCompra, CrearCompraDto, DetalleCompra } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
-import { Plus, Trash2, FileDown, Edit, CheckCircle } from 'lucide-react';
+import { Plus, Trash2, FileDown, Edit, CheckCircle, Eye, XCircle } from 'lucide-react';
 import { useProveedores } from '../../store/useProveedores';
 import { comprasApi } from '../../api/compras.api';
 import { triggerDownload } from '../../lib/download';
@@ -18,18 +19,67 @@ const emptyForm: CrearCompraDto = {
   detalles: [],
 };
 
+const ocStatusStyle: Record<string, string> = {
+  PENDIENTE: 'bg-warning/10 text-warning border-warning/20',
+  BORRADOR: 'bg-text-muted/10 text-text-muted border-text-muted/20',
+  EMITIDA: 'bg-info/10 text-info border-info/20',
+  RECIBIDA: 'bg-success/10 text-success border-success/20',
+  RECIBIDA_PARCIAL: 'bg-purple-400/10 text-purple-400 border-purple-400/20',
+  CANCELADA: 'bg-danger/10 text-danger border-danger/20',
+};
+
 export default function ComprasPage() {
   const { hasRole } = useAuth();
-  const { compras, isLoading, crear, actualizar, aprobar, recibir } = useCompras();
+  const queryClient = useQueryClient();
   const { materiales } = useMateriales();
   const { proveedores } = useProveedores();
 
+  const { data: compras = [], isLoading } = useQuery({
+    queryKey: ['compras'],
+    queryFn: async () => {
+      const res = await comprasApi.getAll();
+      return res.data || [];
+    },
+  });
+
+  const crear = useMutation({
+    mutationFn: (dto: CrearCompraDto) => comprasApi.create(dto),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['compras'] });
+      toast.success('Orden de compra creada exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al crear OC');
+    },
+  });
+
+  const aprobar = useMutation({
+    mutationFn: (id: number) => comprasApi.aprobar(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['compras'] });
+      toast.success('Orden de compra aprobada');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al aprobar OC');
+    },
+  });
+
+  const recibir = useMutation({
+    mutationFn: (id: number) => comprasApi.recibir(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['compras'] });
+      toast.success('Orden de compra recibida y stock actualizado');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al recibir OC');
+    },
+  });
+
   const [modalOpen, setModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedOC, setSelectedOC] = useState<OrdenCompra | null>(null);
   const [form, setForm] = useState<CrearCompraDto>(emptyForm);
   const [impuestoRate, setImpuestoRate] = useState(15);
-  const [editing, setEditing] = useState<OrdenCompra | null>(null);
-  const [editForm, setEditForm] = useState({ subtotal: 0, impuestos: 0, total: 0 });
 
   const openCreate = () => {
     setForm({ ...emptyForm, detalles: [{ materialId: 0, cantidad: 1, precioUnitario: 0 }] });
@@ -37,22 +87,10 @@ export default function ComprasPage() {
     setModalOpen(true);
   };
 
-  const openEdit = (item: OrdenCompra) => {
-    setEditing(item);
-    setEditForm({
-      subtotal: Number(item.subtotal),
-      impuestos: Number(item.impuestos),
-      total: Number(item.total),
-    });
-    setEditModalOpen(true);
-  };
-
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editing) return;
-    await actualizar.mutateAsync({ id: editing.id, dto: editForm });
-    setEditModalOpen(false);
-    setEditing(null);
+  const openDetail = async (item: OrdenCompra) => {
+    const { data } = await comprasApi.getById(item.id);
+    setSelectedOC(data);
+    setDetailOpen(true);
   };
 
   const addDetalle = () => {
@@ -71,7 +109,7 @@ export default function ComprasPage() {
   };
 
   const subtotalCalc = (form.detalles ?? []).reduce(
-    (sum: number, d: DetalleCompra) => sum + Number(d.cantidad) * Number(d.precioUnitario), 0
+    (sum: number, d: DetalleCompra) => sum + Number(d.cantidad) * Number(d.precioUnitario), 0,
   );
   const impuestosCalc = subtotalCalc * (impuestoRate / 100);
   const totalCalc = subtotalCalc + impuestosCalc;
@@ -100,10 +138,6 @@ export default function ComprasPage() {
     setModalOpen(false);
   };
 
-  const handleRecibir = async (id: number) => {
-    await recibir.mutateAsync(id);
-  };
-
   const handleDownloadPdf = async (item: OrdenCompra) => {
     try {
       const blob = await comprasApi.downloadPdf(item.id);
@@ -122,7 +156,7 @@ export default function ComprasPage() {
         <span className="font-mono text-xs bg-success-bg text-success px-2.5 py-1 rounded-lg border border-success/20 font-semibold">
           {item.codigo}
         </span>
-      )
+      ),
     },
     {
       key: 'proveedor',
@@ -135,25 +169,14 @@ export default function ComprasPage() {
       key: 'estado',
       header: 'Estado',
       sortable: true,
-      render: (item: OrdenCompra) => (
-        <span className={`inline-block px-2.5 py-1 rounded-xl text-xs font-semibold border ${getBadgeStyle(item.estado)}`}>
-          {item.estado}
-        </span>
-      )
-    },
-    {
-      key: 'subtotal',
-      header: 'Subtotal',
-      sortable: true,
-      sortValue: (item: OrdenCompra) => Number(item.subtotal),
-      render: (item: OrdenCompra) => <span className="text-text-secondary">${Number(item.subtotal).toFixed(2)}</span>,
-    },
-    {
-      key: 'impuestos',
-      header: 'Impuestos',
-      sortable: true,
-      sortValue: (item: OrdenCompra) => Number(item.impuestos),
-      render: (item: OrdenCompra) => <span className="text-text-secondary">${Number(item.impuestos).toFixed(2)}</span>,
+      render: (item: OrdenCompra) => {
+        const style = ocStatusStyle[item.estado] || ocStatusStyle.BORRADOR;
+        return (
+          <span className={`inline-block px-2.5 py-1 rounded-xl text-xs font-semibold border ${style}`}>
+            {item.estado?.replace(/_/g, ' ')}
+          </span>
+        );
+      },
     },
     {
       key: 'total',
@@ -169,30 +192,19 @@ export default function ComprasPage() {
       header: '',
       render: (item: OrdenCompra) => (
         <div className="flex gap-1.5 flex-wrap">
+          <Button variant="ghost" size="sm" onClick={() => openDetail(item)}>
+            <Eye size={14} className="text-accent" /> Detalle
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => handleDownloadPdf(item)}>
             <FileDown size={14} className="text-info" /> PDF
           </Button>
-          {(item.estado === 'BORRADOR' || item.estado === 'PENDIENTE') && (
-            <>
-              {hasRole(['ADMIN']) && item.estado === 'BORRADOR' && (
-                <Button variant="primary" size="sm" onClick={() => aprobar.mutateAsync(item.id)}>
-                  <CheckCircle size={14} /> Aprobar OC
-                </Button>
-              )}
-              {hasRole(['ADMIN', 'COMPRADOR']) && (
-                <Button variant="secondary" size="sm" onClick={() => openEdit(item)}>
-                  <Edit size={14} className="text-warning" /> Editar
-                </Button>
-              )}
-              {hasRole(['ADMIN', 'BODEGUERO']) && (
-                <Button variant="primary" size="sm" onClick={() => handleRecibir(item.id)}>
-                  <CheckCircle size={14} /> Recibir
-                </Button>
-              )}
-            </>
+          {item.estado === 'PENDIENTE' && hasRole(['ADMIN']) && (
+            <Button variant="primary" size="sm" onClick={() => aprobar.mutateAsync(item.id)} loading={aprobar.isPending}>
+              <CheckCircle size={14} /> Aprobar
+            </Button>
           )}
           {item.estado === 'EMITIDA' && hasRole(['ADMIN', 'BODEGUERO']) && (
-            <Button variant="primary" size="sm" onClick={() => handleRecibir(item.id)}>
+            <Button variant="primary" size="sm" onClick={() => recibir.mutateAsync(item.id)} loading={recibir.isPending}>
               <CheckCircle size={14} /> Recibir
             </Button>
           )}
@@ -216,8 +228,87 @@ export default function ComprasPage() {
       </div>
 
       <div className="bg-surface rounded-xl border border-border-subtle p-6">
-        <DataTable columns={columns} data={compras} loading={isLoading} searchable searchKeys={["codigo", "estado"]} />
+        <DataTable columns={columns} data={compras} loading={isLoading} searchable searchKeys={['codigo', 'estado']} />
       </div>
+
+      <Modal open={detailOpen} onClose={() => setDetailOpen(false)} title={`OC Detalle — ${selectedOC?.codigo ?? ''}`} size="lg">
+        {selectedOC && (
+          <div className="space-y-5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-base rounded-xl border border-border-subtle p-3">
+                <p className="text-xs text-text-muted mb-1">Código</p>
+                <p className="text-sm font-semibold text-text-primary font-mono">{selectedOC.codigo}</p>
+              </div>
+              <div className="bg-base rounded-xl border border-border-subtle p-3">
+                <p className="text-xs text-text-muted mb-1">Proveedor</p>
+                <p className="text-sm font-semibold text-text-primary">{selectedOC.proveedor?.razon_social ?? '-'}</p>
+              </div>
+              <div className="bg-base rounded-xl border border-border-subtle p-3">
+                <p className="text-xs text-text-muted mb-1">Estado</p>
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${ocStatusStyle[selectedOC.estado] || ocStatusStyle.BORRADOR}`}>
+                  {selectedOC.estado?.replace(/_/g, ' ')}
+                </span>
+              </div>
+              <div className="bg-base rounded-xl border border-border-subtle p-3">
+                <p className="text-xs text-text-muted mb-1">Total</p>
+                <p className="text-sm font-bold text-success">${Number(selectedOC.total).toFixed(2)}</p>
+              </div>
+            </div>
+
+            <div className="bg-base rounded-xl border border-border-subtle overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border-subtle bg-elevated/50">
+                    <th className="text-left py-3 px-3 text-text-muted font-medium">Material</th>
+                    <th className="text-center py-3 px-3 text-text-muted font-medium">Cantidad</th>
+                    <th className="text-right py-3 px-3 text-text-muted font-medium">P. Unitario</th>
+                    <th className="text-right py-3 px-3 text-text-muted font-medium">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedOC.detalles?.map((det: any, idx: number) => (
+                    <tr key={idx} className="border-b border-border-subtle/50 hover:bg-elevated/30">
+                      <td className="py-3 px-3">
+                        <div className="flex flex-col">
+                          <span className="text-text-primary font-medium">{det.material?.nombre ?? `Material #${det.materialId}`}</span>
+                          <span className="text-text-muted font-mono text-xs">{det.material?.sku ?? '-'}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-3 text-center text-text-primary font-semibold">{det.cantidad}</td>
+                      <td className="py-3 px-3 text-right text-text-secondary">${Number(det.precioUnitario).toFixed(2)}</td>
+                      <td className="py-3 px-3 text-right font-semibold text-text-primary">
+                        ${(Number(det.cantidad) * Number(det.precioUnitario)).toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex flex-col items-end gap-1 text-sm">
+              <p className="text-text-secondary">Subtotal: <span className="font-semibold text-text-primary ml-1">${Number(selectedOC.subtotal).toFixed(2)}</span></p>
+              <p className="text-text-secondary">Impuestos: <span className="font-semibold text-text-primary ml-1">${Number(selectedOC.impuestos).toFixed(2)}</span></p>
+              <p className="text-base font-bold text-text-primary pt-1 border-t border-border-subtle w-full text-right">
+                Total: <span className="text-success ml-1">${Number(selectedOC.total).toFixed(2)}</span>
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              {selectedOC.estado === 'PENDIENTE' && hasRole(['ADMIN']) && (
+                <Button variant="primary" onClick={() => { aprobar.mutateAsync(selectedOC.id); setDetailOpen(false); }} loading={aprobar.isPending}>
+                  <CheckCircle size={14} /> Aprobar Orden
+                </Button>
+              )}
+              {selectedOC.estado === 'EMITIDA' && hasRole(['ADMIN', 'BODEGUERO']) && (
+                <Button variant="primary" onClick={() => { recibir.mutateAsync(selectedOC.id); setDetailOpen(false); }} loading={recibir.isPending}>
+                  <CheckCircle size={14} /> Recibir Orden
+                </Button>
+              )}
+              <Button variant="secondary" onClick={() => setDetailOpen(false)}>Cerrar</Button>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nueva Orden de Compra">
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -321,62 +412,6 @@ export default function ComprasPage() {
             </Button>
             <Button type="submit" loading={crear.isPending}>
               Crear Orden
-            </Button>
-          </div>
-        </form>
-      </Modal>
-
-      <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)} title={`Editar OC - ${editing?.codigo ?? ''}`}>
-        <form onSubmit={handleEditSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-text-primary mb-1.5">Subtotal</label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={editForm.subtotal}
-              onChange={e => {
-                const sub = Number(e.target.value);
-                const imp = sub * (impuestoRate / 100);
-                setEditForm({ subtotal: sub, impuestos: imp, total: sub + imp });
-              }}
-              className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-text-primary mb-1.5">Impuestos</label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={editForm.impuestos}
-              onChange={e => setEditForm({ ...editForm, impuestos: Number(e.target.value), total: editForm.subtotal + Number(e.target.value) })}
-              className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-text-primary mb-1.5">Total</label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={editForm.total}
-              onChange={e => setEditForm({ ...editForm, total: Number(e.target.value) })}
-              className="w-full px-4 py-2.5 bg-base text-success border border-border-subtle rounded-xl text-sm font-bold placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
-              required
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-border-subtle">
-            <Button variant="secondary" type="button" onClick={() => setEditModalOpen(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit" loading={actualizar.isPending}>
-              Actualizar
             </Button>
           </div>
         </form>

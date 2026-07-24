@@ -17,6 +17,7 @@ import type { JSX } from 'react/jsx-runtime';
 import DespachosPage from '../pages/private/DespachosPage';
 import ProfilePage from '../pages/private/ProfilePage';
 import TraspasosPage from '../pages/private/TraspasosPage';
+import NotificationsPage from '../pages/private/NotificationsPage';
 import { PERMISSIONS } from '../lib/permissions';
 
 interface PrivateRoute {
@@ -43,4 +44,5 @@ export const privateRoutes: PrivateRoute[] = [
   { path: '/proyectos', element: <ProyectosPage />, allowedRoles: PERMISSIONS.CAN_MANAGE_PROYECTOS },
   { path: '/despachos', element: <DespachosPage />, allowedRoles: PERMISSIONS.CAN_MANAGE_DESPACHOS },
   { path: '/traspasos', element: <TraspasosPage />, allowedRoles: PERMISSIONS.CAN_MANAGE_TRASPASOS },
+  { path: '/notifications', element: <NotificationsPage />, allowedRoles: PERMISSIONS.CAN_ACCESS_DASHBOARD },
 ];
