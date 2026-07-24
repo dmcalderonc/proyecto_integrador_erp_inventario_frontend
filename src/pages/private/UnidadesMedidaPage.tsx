@@ -5,7 +5,7 @@ import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { Plus, Power, PowerOff } from 'lucide-react';
+import { Plus, Power, PowerOff, Trash2 } from 'lucide-react';
 import { getBadgeStyle } from '../../lib/design-tokens';
 
 const emptyForm = { nombre: '', simbolo: '' };
@@ -87,6 +87,13 @@ export default function UnidadesMedidaPage() {
             title={item.isActive ? 'Suspender' : 'Activar'}
           >
             {item.isActive ? <PowerOff size={14} /> : <Power size={14} />}
+          </button>
+          <button
+            onClick={() => { setDeleting(item); setConfirmOpen(true); }}
+            className="text-danger hover:text-danger/80 p-1.5 rounded-lg hover:bg-danger/10 transition-colors cursor-pointer"
+            title="Eliminar"
+          >
+            <Trash2 size={14} />
           </button>
         </div>
       ),
