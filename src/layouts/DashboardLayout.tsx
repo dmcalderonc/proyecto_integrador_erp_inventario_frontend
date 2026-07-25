@@ -8,7 +8,7 @@ import {
     LayoutDashboard, Users, Box, Tags, Truck, Package,
     ClipboardList, ShoppingCart, SlidersHorizontal, FolderOpen,
     FileText, ClipboardCheck, PackageCheck, Activity, LogOut,
-    Menu, X, Sun, Moon
+    Menu, X, Sun, Moon, Bell,
 } from 'lucide-react';
 import type { UserRole } from '../types';
 
@@ -36,6 +36,7 @@ const navLinks: NavItem[] = [
     { to: '/ajustes-inventario', label: 'Ajustes', icon: SlidersHorizontal, roles: ['ADMIN', 'BODEGUERO'] },
     { to: '/despachos', label: 'Despachos', icon: PackageCheck, roles: ['ADMIN', 'BODEGUERO'] },
     { to: '/traspasos', label: 'Traspasos', icon: Truck, roles: ['ADMIN', 'BODEGUERO'] },
+    { to: '/notifications', label: 'Notificaciones', icon: Bell, roles: ['ADMIN', 'SOLICITANTE', 'BODEGUERO', 'COMPRADOR'] },
 ];
 
 const roleBadgeColor: Record<string, string> = {

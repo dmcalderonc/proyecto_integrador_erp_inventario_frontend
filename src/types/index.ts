@@ -15,3 +15,4 @@ export type { Cotizacion, CreateCotizacionDto, EstadoCotizacion } from './cotiza
 export type { DetalleDespacho, CreateEntregaDirectaDto, DespachoResponse } from './despacho.types';
 export type { UnidadMedida, CreateUnidadMedidaDto } from './unidad-medida.types';
 export type { Traspaso, DetalleTraspaso, EstadoTraspaso, CreateTraspasoDto } from './traspaso.types';
+export type { Notification } from './notification.types';

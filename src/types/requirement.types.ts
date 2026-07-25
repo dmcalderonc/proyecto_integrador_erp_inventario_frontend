@@ -3,20 +3,20 @@ import type { Proyecto } from './proyecto.types';
 import type { User } from './user.types';
 import type { Bodega } from './bodega.types';
 
-export type ItemStatus = 
-  | 'PENDIENTE' 
-  | 'APROBADO_BODEGA' 
-  | 'RECHAZADO' 
-  | 'EN_COMPRAS' 
-  | 'EN_TRASLADO' 
+export type ItemStatus =
+  | 'PENDIENTE'
+  | 'APROBADO_BODEGA'
+  | 'RECHAZADO'
+  | 'EN_COMPRAS'
+  | 'EN_TRASLADO'
   | 'DESPACHADO';
 
-export type RequirementStatus = 
-  | 'PENDIENTE' 
-  | 'APROBADO' 
-  | 'PARCIALMENTE_ATENDIDO' 
-  | 'ATENDIDO' 
-  | 'RECHAZADO' 
+export type RequirementStatus =
+  | 'PENDIENTE'
+  | 'APROBADO'
+  | 'PARCIALMENTE_ATENDIDO'
+  | 'ATENDIDO'
+  | 'RECHAZADO'
   | 'DESPACHADO';
 
 export interface RequirementDetalle {
@@ -36,6 +36,7 @@ export interface Requirement {
   bodegaId: number;
   fechaSolicitud: string;
   estado: RequirementStatus;
+  justificativo?: string;
   detalles?: RequirementDetalle[];
   proyecto?: Proyecto;
   usuarioSolicitante?: User;
@@ -45,5 +46,6 @@ export interface Requirement {
 export interface CreateRequirementDto {
   proyectoId: string;
   bodegaId: number;
+  justificativo?: string;
   detalles: { materialId: number; cantidadSolicitada: number }[];
 }

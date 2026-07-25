@@ -1,23 +1,35 @@
 import type { Proveedor } from './proveedor.types';
-import type { SolicitudCompra } from './solicitud.types';
+import type { Material } from './material.types';
 
 export type EstadoCotizacion = 'EN_EVALUACION' | 'ELEGIDA' | 'DESCARTADA';
 
 export interface Cotizacion {
   id: number;
-  solicitudId: number;
+  requerimientoDetalleId: number | null;
   proveedorId: number;
-  precioOfertadoTotal: number;
+  cantidad: number;
+  precioUnitario: number;
+  tiempoEntregaDias: number | null;
+  marca: string | null;
+  observaciones: string | null;
   archivoRespaldoUrl?: string;
   estado: EstadoCotizacion;
-  solicitud?: SolicitudCompra;
   proveedor?: Proveedor;
+  requerimientoDetalle?: {
+    id: number;
+    materialId: number;
+    cantidadSolicitada: number;
+    material?: Material;
+  };
 }
 
 export interface CreateCotizacionDto {
-  solicitudId: number;
+  requerimientoDetalleId: number;
   proveedorId: number;
-  precioOfertadoTotal: number;
+  cantidad: number;
+  precioUnitario: number;
+  tiempoEntregaDias?: number;
+  marca?: string;
+  observaciones?: string;
   archivoRespaldoUrl?: string;
-  estado?: EstadoCotizacion;
 }
