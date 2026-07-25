@@ -40,14 +40,6 @@ export default function ComprasPage() {
     },
   });
 
-  const { data: itemsEnCompras = [] } = useQuery({
-    queryKey: ['compras-items-en-compras'],
-    queryFn: async () => {
-      const res = await comprasApi.getItemsEnCompras();
-      return res.data || [];
-    },
-  });
-
   const materialesDisponibles = materiales;
 
   const crear = useMutation({
