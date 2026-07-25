@@ -32,7 +32,7 @@ export default function TraspasosPage() {
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [traspasoACancelar, setTraspasoACancelar] = useState<Traspaso | null>(null);
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
   const { enviar, recibir, cancelar, autorizar } = useTraspasos();
   const { bodegas } = useBodegas();
 
@@ -115,6 +115,21 @@ export default function TraspasosPage() {
   const bodegaOptions: ComboboxOption[] = bodegas.map((b: Bodega) => ({ id: b.id, nombre: b.nombre }));
   const materialOptions: ComboboxOption[] = materiales.map((m: Material) => ({ id: m.id, nombre: `${m.sku} - ${m.nombre}` }));
 
+  const userBodegaIds = (user as any)?.bodegaIds || [];
+  const isBodeguero = hasRole(['BODEGUERO']);
+
+  const porEntregar = isBodeguero
+    ? traspasos.filter(t =>
+        (t.estado === 'PENDIENTE' || t.estado === 'EN_TRANSITO') && userBodegaIds.includes(t.bodegaOrigenId)
+      )
+    : [];
+
+  const porRecibir = isBodeguero
+    ? traspasos.filter(t =>
+        t.estado === 'EN_TRANSITO' && userBodegaIds.includes(t.bodegaDestinoId)
+      )
+    : [];
+
   const columns = [
     { key: 'codigo', header: 'Código', render: (t: Traspaso) => <span className="font-mono text-sm text-accent">{t.codigo}</span> },
     { key: 'origen', header: 'Origen', render: (t: Traspaso) => <span className="text-text-primary">{t.bodegaOrigen?.nombre ?? '-'}</span> },
@@ -153,9 +168,43 @@ export default function TraspasosPage() {
         </div>
       </div>
 
-      <div className="bg-surface rounded-xl border border-border-subtle p-6">
-        <DataTable columns={columns} data={traspasos} loading={isLoading} searchable searchKeys={['codigo']} searchPlaceholder="Buscar por código..." />
-      </div>
+      {isBodeguero && (
+        <div className="space-y-6">
+          {porEntregar.length > 0 && (
+            <div className="bg-surface rounded-xl border border-border-subtle p-6">
+              <h3 className="text-sm font-bold text-text-primary mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-warning" />
+                Por Entregar ({porEntregar.length})
+              </h3>
+              <p className="text-xs text-text-muted mb-4">Traslados salientes que debes preparar y enviar.</p>
+              <DataTable columns={columns} data={porEntregar} loading={isLoading} searchable searchKeys={['codigo']} searchPlaceholder="Buscar por código..." />
+            </div>
+          )}
+
+          {porRecibir.length > 0 && (
+            <div className="bg-surface rounded-xl border border-border-subtle p-6">
+              <h3 className="text-sm font-bold text-text-primary mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-info" />
+                Por Recibir ({porRecibir.length})
+              </h3>
+              <p className="text-xs text-text-muted mb-4">Traslados entrantes en tránsito hacia tu bodega.</p>
+              <DataTable columns={columns} data={porRecibir} loading={isLoading} searchable searchKeys={['codigo']} searchPlaceholder="Buscar por código..." />
+            </div>
+          )}
+
+          {porEntregar.length === 0 && porRecibir.length === 0 && (
+            <div className="bg-surface rounded-xl border border-border-subtle p-6">
+              <p className="text-sm text-text-muted text-center">No hay traspasos para tus bodegas.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!isBodeguero && (
+        <div className="bg-surface rounded-xl border border-border-subtle p-6">
+          <DataTable columns={columns} data={traspasos} loading={isLoading} searchable searchKeys={['codigo']} searchPlaceholder="Buscar por código..." />
+        </div>
+      )}
 
       <Modal open={detailOpen} onClose={() => setDetailOpen(false)} title={`Detalle — ${selected?.codigo || ''}`} size="lg">
         {selected && (

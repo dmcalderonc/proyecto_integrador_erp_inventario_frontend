@@ -23,7 +23,7 @@ export default function DespachosPage() {
   const { proyectos } = useProyectos();
   const { materiales } = useMateriales();
 
-  const reqAprobados = requirements.filter(r => r.estado === 'APROBADO');
+  const reqAprobados = requirements.filter(r => r.estado === 'APROBADO' || r.estado === 'PARCIALMENTE_ATENDIDO');
 
   const [ordenCompraId, setOrdenCompraId] = useState('');
   const [requerimientoId, setRequerimientoId] = useState('');

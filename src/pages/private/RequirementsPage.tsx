@@ -284,10 +284,11 @@ export default function RequirementsPage() {
   const renderDetailItem = (det: RequirementDetalle) => {
     const cfg = itemStatusConfig[det.estadoItem || 'PENDIENTE'];
     const isPendiente = det.estadoItem === 'PENDIENTE';
+    const isDespachado = det.estadoItem === 'DESPACHADO';
     const canEvaluar = isPendiente && hasRole(['ADMIN']) && selectedReq?.estado === 'PENDIENTE';
 
     return (
-      <tr key={det.id} className="border-b border-border-subtle/50 hover:bg-elevated/30 transition-colors">
+      <tr key={det.id} className={`border-b border-border-subtle/50 transition-colors ${isDespachado ? 'opacity-50 bg-success/5' : 'hover:bg-elevated/30'}`}>
         <td className="py-3 px-3">
           <div className="flex flex-col">
             <span className="text-text-primary font-medium text-sm">{det.material?.nombre ?? `Material #${det.materialId}`}</span>
@@ -319,7 +320,12 @@ export default function RequirementsPage() {
               </button>
             </div>
           )}
-          {!canEvaluar && det.estadoItem && (
+          {isDespachado && (
+            <span className="text-success text-xs font-semibold flex items-center gap-1">
+              <CheckCircle size={13} /> Despachado
+            </span>
+          )}
+          {!canEvaluar && !isDespachado && det.estadoItem && (
             <span className="text-text-muted text-xs">{cfg?.label}</span>
           )}
         </td>

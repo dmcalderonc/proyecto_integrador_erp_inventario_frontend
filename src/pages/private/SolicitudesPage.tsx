@@ -1,29 +1,47 @@
 import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSolicitudes } from '../../store/useSolicitudes';
 import { useProyectos } from '../../store/useProyectos';
 import { useMateriales } from '../../store/useMateriales';
+import { useProveedores } from '../../store/useProveedores';
 import { useAuth } from '../../contexts/AuthContext';
+import { solicitudesApi } from '../../api/solicitudes.api';
+import { cotizacionesApi } from '../../api/cotizaciones.api';
 import type { SolicitudCompra, UpdateSolicitudDto, EstadoSolicitud, NivelPrioridad } from '../../types';
+import type { Cotizacion, CreateCotizacionDto } from '../../types/cotizacion.types';
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
-import { Eye, Pencil, Plus, Trash2, CheckCircle } from 'lucide-react';
+import { SmartCombobox } from '../../components/ui/SmartCombobox';
+import type { ComboboxOption } from '../../components/ui/SmartCombobox';
+import { Eye, Pencil, Plus, Trash2, CheckCircle, FileText } from 'lucide-react';
 import { getBadgeStyle } from '../../lib/design-tokens';
+import toast from 'react-hot-toast';
 
 interface DetalleForm {
   materialId: number;
   cantidadRequerida: number;
 }
 
+const solicitudEstadoStyle: Record<string, string> = {
+  PENDIENTE: 'bg-warning/10 text-warning border-warning/20',
+  COTIZANDO: 'bg-info/10 text-info border-info/20',
+  APROBADA: 'bg-success/10 text-success border-success/20',
+  RECHAZADA: 'bg-danger/10 text-danger border-danger/20',
+  PROCESADO: 'bg-purple-400/10 text-purple-400 border-purple-400/20',
+};
+
 export default function SolicitudesPage() {
   const { hasRole, user } = useAuth();
   const { proyectos } = useProyectos();
   const { materiales } = useMateriales();
+  const { proveedores } = useProveedores();
+  const queryClient = useQueryClient();
 
   const [filtroEstado, setFiltroEstado] = useState<string>('');
   const [filtroProyecto, setFiltroProyecto] = useState<string>('');
 
-  const { solicitudes, isLoading, crear, actualizar, cotizar, aprobar, procesar } = useSolicitudes({
+  const { solicitudes, isLoading, crear, actualizar, aprobar, procesar } = useSolicitudes({
     estado: filtroEstado || undefined,
     proyectoId: filtroProyecto || undefined,
   });
@@ -31,6 +49,7 @@ export default function SolicitudesPage() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [cotizarModalOpen, setCotizarModalOpen] = useState(false);
   const [selected, setSelected] = useState<SolicitudCompra | null>(null);
   const [editForm, setEditForm] = useState<UpdateSolicitudDto>({});
 
@@ -39,6 +58,41 @@ export default function SolicitudesPage() {
     usuarioSolicitanteId: user?.id ?? '',
     nivelPrioridad: 'MEDIA' as NivelPrioridad,
     detalles: [] as DetalleForm[],
+  });
+
+  const [cotForm, setCotForm] = useState({
+    proveedorId: null as ComboboxOption | null,
+    cantidad: '',
+    precioUnitario: '',
+    tiempoEntrega: '',
+    marca: '',
+    observaciones: '',
+  });
+
+  const proveedorOptions: ComboboxOption[] = proveedores.map((p: any) => ({ id: p.id, nombre: p.razon_social }));
+
+  const { data: selectedDetail, isLoading: loadingDetail } = useQuery({
+    queryKey: ['solicitud-detail', selected?.id],
+    queryFn: async () => {
+      if (!selected) return null;
+      const { data } = await solicitudesApi.getById(selected.id);
+      return data;
+    },
+    enabled: !!selected && detailModalOpen,
+  });
+
+  const crearCotizacion = useMutation({
+    mutationFn: (dto: CreateCotizacionDto) => cotizacionesApi.create(dto),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['solicitudes'] });
+      queryClient.invalidateQueries({ queryKey: ['solicitud-detail'] });
+      toast.success('Cotización creada. Estado actualizado a COTIZANDO automáticamente.');
+      setCotizarModalOpen(false);
+      resetCotForm();
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al crear cotización');
+    },
   });
 
   const openCreate = () => {
@@ -60,6 +114,37 @@ export default function SolicitudesPage() {
   const openDetail = (item: SolicitudCompra) => {
     setSelected(item);
     setDetailModalOpen(true);
+  };
+
+  const openCotizar = (item: SolicitudCompra) => {
+    setSelected(item);
+    setCotForm({ proveedorId: null, cantidad: '', precioUnitario: '', tiempoEntrega: '', marca: '', observaciones: '' });
+    setCotizarModalOpen(true);
+  };
+
+  const resetCotForm = () => {
+    setCotForm({ proveedorId: null, cantidad: '', precioUnitario: '', tiempoEntrega: '', marca: '', observaciones: '' });
+  };
+
+  const handleSubmitCotizacion = () => {
+    if (!cotForm.proveedorId) { toast.error('Selecciona un proveedor'); return; }
+    if (!cotForm.cantidad || Number(cotForm.cantidad) <= 0) { toast.error('Ingresa una cantidad válida'); return; }
+    if (!cotForm.precioUnitario || Number(cotForm.precioUnitario) <= 0) { toast.error('Ingresa un precio válido'); return; }
+    if (!selected) return;
+
+    const primerDetalle = selected.detalles?.[0];
+    if (!primerDetalle) { toast.error('La solicitud no tiene detalles'); return; }
+
+    crearCotizacion.mutate({
+      requerimientoDetalleId: 0,
+      proveedorId: Number(cotForm.proveedorId.id),
+      cantidad: Number(cotForm.cantidad),
+      precioUnitario: Number(cotForm.precioUnitario),
+      tiempoEntregaDias: cotForm.tiempoEntrega ? Number(cotForm.tiempoEntrega) : undefined,
+      marca: cotForm.marca.trim() || undefined,
+      observaciones: cotForm.observaciones.trim() || undefined,
+      solicitudCompraId: selected.id,
+    });
   };
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
@@ -123,15 +208,15 @@ export default function SolicitudesPage() {
     {
       key: 'estado', header: 'Estado',
       render: (item: SolicitudCompra) => (
-        <span className={`inline-block px-2.5 py-1 rounded-xl text-xs font-semibold border ${getBadgeStyle(item.estado)}`}>
-          {item.estado}
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-semibold border ${solicitudEstadoStyle[item.estado] || getBadgeStyle(item.estado)}`}>
+          {item.estado?.replace(/_/g, ' ')}
         </span>
       ),
     },
     {
       key: 'nivelPrioridad', header: 'Prioridad',
       render: (item: SolicitudCompra) => (
-        <span className={`inline-block px-2.5 py-1 rounded-xl text-xs font-semibold border ${getBadgeStyle(item.nivelPrioridad)}`}>
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-semibold border ${getBadgeStyle(item.nivelPrioridad)}`}>
           {item.nivelPrioridad}
         </span>
       ),
@@ -140,9 +225,9 @@ export default function SolicitudesPage() {
       key: 'acciones', header: 'Acciones',
       render: (item: SolicitudCompra) => (
         <div className="flex gap-1.5 justify-end">
-          {hasRole(['COMPRADOR']) && item.estado === 'PENDIENTE' && (
-            <Button variant="primary" size="sm" onClick={() => cotizar.mutateAsync(item.id)}>
-              Marcar como Cotizando
+          {hasRole(['COMPRADOR']) && (item.estado === 'PENDIENTE' || item.estado === 'COTIZANDO') && (
+            <Button variant="primary" size="sm" onClick={() => openCotizar(item)} className="gap-1">
+              <FileText size={14} /> Subir Cotización
             </Button>
           )}
           {hasRole(['ADMIN']) && item.estado === 'COTIZANDO' && (
@@ -195,6 +280,7 @@ export default function SolicitudesPage() {
             <option value="COTIZANDO">COTIZANDO</option>
             <option value="APROBADA">APROBADA</option>
             <option value="RECHAZADA">RECHAZADA</option>
+            <option value="PROCESADO">PROCESADO</option>
           </select>
         </div>
 
@@ -316,20 +402,6 @@ export default function SolicitudesPage() {
       <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)} title={`Editar Solicitud — ${selected?.codigo ?? ''}`}>
         <form onSubmit={handleEditSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-text-primary mb-1.5">Estado</label>
-            <select
-              value={editForm.estado}
-              onChange={e => setEditForm({ ...editForm, estado: e.target.value as EstadoSolicitud })}
-              className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent transition-all"
-            >
-              <option value="PENDIENTE">PENDIENTE</option>
-              <option value="COTIZANDO">COTIZANDO</option>
-              <option value="APROBADA">APROBADA</option>
-              <option value="RECHAZADA">RECHAZADA</option>
-            </select>
-          </div>
-
-          <div>
             <label className="block text-sm font-medium text-text-primary mb-1.5">Nivel de Prioridad</label>
             <select
               value={editForm.nivelPrioridad}
@@ -353,18 +425,20 @@ export default function SolicitudesPage() {
         </form>
       </Modal>
 
-      <Modal open={detailModalOpen} onClose={() => setDetailModalOpen(false)} title={`Detalle — ${selected?.codigo ?? ''}`}>
+      <Modal open={detailModalOpen} onClose={() => setDetailModalOpen(false)} title={`Detalle — ${selected?.codigo ?? ''}`} size="lg">
         {selected && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-base p-4 rounded-xl border border-border-subtle text-sm">
-              <div><span className="font-semibold text-text-primary">Estado:</span> <span className={`inline-block ml-2 px-2.5 py-0.5 rounded-xl text-xs font-bold border ${getBadgeStyle(selected.estado)}`}>{selected.estado}</span></div>
-              <div><span className="font-semibold text-text-primary">Prioridad:</span> <span className={`inline-block ml-2 px-2.5 py-0.5 rounded-xl text-xs font-bold border ${getBadgeStyle(selected.nivelPrioridad)}`}>{selected.nivelPrioridad}</span></div>
-              <div><span className="font-semibold text-text-primary">Proyecto:</span> <span className="text-text-secondary ml-1">{selected.proyecto?.nombre ?? '-'}</span></div>
-              <div><span className="font-semibold text-text-primary">Solicitante:</span> <span className="text-text-secondary ml-1">{selected.usuarioSolicitante?.nombre ?? '-'}</span></div>
-              <div className="sm:col-span-2"><span className="font-semibold text-text-primary">Fecha:</span> <span className="text-text-secondary ml-1">{new Date(selected.fechaSolicitud).toLocaleString()}</span></div>
+              <div><span className="font-semibold text-text-primary">Estado:</span> <span className={`inline-flex items-center ml-2 px-2.5 py-0.5 rounded-xl text-xs font-bold border ${solicitudEstadoStyle[selectedDetail?.estado || selected.estado] || getBadgeStyle(selectedDetail?.estado || selected.estado)}`}>{(selectedDetail?.estado || selected.estado)?.replace(/_/g, ' ')}</span></div>
+              <div><span className="font-semibold text-text-primary">Prioridad:</span> <span className={`inline-flex items-center ml-2 px-2.5 py-0.5 rounded-xl text-xs font-bold border ${getBadgeStyle(selectedDetail?.nivelPrioridad || selected.nivelPrioridad)}`}>{selectedDetail?.nivelPrioridad || selected.nivelPrioridad}</span></div>
+              <div><span className="font-semibold text-text-primary">Proyecto:</span> <span className="text-text-secondary ml-1">{selectedDetail?.proyecto?.nombre ?? selected.proyecto?.nombre ?? '-'}</span></div>
+              <div><span className="font-semibold text-text-primary">Solicitante:</span> <span className="text-text-secondary ml-1">{selectedDetail?.usuarioSolicitante?.nombre ?? selected.usuarioSolicitante?.nombre ?? '-'}</span></div>
+              <div className="sm:col-span-2"><span className="font-semibold text-text-primary">Fecha:</span> <span className="text-text-secondary ml-1">{new Date(selectedDetail?.fechaSolicitud || selected.fechaSolicitud).toLocaleString()}</span></div>
             </div>
 
-            {selected.detalles && selected.detalles.length > 0 && (
+            {loadingDetail ? (
+              <p className="text-text-muted text-sm text-center py-4">Cargando detalles...</p>
+            ) : selectedDetail?.detalles && selectedDetail.detalles.length > 0 && (
               <div>
                 <h4 className="font-bold text-text-primary text-base mb-3">Materiales Requeridos</h4>
                 <div className="overflow-x-auto rounded-xl border border-border-subtle">
@@ -376,7 +450,7 @@ export default function SolicitudesPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border-subtle bg-surface">
-                      {selected.detalles.map((d, i) => (
+                      {selectedDetail.detalles.map((d: any, i: number) => (
                         <tr key={i} className="hover:bg-elevated/50 transition-colors">
                           <td className="px-4 py-3 text-text-primary font-medium">{d.material?.nombre ?? `Material #${d.materialId}`}</td>
                           <td className="text-right px-4 py-3 font-bold text-success">{d.cantidadRequerida}</td>
@@ -388,7 +462,7 @@ export default function SolicitudesPage() {
               </div>
             )}
 
-            {selected.cotizaciones && selected.cotizaciones.length > 0 && (
+            {selectedDetail?.cotizaciones && selectedDetail.cotizaciones.length > 0 && (
               <div>
                 <h4 className="font-bold text-text-primary text-base mb-3">Cotizaciones Recibidas</h4>
                 <div className="overflow-x-auto rounded-xl border border-border-subtle">
@@ -396,18 +470,22 @@ export default function SolicitudesPage() {
                     <thead>
                       <tr className="bg-base text-text-primary border-b border-border-subtle">
                         <th className="text-left px-4 py-3 font-semibold">Proveedor</th>
-                        <th className="text-right px-4 py-3 font-semibold">Precio Total</th>
+                        <th className="text-center px-4 py-3 font-semibold">Cantidad</th>
+                        <th className="text-right px-4 py-3 font-semibold">P. Unitario</th>
+                        <th className="text-right px-4 py-3 font-semibold">Total</th>
                         <th className="text-center px-4 py-3 font-semibold">Estado</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border-subtle bg-surface">
-                      {selected.cotizaciones.map((c, i) => (
+                      {selectedDetail.cotizaciones.map((c: Cotizacion, i: number) => (
                         <tr key={i} className="hover:bg-elevated/50 transition-colors">
                           <td className="px-4 py-3 text-text-primary font-medium">{c.proveedor?.razon_social ?? `Proveedor #${c.proveedorId}`}</td>
+                          <td className="text-center px-4 py-3 text-text-primary">{c.cantidad}</td>
+                          <td className="text-right px-4 py-3 text-text-secondary">${Number(c.precioUnitario).toFixed(2)}</td>
                           <td className="text-right px-4 py-3 font-bold text-success">${Number(c.precioUnitario * c.cantidad).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
                           <td className="text-center px-4 py-3">
-                            <span className={`inline-block px-2.5 py-0.5 rounded-xl text-xs font-semibold border ${getBadgeStyle(c.estado)}`}>
-                              {c.estado}
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-xl text-xs font-semibold border ${getBadgeStyle(c.estado)}`}>
+                              {c.estado?.replace(/_/g, ' ')}
                             </span>
                           </td>
                         </tr>
@@ -418,11 +496,103 @@ export default function SolicitudesPage() {
               </div>
             )}
 
-            {(!selected.detalles || selected.detalles.length === 0) && (!selected.cotizaciones || selected.cotizaciones.length === 0) && (
+            {(!selectedDetail?.detalles || selectedDetail.detalles.length === 0) && (!selectedDetail?.cotizaciones || selectedDetail.cotizaciones.length === 0) && (
               <p className="text-sm text-text-muted italic text-center py-2">Sin detalles ni cotizaciones asociadas.</p>
             )}
           </div>
         )}
+      </Modal>
+
+      <Modal open={cotizarModalOpen} onClose={() => setCotizarModalOpen(false)} title={`Subir Cotización — ${selected?.codigo ?? ''}`} size="md">
+        <div className="space-y-4">
+          <div className="bg-base rounded-xl border border-border-subtle p-3">
+            <p className="text-xs text-text-muted mb-1">Materiales de la solicitud</p>
+            {selected?.detalles?.map((d: any, i: number) => (
+              <p key={i} className="text-sm text-text-primary font-medium">{d.material?.nombre ?? `Material #${d.materialId}`} — {d.cantidadRequerida} uds</p>
+            ))}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">Proveedor *</label>
+            <SmartCombobox
+              options={proveedorOptions}
+              value={cotForm.proveedorId}
+              onChange={(opt) => setCotForm(f => ({ ...f, proveedorId: opt }))}
+              placeholder="Seleccionar proveedor..."
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1.5">Cantidad *</label>
+              <input
+                type="number"
+                min="1"
+                value={cotForm.cantidad}
+                onChange={(e) => setCotForm(f => ({ ...f, cantidad: e.target.value }))}
+                className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1.5">Precio Unitario *</label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={cotForm.precioUnitario}
+                onChange={(e) => setCotForm(f => ({ ...f, precioUnitario: e.target.value }))}
+                className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1.5">Tiempo Entrega (días)</label>
+              <input
+                type="number"
+                min="0"
+                value={cotForm.tiempoEntrega}
+                onChange={(e) => setCotForm(f => ({ ...f, tiempoEntrega: e.target.value }))}
+                className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1.5">Marca</label>
+              <input
+                type="text"
+                value={cotForm.marca}
+                onChange={(e) => setCotForm(f => ({ ...f, marca: e.target.value }))}
+                placeholder="Marca del material"
+                className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent transition-all"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">Observaciones</label>
+            <textarea
+              value={cotForm.observaciones}
+              onChange={(e) => setCotForm(f => ({ ...f, observaciones: e.target.value }))}
+              rows={2}
+              placeholder="Notas adicionales..."
+              className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent transition-all resize-none"
+            />
+          </div>
+
+          {cotForm.cantidad && cotForm.precioUnitario && (
+            <div className="bg-base rounded-xl border border-border-subtle p-3 text-sm">
+              <p className="text-text-secondary">Subtotal: <span className="font-semibold text-text-primary">${(Number(cotForm.cantidad) * Number(cotForm.precioUnitario)).toFixed(2)}</span></p>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-border-subtle">
+            <Button variant="secondary" onClick={() => setCotizarModalOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSubmitCotizacion} loading={crearCotizacion.isPending}>
+              Crear Cotización
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

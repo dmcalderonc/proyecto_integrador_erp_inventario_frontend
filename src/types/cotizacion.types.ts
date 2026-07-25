@@ -13,6 +13,7 @@ export interface Cotizacion {
   marca: string | null;
   observaciones: string | null;
   archivoRespaldoUrl?: string;
+  solicitudCompraId?: number | null;
   estado: EstadoCotizacion;
   proveedor?: Proveedor;
   requerimientoDetalle?: {
@@ -32,4 +33,5 @@ export interface CreateCotizacionDto {
   marca?: string;
   observaciones?: string;
   archivoRespaldoUrl?: string;
+  solicitudCompraId?: number;
 }
