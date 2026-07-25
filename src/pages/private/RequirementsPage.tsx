@@ -4,8 +4,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useRequirements } from '../../store/useRequirements';
 import { useProyectos } from '../../store/useProyectos';
 import { useBodegas } from '../../store/useBodegas';
+import { useProveedores } from '../../store/useProveedores';
 import { materialesApi } from '../../api/materiales.api';
 import { requirementsApi } from '../../api/requirements.api';
+import { comprasApi } from '../../api/compras.api';
 import type { Requirement, RequirementDetalle } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
@@ -64,6 +66,10 @@ export default function RequirementsPage() {
   const { crear } = useRequirements();
   const { proyectos } = useProyectos();
   const { bodegas } = useBodegas();
+  const { proveedores } = useProveedores();
+
+  const [modalOCOpen, setModalOCOpen] = useState(false);
+  const [proveedorOC, setProveedorOC] = useState<ComboboxOption | null>(null);
 
   const { data: materiales = [] } = useQuery({
     queryKey: ['materialesAll'],
@@ -100,6 +106,22 @@ export default function RequirementsPage() {
     },
   });
 
+  const crearOCDesdeRequerimiento = useMutation({
+    mutationFn: async ({ requirementId, proveedorId }: { requirementId: number; proveedorId: number }) => {
+      const { data } = await comprasApi.createFromRequirement(requirementId, { proveedorId });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['requirements'] });
+      queryClient.invalidateQueries({ queryKey: ['compras'] });
+      toast.success('Orden de compra creada desde requerimiento');
+      setModalOCOpen(false);
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al crear OC desde requerimiento');
+    },
+  });
+
   const openDetail = async (req: Requirement) => {
     const { data } = await requirementsApi.getById(req.id);
     setSelectedReq(data);
@@ -112,6 +134,20 @@ export default function RequirementsPage() {
     setProyectoSeleccionado(null);
     setBodegaSeleccionada(null);
     setModalOpen(true);
+  };
+
+  const openOCModal = () => {
+    setProveedorOC(null);
+    setModalOCOpen(true);
+  };
+
+  const handleSubmitOC = () => {
+    if (!proveedorOC) { toast.error('Selecciona un proveedor'); return; }
+    if (!selectedReq) { toast.error('No hay requerimiento seleccionado'); return; }
+    crearOCDesdeRequerimiento.mutate({
+      requirementId: selectedReq.id,
+      proveedorId: Number(proveedorOC.id),
+    });
   };
 
   const addDetalle = () => setDetalles([...detalles, emptyDetalle()]);
@@ -143,6 +179,7 @@ export default function RequirementsPage() {
   const materialOptions: ComboboxOption[] = materiales.map((m: any) => ({ id: m.id, nombre: `${m.sku} - ${m.nombre}` }));
   const proyectoOptions: ComboboxOption[] = proyectos.map((p: any) => ({ id: p.id, nombre: `${p.codigoProyecto || 'PROY'} - ${p.nombre}` }));
   const bodegaOptions: ComboboxOption[] = bodegas.map((b: any) => ({ id: b.id, nombre: b.nombre }));
+  const proveedorOptions: ComboboxOption[] = proveedores.map((p: any) => ({ id: p.id, nombre: p.razon_social }));
 
   const getItemCounts = (req: Requirement) => {
     const total = req.detalles?.length || 0;
@@ -374,6 +411,14 @@ export default function RequirementsPage() {
                 </div>
               </div>
             )}
+
+            {selectedReq.detalles?.some(d => d.estadoItem === 'EN_COMPRAS') && hasRole(['ADMIN', 'COMPRADOR']) && (
+              <div className="flex justify-end pt-3 border-t border-border-subtle">
+                <Button onClick={openOCModal} className="gap-1.5">
+                  <ShoppingCart size={16} /> Crear OC desde Requerimiento
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </Modal>
@@ -441,6 +486,47 @@ export default function RequirementsPage() {
           <div className="flex justify-end gap-3 pt-4 border-t border-border-subtle">
             <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
             <Button onClick={handleSubmit} loading={crear.isPending}>Crear Requerimiento</Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        open={modalOCOpen}
+        onClose={() => setModalOCOpen(false)}
+        title={`Crear OC — REQ-${selectedReq ? String(selectedReq.id).padStart(3, '0') : ''}`}
+        size="md"
+      >
+        <div className="space-y-4">
+          <div className="bg-base rounded-xl border border-border-subtle p-4">
+            <p className="text-xs text-text-muted mb-2 font-medium uppercase tracking-wide">Ítems a incluir en la OC</p>
+            <div className="space-y-2">
+              {selectedReq?.detalles?.filter(d => d.estadoItem === 'EN_COMPRAS').map(det => (
+                <div key={det.id} className="flex items-center justify-between py-2 px-3 bg-elevated/50 rounded-lg">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-text-primary">{det.material?.nombre ?? `Material #${det.materialId}`}</span>
+                    <span className="text-xs text-text-muted font-mono">{det.material?.sku ?? '-'}</span>
+                  </div>
+                  <span className="text-sm font-semibold text-info">{det.cantidadSolicitada} uds</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">Proveedor *</label>
+            <SmartCombobox
+              options={proveedorOptions}
+              value={proveedorOC}
+              onChange={setProveedorOC}
+              placeholder="Seleccionar proveedor..."
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-border-subtle">
+            <Button variant="secondary" onClick={() => setModalOCOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSubmitOC} loading={crearOCDesdeRequerimiento.isPending}>
+              <ShoppingCart size={16} /> Crear Orden de Compra
+            </Button>
           </div>
         </div>
       </Modal>
