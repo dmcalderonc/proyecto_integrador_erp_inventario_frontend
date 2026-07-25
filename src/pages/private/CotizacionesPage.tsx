@@ -194,25 +194,6 @@ return (
           )}
         </div>
       </div>
-        {selectedReqId && (
-          <div className="flex flex-wrap items-center gap-3">
-            <select
-              value={filtroEstado}
-              onChange={e => setFiltroEstado(e.target.value)}
-              className="px-3 py-2 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent transition-all"
-            >
-              <option value="">Todos los estados</option>
-              <option value="EN_EVALUACION">En Evaluación</option>
-              <option value="ELEGIDA">Elegida</option>
-              <option value="DESCARTADA">Descartada</option>
-            </select>
-<Button variant="secondary" onClick={() => setSelectedReqId(null)} className="gap-1.5">
-              <ArrowLeft size={16} /> Volver
-            </Button>
-          </div>
-        </div>
-        )}
-      </div>
 
       {!selectedReqId ? (
         <div className="bg-surface rounded-xl border border-border-subtle p-6">
