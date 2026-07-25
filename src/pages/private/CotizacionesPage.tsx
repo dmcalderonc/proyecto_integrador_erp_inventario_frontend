@@ -9,7 +9,7 @@ import { Button } from '../../components/ui/Button';
 import { SmartCombobox } from '../../components/ui/SmartCombobox';
 import type { ComboboxOption } from '../../components/ui/SmartCombobox';
 import {
-  ShoppingCart, Eye, XCircle, Plus, Trash2, Check, ArrowLeft, Filter,
+  ShoppingCart, Eye, XCircle, Plus, Trash2, Check, ArrowLeft,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 

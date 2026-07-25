@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useSolicitudes } from '../../store/useSolicitudes';
 import { useProyectos } from '../../store/useProyectos';
 import { useMateriales } from '../../store/useMateriales';
 import { useAuth } from '../../contexts/AuthContext';
 import { solicitudesApi } from '../../api/solicitudes.api';
 import type { SolicitudCompra, UpdateSolicitudDto, NivelPrioridad } from '../../types';
+import type { Cotizacion } from '../../types/cotizacion.types';
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
@@ -29,12 +30,11 @@ export default function SolicitudesPage() {
   const { hasRole, user } = useAuth();
   const { proyectos } = useProyectos();
   const { materiales } = useMateriales();
-  const queryClient = useQueryClient();
 
   const [filtroEstado, setFiltroEstado] = useState<string>('');
   const [filtroProyecto, setFiltroProyecto] = useState<string>('');
 
-const { solicitudes, isLoading, crear, actualizar, aprobar, procesar } = useSolicitudes({
+  const { solicitudes, isLoading, crear, actualizar, aprobar, procesar } = useSolicitudes({
     estado: filtroEstado || undefined,
     proyectoId: filtroProyecto || undefined,
   });
@@ -52,6 +52,26 @@ const { solicitudes, isLoading, crear, actualizar, aprobar, procesar } = useSoli
     detalles: [] as DetalleForm[],
   });
 
+  const { data: selectedDetail, isLoading: loadingDetail } = useQuery({
+    queryKey: ['solicitud-detail', selected?.id],
+    queryFn: async () => {
+      if (!selected) return null;
+      const { data } = await solicitudesApi.getById(selected.id);
+      return data;
+    },
+    enabled: !!selected && detailModalOpen,
+  });
+
+  const openCreate = () => {
+    setCreateForm({
+      proyectoId: '',
+      usuarioSolicitanteId: user?.id ?? '',
+      nivelPrioridad: 'MEDIA',
+      detalles: [{ materialId: 0, cantidadRequerida: 1 }],
+    });
+    setCreateModalOpen(true);
+  };
+
   const openEdit = (item: SolicitudCompra) => {
     setSelected(item);
     setEditForm({ estado: item.estado, nivelPrioridad: item.nivelPrioridad });
@@ -61,37 +81,6 @@ const { solicitudes, isLoading, crear, actualizar, aprobar, procesar } = useSoli
   const openDetail = (item: SolicitudCompra) => {
     setSelected(item);
     setDetailModalOpen(true);
-  };
-
-  const openCotizar = (item: SolicitudCompra) => {
-    setSelected(item);
-    setCotForm({ proveedorId: null, cantidad: '', precioUnitario: '', tiempoEntrega: '', marca: '', observaciones: '' });
-    setCotizarModalOpen(true);
-  };
-
-  const resetCotForm = () => {
-    setCotForm({ proveedorId: null, cantidad: '', precioUnitario: '', tiempoEntrega: '', marca: '', observaciones: '' });
-  };
-
-  const handleSubmitCotizacion = () => {
-    if (!cotForm.proveedorId) { toast.error('Selecciona un proveedor'); return; }
-    if (!cotForm.cantidad || Number(cotForm.cantidad) <= 0) { toast.error('Ingresa una cantidad válida'); return; }
-    if (!cotForm.precioUnitario || Number(cotForm.precioUnitario) <= 0) { toast.error('Ingresa un precio válido'); return; }
-    if (!selected) return;
-
-    const primerDetalle = selected.detalles?.[0];
-    if (!primerDetalle) { toast.error('La solicitud no tiene detalles'); return; }
-
-    crearCotizacion.mutate({
-      requerimientoDetalleId: 0,
-      proveedorId: Number(cotForm.proveedorId.id),
-      cantidad: Number(cotForm.cantidad),
-      precioUnitario: Number(cotForm.precioUnitario),
-      tiempoEntregaDias: cotForm.tiempoEntrega ? Number(cotForm.tiempoEntrega) : undefined,
-      marca: cotForm.marca.trim() || undefined,
-      observaciones: cotForm.observaciones.trim() || undefined,
-      solicitudCompraId: selected.id,
-    });
   };
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
@@ -110,7 +99,7 @@ const { solicitudes, isLoading, crear, actualizar, aprobar, procesar } = useSoli
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-if (!selected) return;
+    if (!selected) return;
     await actualizar.mutateAsync({ id: selected.id, dto: editForm });
     setEditModalOpen(false);
     setSelected(null);
@@ -168,6 +157,31 @@ if (!selected) return;
         </span>
       ),
     },
+    ...(!hasRole(['COMPRADOR']) ? [{
+      key: 'acciones', header: 'Acciones',
+      render: (item: SolicitudCompra) => (
+        <div className="flex gap-1.5 justify-end">
+          {hasRole(['ADMIN']) && item.estado === 'COTIZANDO' && (
+            <Button variant="primary" size="sm" onClick={() => aprobar.mutateAsync(item.id)}>
+              <CheckCircle size={14} /> Aprobar
+            </Button>
+          )}
+          {hasRole(['ADMIN']) && item.estado === 'APROBADA' && (
+            <Button variant="primary" size="sm" onClick={() => procesar.mutateAsync(item.id)}>
+              <CheckCircle size={14} /> Procesar
+            </Button>
+          )}
+          {hasRole(['SOLICITANTE']) && item.estado === 'PENDIENTE' && item.usuarioSolicitanteId === user?.id && (
+            <Button variant="secondary" size="sm" onClick={() => openEdit(item)}>
+              <Pencil size={14} className="text-warning" /> Editar
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={() => openDetail(item)}>
+            <Eye size={14} className="text-info" /> Ver
+          </Button>
+        </div>
+      ),
+    }] : []),
   ];
 
   return (
