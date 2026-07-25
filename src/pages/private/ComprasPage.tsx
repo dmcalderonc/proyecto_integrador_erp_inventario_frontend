@@ -40,6 +40,21 @@ export default function ComprasPage() {
     },
   });
 
+  const { data: itemsEnCompras = [] } = useQuery({
+    queryKey: ['compras-items-en-compras'],
+    queryFn: async () => {
+      const res = await comprasApi.getItemsEnCompras();
+      return res.data || [];
+    },
+  });
+
+  const materialesDisponibles = (() => {
+    const materialIds = new Set(
+      (itemsEnCompras as any[]).map((item: any) => item.materialId).filter(Boolean),
+    );
+    return materiales.filter(m => materialIds.has(m.id));
+  })();
+
   const crear = useMutation({
     mutationFn: (dto: CrearCompraDto) => comprasApi.create(dto),
     onSuccess: () => {
@@ -75,12 +90,12 @@ export default function ComprasPage() {
   });
 
   const recibirItem = useMutation({
-    mutationFn: ({ ocId, detalleId, cantidadRecibida }: { ocId: number; detalleId: number; cantidadRecibida: number }) =>
-      comprasApi.recibirItem(ocId, detalleId, cantidadRecibida),
-    onSuccess: () => {
+    mutationFn: ({ ocId, detalleId, cantidadRecibida, justificativo }: { ocId: number; detalleId: number; cantidadRecibida: number; justificativo?: string }) =>
+      comprasApi.recibirItem(ocId, detalleId, cantidadRecibida, justificativo),
+    onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ['compras'] });
       queryClient.invalidateQueries({ queryKey: ['compras-detail'] });
-      toast.success('Ítem recibido exitosamente');
+      toast.success(res?.data?.tieneDiferencia ? 'Ítem recibido con diferencia. Notificación enviada al Admin.' : 'Ítem recibido exitosamente');
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Error al recibir ítem');
@@ -93,6 +108,7 @@ export default function ComprasPage() {
   const [selectedOC, setSelectedOC] = useState<OrdenCompra | null>(null);
   const [receiveOC, setReceiveOC] = useState<OrdenCompra | null>(null);
   const [receiveCantidades, setReceiveCantidades] = useState<Record<number, number>>({});
+  const [receiveJustificativos, setReceiveJustificativos] = useState<Record<number, string>>({});
   const [form, setForm] = useState<CrearCompraDto>(emptyForm);
   const [impuestoRate, setImpuestoRate] = useState(15);
 
@@ -117,6 +133,7 @@ export default function ComprasPage() {
       cantidades[det.id] = pendiente > 0 ? pendiente : 0;
     });
     setReceiveCantidades(cantidades);
+    setReceiveJustificativos({});
     setReceiveOpen(true);
   };
 
@@ -181,7 +198,22 @@ export default function ComprasPage() {
       toast.error('Ingrese una cantidad válida');
       return;
     }
-    await recibirItem.mutateAsync({ ocId: receiveOC.id, detalleId, cantidadRecibida: cantidad });
+    const det = receiveOC.detalles?.find((d: DetalleOrdenCompra) => d.id === detalleId);
+    if (det) {
+      const cantidadOrdenada = Number(det.cantidad);
+      const totalRecibido = Number(det.cantidadRecibida || 0) + cantidad;
+      const tieneDiferencia = totalRecibido !== cantidadOrdenada;
+      if (tieneDiferencia && !receiveJustificativos[detalleId]?.trim()) {
+        toast.error('La cantidad difiere de la ordenada. Se requiere un justificativo.');
+        return;
+      }
+    }
+    await recibirItem.mutateAsync({
+      ocId: receiveOC.id,
+      detalleId,
+      cantidadRecibida: cantidad,
+      justificativo: receiveJustificativos[detalleId]?.trim() || undefined,
+    });
     const { data: refreshed } = await comprasApi.getById(receiveOC.id);
     setReceiveOC(refreshed);
     const newCantidades: Record<number, number> = {};
@@ -190,6 +222,7 @@ export default function ComprasPage() {
       newCantidades[det.id] = pendiente > 0 ? pendiente : 0;
     });
     setReceiveCantidades(newCantidades);
+    setReceiveJustificativos({});
   };
 
   const handleReceiveAll = async () => {
@@ -398,7 +431,10 @@ export default function ComprasPage() {
                     const recibido = Number(det.cantidadRecibida || 0);
                     const pendiente = Number(det.cantidad) - recibido;
                     const inputCant = receiveCantidades[det.id] || 0;
+                    const totalDespues = recibido + inputCant;
+                    const tieneDiferencia = inputCant > 0 && totalDespues !== Number(det.cantidad);
                     return (
+                      <>
                       <tr key={det.id} className="border-b border-border-subtle/50 hover:bg-elevated/30">
                         <td className="py-3 px-3">
                           <div className="flex flex-col">
@@ -447,6 +483,23 @@ export default function ComprasPage() {
                           )}
                         </td>
                       </tr>
+                      {tieneDiferencia && (
+                        <tr key={`${det.id}-just`} className="bg-warning/5">
+                          <td colSpan={6} className="py-2 px-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-warning whitespace-nowrap">Justificativo de diferencia *:</span>
+                              <input
+                                type="text"
+                                value={receiveJustificativos[det.id] || ''}
+                                onChange={e => setReceiveJustificativos(prev => ({ ...prev, [det.id]: e.target.value }))}
+                                placeholder="Motivo de la diferencia de cantidad..."
+                                className="flex-1 px-3 py-1.5 bg-base text-text-primary border border-warning/30 rounded-lg text-xs focus:outline-none focus:border-warning"
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                      </>
                     );
                   })}
                 </tbody>
@@ -503,7 +556,7 @@ export default function ComprasPage() {
                     required
                   >
                     <option value={0}>Seleccione material</option>
-                    {materiales.map(m => <option key={m.id} value={m.id}>{m.nombre} ({m.sku})</option>)}
+                    {materialesDisponibles.map(m => <option key={m.id} value={m.id}>{m.nombre} ({m.sku})</option>)}
                   </select>
 
                   <input

@@ -23,6 +23,7 @@ export interface RequirementDetalle {
   id: number;
   materialId: number;
   cantidadSolicitada: number;
+  cantidadOriginal?: number;
   cantidadDespachada?: number;
   estadoItem?: ItemStatus;
   material?: Material;

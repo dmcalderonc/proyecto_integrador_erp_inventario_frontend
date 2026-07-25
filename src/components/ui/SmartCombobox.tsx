@@ -5,6 +5,7 @@ import { Check, ChevronsUpDown, Search } from 'lucide-react';
 export interface ComboboxOption {
   id: number | string;
   nombre: string;
+  grupo?: string;
 }
 
 interface SmartComboboxProps {
@@ -26,6 +27,18 @@ export function SmartCombobox({ options, value, onChange, placeholder = "Selecci
           .replace(/\s+/g, '')
           .includes(query.toLowerCase().replace(/\s+/g, ''))
       );
+
+  const hasGroups = filteredOptions.some(o => o.grupo);
+
+  const grouped = hasGroups
+    ? Object.entries(
+        filteredOptions.reduce<Record<string, ComboboxOption[]>>((acc, opt) => {
+          const key = opt.grupo || 'Otros';
+          (acc[key] = acc[key] || []).push(opt);
+          return acc;
+        }, {})
+      )
+    : null;
 
   return (
     <div className="relative w-full">
@@ -57,6 +70,38 @@ export function SmartCombobox({ options, value, onChange, placeholder = "Selecci
                   <Search size={16} />
                   No se encontraron resultados.
                 </div>
+              ) : grouped ? (
+                grouped.map(([groupName, items]) => (
+                  <Fragment key={groupName}>
+                    <div className="px-3 py-1.5 text-xs font-bold text-accent uppercase tracking-wider bg-elevated/50 sticky top-0">
+                      {groupName}
+                    </div>
+                    {items.map((option) => (
+                      <Combobox.Option
+                        key={option.id}
+                        className={({ active }) =>
+                          `relative cursor-pointer select-none py-2.5 pl-10 pr-4 transition-colors ${
+                            active ? 'bg-accent/10 text-accent' : 'text-text-primary'
+                          }`
+                        }
+                        value={option}
+                      >
+                        {({ selected, active }) => (
+                          <>
+                            <span className={`block truncate ${selected ? 'font-bold' : 'font-normal'}`}>
+                              {option.nombre}
+                            </span>
+                            {selected ? (
+                              <span className={`absolute inset-y-0 left-0 flex items-center pl-3 ${active ? 'text-accent' : 'text-success'}`}>
+                                <Check className="h-4 w-4" aria-hidden="true" />
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                      </Combobox.Option>
+                    ))}
+                  </Fragment>
+                ))
               ) : (
                 filteredOptions.map((option) => (
                   <Combobox.Option

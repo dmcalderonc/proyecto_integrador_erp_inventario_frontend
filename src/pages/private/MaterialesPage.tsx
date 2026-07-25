@@ -23,12 +23,6 @@ const emptyForm: CreateMaterialDto = {
   categoria_id: 0,
 };
 
-function getStockStatus(disponible: number): { label: string; className: string } {
-  if (disponible === 0) return { label: 'Agotado', className: 'bg-danger-bg text-danger border-danger/30' };
-  if (disponible <= 5) return { label: 'Bajo', className: 'bg-warning-bg text-warning border-warning/30' };
-  return { label: 'Normal', className: 'bg-success-bg text-success border-success/30' };
-}
-
 export default function MaterialesPage() {
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
@@ -36,6 +30,7 @@ export default function MaterialesPage() {
   const [searchInput, setSearchInput] = useState('');
   const [filterCategory, setFilterCategory] = useState<number | null>(null);
   const [filterBodega, setFilterBodega] = useState<number | null>(null);
+  const [filterStock, setFilterStock] = useState<string>('');
 
   const { materiales, meta, isLoading, crear, actualizar, eliminar } = useMateriales({
     page, limit, search,
@@ -56,11 +51,22 @@ export default function MaterialesPage() {
   const [imagePreview, setImagePreview] = useState<string>('');
   const [detailMaterial, setDetailMaterial] = useState<Material | null>(null);
 
-  const hasActiveFilters = filterCategory !== null || filterBodega !== null || search !== '';
+  const hasActiveFilters = filterCategory !== null || filterBodega !== null || search !== '' || filterStock !== '';
+
+  const filteredMateriales = filterStock
+    ? materiales.filter((m: Material) => {
+        const d = m.stockDisponible ?? 0;
+        if (filterStock === 'agotado') return d === 0;
+        if (filterStock === 'bajo') return d > 0 && d <= 5;
+        if (filterStock === 'normal') return d > 5;
+        return true;
+      })
+    : materiales;
 
   const clearFilters = () => {
     setFilterCategory(null);
     setFilterBodega(null);
+    setFilterStock('');
     setSearch('');
     setSearchInput('');
     setPage(1);
@@ -181,15 +187,31 @@ export default function MaterialesPage() {
       ),
     },
     {
-      key: 'estado',
-      header: 'Estado',
+      key: 'stockPorBodega',
+      header: 'Stock por Bodega',
       render: (m: Material) => {
-        const disponible = m.stockDisponible ?? 0;
-        const status = getStockStatus(disponible);
+        const stock = m.stockPorBodega;
+        if (!stock || stock.length === 0) {
+          return <span className="text-xs text-text-muted">Sin registro</span>;
+        }
         return (
-          <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-lg font-bold text-xs border", status.className)}>
-            {status.label}
-          </span>
+          <div className="flex flex-wrap gap-1">
+            {stock.map((s) => (
+              <span
+                key={s.bodegaId}
+                className={cn(
+                  "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium border",
+                  s.cantidad_disponible === 0
+                    ? "bg-danger/10 text-danger border-danger/20"
+                    : "bg-success/10 text-success border-success/20"
+                )}
+                title={`${s.bodegaNombre}: ${s.cantidad_disponible} disp. / ${s.cantidad_reservada} reserv.`}
+              >
+                <span className="truncate max-w-[80px]">{s.bodegaNombre}</span>
+                <span className="font-bold">{s.cantidad_disponible}</span>
+              </span>
+            ))}
+          </div>
         );
       },
     },
@@ -285,6 +307,16 @@ export default function MaterialesPage() {
             <option value="">Todas las bodegas</option>
             {bodegas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
           </select>
+          <select
+            value={filterStock}
+            onChange={e => { setFilterStock(e.target.value); setPage(1); }}
+            className="px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent transition-all"
+          >
+            <option value="">Todo el stock</option>
+            <option value="agotado">Agotado</option>
+            <option value="bajo">Stock bajo</option>
+            <option value="normal">Stock normal</option>
+          </select>
           {hasActiveFilters && (
             <Button variant="ghost" onClick={clearFilters} className="gap-1.5 text-text-muted hover:text-text-primary">
               <RotateCcw size={14} /> Limpiar
@@ -301,7 +333,7 @@ export default function MaterialesPage() {
       <div className="bg-surface rounded-xl border border-border-subtle">
         <DataTable
           columns={columns}
-          data={materiales}
+          data={filteredMateriales}
           loading={isLoading}
           searchable={false}
           onRowClick={handleRowClick}

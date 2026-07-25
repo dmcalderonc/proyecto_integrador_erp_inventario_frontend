@@ -47,5 +47,16 @@ export function useTraspasos(params?: { estado?: string; bodegaOrigenId?: number
     },
   });
 
-  return { traspasos, enviar, recibir, cancelar };
+  const autorizar = useMutation({
+    mutationFn: (id: number) => traspasosApi.autorizar(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['traspasos'] });
+      toast.success('Traspaso autorizado correctamente');
+    },
+    onError: (error: { response?: { data?: { message?: string } } }) => {
+      toast.error(error.response?.data?.message || 'Error al autorizar traspaso');
+    },
+  });
+
+  return { traspasos, enviar, recibir, cancelar, autorizar };
 }

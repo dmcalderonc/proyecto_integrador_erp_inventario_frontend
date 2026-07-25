@@ -4,15 +4,17 @@ import { useTraspasos } from '../../store/useTraspasos';
 import { useBodegas } from '../../store/useBodegas';
 import { useAuth } from '../../contexts/AuthContext';
 import { materialesApi } from '../../api/materiales.api';
+import { inventarioApi } from '../../api/inventario.api';
 import { traspasosApi } from '../../api/traspasos.api';
-import type { Traspaso, Bodega, Material, CreateTraspasoDto } from '../../types';
+import type { Traspaso, Bodega, Material, CreateTraspasoDto, Inventario } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { SmartCombobox } from '../../components/ui/SmartCombobox';
 import type { ComboboxOption } from '../../components/ui/SmartCombobox';
 import { getBadgeStyle } from '../../lib/design-tokens';
-import { Plus, Trash2, Eye, Send, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Trash2, Eye, Send, CheckCircle, XCircle, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 type DetalleForm = { materialId: number; cantidad: string };
@@ -27,10 +29,11 @@ export default function TraspasosPage() {
   const [destinoSeleccionada, setDestinoSeleccionada] = useState<ComboboxOption | null>(null);
   const [observaciones, setObservaciones] = useState('');
   const [filtroEstado, setFiltroEstado] = useState<string>('');
-
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
+  const [traspasoACancelar, setTraspasoACancelar] = useState<Traspaso | null>(null);
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { enviar, recibir, cancelar } = useTraspasos();
+  const { enviar, recibir, cancelar, autorizar } = useTraspasos();
   const { bodegas } = useBodegas();
 
   const { data: traspasos = [], isLoading } = useQuery({
@@ -49,6 +52,16 @@ export default function TraspasosPage() {
       const res = await materialesApi.getAll({ limit: 200 });
       return res.data || [];
     },
+  });
+
+  const { data: stockOrigen = [] } = useQuery({
+    queryKey: ['stockOrigen', origenSeleccionada?.id],
+    queryFn: async () => {
+      if (!origenSeleccionada) return [];
+      const res = await inventarioApi.getAll();
+      return (res.data || []).filter((s: Inventario) => s.bodega_id === Number(origenSeleccionada.id) && s.cantidad_disponible > 0);
+    },
+    enabled: !!origenSeleccionada,
   });
 
   const crear = useMutation({
@@ -164,6 +177,13 @@ export default function TraspasosPage() {
                 <p className="text-xs text-text-muted">Fecha Envío</p>
                 <p className="text-sm font-semibold text-text-primary">{selected.fechaEnvio ? new Date(selected.fechaEnvio).toLocaleString() : 'Pendiente'}</p>
               </div>
+              {selected.autorizadoPor && (
+                <div className="bg-base rounded-xl border border-border-subtle p-3">
+                  <p className="text-xs text-text-muted">Autorizado por</p>
+                  <p className="text-sm font-semibold text-text-primary">{selected.autorizadoPor.nombre ?? '-'}</p>
+                  {selected.fechaAutorizacion && <p className="text-xs text-text-muted">{new Date(selected.fechaAutorizacion).toLocaleString()}</p>}
+                </div>
+              )}
             </div>
 
             <div className="overflow-x-auto">
@@ -197,10 +217,18 @@ export default function TraspasosPage() {
             )}
 
             <div className="flex justify-end gap-3 pt-4 border-t border-border-subtle">
-              {selected.estado === 'PENDIENTE' && (user?.rol === 'ADMIN' || (user?.rol === 'BODEGUERO' && (user as any).bodegaIds?.includes(selected.bodegaOrigenId))) && (
+              {selected.estado === 'PENDIENTE' && user?.rol === 'ADMIN' && !selected.autorizadoPorId && (
+                <Button onClick={() => { autorizar.mutate(selected.id); setDetailOpen(false); }} loading={autorizar.isPending} className="gap-1.5">
+                  <ShieldCheck size={16} /> Autorizar Traspaso
+                </Button>
+              )}
+              {selected.estado === 'PENDIENTE' && selected.autorizadoPorId && (user?.rol === 'ADMIN' || (user?.rol === 'BODEGUERO' && (user as any).bodegaIds?.includes(selected.bodegaOrigenId))) && (
                 <Button onClick={() => { enviar.mutate(selected.id); setDetailOpen(false); }} loading={enviar.isPending} className="gap-1.5">
                   <Send size={16} /> Confirmar Envío
                 </Button>
+              )}
+              {selected.estado === 'PENDIENTE' && !selected.autorizadoPorId && user?.rol === 'BODEGUERO' && (
+                <span className="text-xs text-text-muted italic">Pendiente de autorización admin</span>
               )}
               {selected.estado === 'EN_TRANSITO' && (user?.rol === 'ADMIN' || (user?.rol === 'BODEGUERO' && (user as any).bodegaIds?.includes(selected.bodegaDestinoId))) && (
                 <Button onClick={() => { recibir.mutate(selected.id); setDetailOpen(false); }} loading={recibir.isPending} className="gap-1.5">
@@ -208,7 +236,7 @@ export default function TraspasosPage() {
                 </Button>
               )}
               {selected.estado === 'PENDIENTE' && user?.rol === 'ADMIN' && (
-                <Button variant="danger" onClick={() => { cancelar.mutate(selected.id); setDetailOpen(false); }} loading={cancelar.isPending} className="gap-1.5">
+                <Button variant="danger" onClick={() => { setTraspasoACancelar(selected); setCancelConfirmOpen(true); }} loading={cancelar.isPending} className="gap-1.5">
                   <XCircle size={16} /> Cancelar
                 </Button>
               )}
@@ -229,6 +257,24 @@ export default function TraspasosPage() {
               <SmartCombobox options={bodegaOptions} value={destinoSeleccionada} onChange={setDestinoSeleccionada} placeholder="Seleccionar destino..." />
             </div>
           </div>
+
+          {origenSeleccionada && stockOrigen.length > 0 && (
+            <div className="bg-base rounded-xl border border-border-subtle p-3">
+              <p className="text-xs text-text-muted font-medium uppercase tracking-wide mb-2">Stock disponible en {origenSeleccionada.nombre}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-32 overflow-y-auto">
+                {stockOrigen.map((s: Inventario) => {
+                  const mat = materiales.find((m: Material) => m.id === s.material_id);
+                  const libre = s.cantidad_disponible - s.cantidad_reservada;
+                  return (
+                    <div key={s.id} className="flex items-center justify-between text-xs py-1 px-2 bg-elevated/50 rounded-lg">
+                      <span className="text-text-primary truncate">{mat?.sku ?? `#${s.material_id}`} — {mat?.nombre ?? 'Material'}</span>
+                      <span className={`font-semibold ml-2 ${libre > 0 ? 'text-success' : 'text-danger'}`}>{libre} disp.</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div>
             <div className="flex items-center justify-between mb-3">
@@ -283,6 +329,25 @@ export default function TraspasosPage() {
           </div>
         </div>
       </Modal>
+
+      <ConfirmDialog
+        open={cancelConfirmOpen}
+        onClose={() => setCancelConfirmOpen(false)}
+        onConfirm={() => {
+          if (traspasoACancelar) {
+            cancelar.mutate(traspasoACancelar.id);
+            setCancelConfirmOpen(false);
+            setDetailOpen(false);
+            setTraspasoACancelar(null);
+          }
+        }}
+        title="Cancelar Traspaso"
+        message={`¿Estás seguro de cancelar el traspaso ${traspasoACancelar?.codigo}? Esta acción no se puede deshacer.`}
+        loading={cancelar.isPending}
+        confirmLabel="Cancelar Traspaso"
+        loadingLabel="Cancelando..."
+        variant="danger"
+      />
     </div>
   );
 }

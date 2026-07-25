@@ -12,8 +12,8 @@ export const comprasApi = {
   delete: (id: number) => api.delete(`/compras/${id}`),
   aprobar: (id: number) => api.patch<OrdenCompra>(`/compras/${id}/aprobar`),
   recibir: (id: number) => api.patch(`/compras/${id}/recibir`),
-  recibirItem: (ocId: number, detalleId: number, cantidadRecibida: number) =>
-    api.patch(`/compras/${ocId}/recibir-item/${detalleId}`, { cantidadRecibida }),
+  recibirItem: (ocId: number, detalleId: number, cantidadRecibida: number, justificativo?: string) =>
+    api.patch(`/compras/${ocId}/recibir-item/${detalleId}`, { cantidadRecibida, justificativo }),
   downloadPdf: async (id: number) => {
     const token = localStorage.getItem('token');
     const base = import.meta.env.VITE_API_URL || '';

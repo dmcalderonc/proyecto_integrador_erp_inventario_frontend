@@ -17,6 +17,7 @@ export interface DetalleOrdenCompra {
   material?: { id: number; nombre: string; sku: string };
   requerimientoDetalleId?: number | null;
   cantidadRecibida?: number;
+  justificativoRecepcion?: string | null;
   tiempoEntregaDias?: number | null;
   marca?: string | null;
   observaciones?: string | null;

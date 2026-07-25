@@ -15,7 +15,7 @@ import { Button } from '../../components/ui/Button';
 import { SmartCombobox } from '../../components/ui/SmartCombobox';
 import type { ComboboxOption } from '../../components/ui/SmartCombobox';
 import {
-  Plus, Trash2, Eye, CheckCircle, XCircle, Truck, ShoppingCart, Package, FileText,
+  Plus, Trash2, Eye, CheckCircle, XCircle, Truck, ShoppingCart, Package, FileText, Send,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -121,6 +121,22 @@ export default function RequirementsPage() {
     },
   });
 
+  const despacharReq = useMutation({
+    mutationFn: async (reqId: number) => {
+      const { data } = await requirementsApi.despachar(reqId);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['requirements'] });
+      queryClient.invalidateQueries({ queryKey: ['inventario'] });
+      toast.success('Requerimiento despachado correctamente');
+      setDetailOpen(false);
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al despachar requerimiento');
+    },
+  });
+
   const openDetail = async (req: Requirement) => {
     const { data } = await requirementsApi.getById(req.id);
     setSelectedReq(data);
@@ -160,13 +176,14 @@ export default function RequirementsPage() {
   const handleSubmit = async () => {
     if (!proyectoSeleccionado) { toast.error('Selecciona un proyecto'); return; }
     if (!bodegaSeleccionada) { toast.error('Selecciona una bodega'); return; }
+    if (!justificativo.trim()) { toast.error('El justificativo es obligatorio'); return; }
     const validDetalles = detalles.filter(d => d.materialId > 0 && Number(d.cantidadSolicitada) > 0);
     if (validDetalles.length === 0) { toast.error('Agrega al menos un material válido'); return; }
 
     await crear.mutateAsync({
       proyectoId: String(proyectoSeleccionado.id),
       bodegaId: Number(bodegaSeleccionada.id),
-      justificativo: justificativo.trim() || undefined,
+      justificativo: justificativo.trim(),
       detalles: validDetalles.map(d => ({
         materialId: d.materialId,
         cantidadSolicitada: Number(d.cantidadSolicitada),
@@ -175,7 +192,7 @@ export default function RequirementsPage() {
     setModalOpen(false);
   };
 
-  const materialOptions: ComboboxOption[] = materiales.map((m: any) => ({ id: m.id, nombre: `${m.sku} - ${m.nombre}` }));
+  const materialOptions: ComboboxOption[] = materiales.map((m: any) => ({ id: m.id, nombre: `${m.sku} - ${m.nombre}`, grupo: m.categoria?.nombre || 'Sin categoría' }));
   const proyectoOptions: ComboboxOption[] = proyectos.map((p: any) => ({ id: p.id, nombre: `${p.codigoProyecto || 'PROY'} - ${p.nombre}` }));
   const bodegaOptions: ComboboxOption[] = bodegas.map((b: any) => ({ id: b.id, nombre: b.nombre }));
   const proveedorOptions: ComboboxOption[] = proveedores.map((p: any) => ({ id: p.id, nombre: p.razon_social }));
@@ -317,7 +334,7 @@ export default function RequirementsPage() {
           <h1 className="text-2xl font-bold text-text-primary">Requerimientos</h1>
           <p className="text-sm text-text-secondary mt-1">Gestiona y evalúa los requerimientos de materiales</p>
         </div>
-        {hasRole(['SOLICITANTE', 'ADMIN']) && (
+        {hasRole(['SOLICITANTE', 'ADMIN', 'BODEGUERO']) && (
           <Button onClick={openCreate} className="gap-1.5">
             <Plus size={16} /> Nuevo Requerimiento
           </Button>
@@ -418,6 +435,14 @@ export default function RequirementsPage() {
                 </Button>
               </div>
             )}
+
+            {selectedReq.detalles?.some(d => d.estadoItem === 'APROBADO_BODEGA') && hasRole(['ADMIN', 'BODEGUERO']) && (selectedReq.estado === 'APROBADO' || selectedReq.estado === 'PARCIALMENTE_ATENDIDO') && (
+              <div className="flex justify-end pt-3 border-t border-border-subtle">
+                <Button onClick={() => despacharReq.mutate(selectedReq.id)} loading={despacharReq.isPending} className="gap-1.5">
+                  <Send size={16} /> Despachar Materiales
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </Modal>
@@ -436,11 +461,12 @@ export default function RequirementsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-text-primary mb-1.5">Justificativo (opcional)</label>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">Justificativo *</label>
             <textarea
               value={justificativo}
               onChange={(e) => setJustificativo(e.target.value)}
               rows={3}
+              required
               placeholder="Describe la razón de esta solicitud de materiales..."
               className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all resize-none"
             />

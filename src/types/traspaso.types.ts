@@ -21,6 +21,9 @@ export interface Traspaso {
   fechaRecepcion?: string;
   observaciones?: string;
   requerimientoDetalleId?: number;
+  autorizadoPorId?: string;
+  fechaAutorizacion?: string;
+  autorizadoPor?: { id: string; nombre: string; email: string };
   detalles: DetalleTraspaso[];
   bodegaOrigen?: { id: number; nombre: string; ubicacion: string };
   bodegaDestino?: { id: number; nombre: string; ubicacion: string };

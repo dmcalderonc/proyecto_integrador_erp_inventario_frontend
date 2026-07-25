@@ -21,6 +21,7 @@ export interface Material {
   categoria?: Categoria;
   stockDisponible?: number;
   stockReservado?: number;
+  stockPorBodega?: StockPorBodega[];
   isActive?: boolean;
 }
 

@@ -10,6 +10,9 @@ export const traspasosApi = {
   create: (dto: any) =>
     api.post('/traspasos', dto),
 
+  autorizar: (id: number) =>
+    api.patch(`/traspasos/${id}/autorizar`),
+
   enviar: (id: number) =>
     api.patch(`/traspasos/${id}/enviar`),
 

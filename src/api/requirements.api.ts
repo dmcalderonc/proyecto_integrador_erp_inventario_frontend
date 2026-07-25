@@ -7,6 +7,8 @@ export const requirementsApi = {
   create: (dto: CreateRequirementDto) => api.post<Requirement>('/requirements', dto),
   updateStatus: (id: number, dto: { estado: RequirementStatus }) =>
     api.patch<Requirement>(`/requirements/${id}/status`, dto),
+  despachar: (id: number) =>
+    api.patch<Requirement>(`/requirements/${id}/despachar`),
   delete: (id: number) => api.delete(`/requirements/${id}`),
   evaluarItem: (reqId: number, detalleId: number, accion: string) =>
     api.patch(`/requirements/${reqId}/evaluar-item/${detalleId}`, { accion }),
