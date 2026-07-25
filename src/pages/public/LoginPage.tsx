@@ -19,6 +19,7 @@ type LoginFormInputs = z.infer<typeof loginSchema>;
 
 export function Login() {
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
   const { login } = useAuth();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/dashboard';
@@ -29,12 +30,15 @@ export function Login() {
 
   const onSubmit = async (data: LoginFormInputs) => {
     setIsLoading(true);
+    setLoginError('');
     try {
       await login({ email: data.email, password: data.password });
       toast.success('¡Bienvenido!');
       window.location.replace(from);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Credenciales incorrectas');
+      const msg = error.response?.data?.message;
+      const message = Array.isArray(msg) ? msg[0] : msg;
+      setLoginError(message || 'Correo o contraseña incorrectos');
     } finally {
       setIsLoading(false);
     }
@@ -83,6 +87,13 @@ export function Login() {
                 />
                 {errors.password && <p className="mt-1.5 text-xs text-danger font-medium">{errors.password.message}</p>}
               </div>
+
+              {loginError && (
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-sm font-medium animate-fade-in">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                  {loginError}
+                </div>
+              )}
 
               <Button type="submit" loading={isLoading} className="w-full py-3">
                 Ingresar
