@@ -7,7 +7,7 @@ import { useProveedores } from '../../store/useProveedores';
 import { useAuth } from '../../contexts/AuthContext';
 import { solicitudesApi } from '../../api/solicitudes.api';
 import { cotizacionesApi } from '../../api/cotizaciones.api';
-import type { SolicitudCompra, UpdateSolicitudDto, EstadoSolicitud, NivelPrioridad } from '../../types';
+import type { SolicitudCompra, UpdateSolicitudDto, NivelPrioridad } from '../../types';
 import type { Cotizacion, CreateCotizacionDto } from '../../types/cotizacion.types';
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';

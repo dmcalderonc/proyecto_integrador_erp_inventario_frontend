@@ -119,13 +119,13 @@ export default function TraspasosPage() {
   const isBodeguero = hasRole(['BODEGUERO']);
 
   const porEntregar = isBodeguero
-    ? traspasos.filter(t =>
+    ? traspasos.filter((t: Traspaso) =>
         (t.estado === 'PENDIENTE' || t.estado === 'EN_TRANSITO') && userBodegaIds.includes(t.bodegaOrigenId)
       )
     : [];
 
   const porRecibir = isBodeguero
-    ? traspasos.filter(t =>
+    ? traspasos.filter((t: Traspaso) =>
         t.estado === 'EN_TRANSITO' && userBodegaIds.includes(t.bodegaDestinoId)
       )
     : [];
