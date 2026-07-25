@@ -34,8 +34,8 @@ const navLinks: NavItem[] = [
     { to: '/solicitudes', label: 'Solicitudes', icon: ClipboardCheck, roles: ['ADMIN', 'SOLICITANTE', 'COMPRADOR'] },
     { to: '/movimientos', label: 'Movimientos', icon: Activity, roles: ['ADMIN', 'BODEGUERO'] },
     { to: '/ajustes-inventario', label: 'Ajustes', icon: SlidersHorizontal, roles: ['ADMIN', 'BODEGUERO'] },
-    { to: '/despachos', label: 'Despachos', icon: PackageCheck, roles: ['ADMIN', 'BODEGUERO'] },
-    { to: '/traspasos', label: 'Traspasos', icon: Truck, roles: ['ADMIN', 'BODEGUERO'] },
+    { to: '/despachos', label: 'Despachos', icon: PackageCheck, roles: ['ADMIN'] },
+    { to: '/traspasos', label: 'Traspasos', icon: Truck, roles: ['ADMIN'] },
     { to: '/notifications', label: 'Notificaciones', icon: Bell, roles: ['ADMIN', 'SOLICITANTE', 'BODEGUERO', 'COMPRADOR'] },
 ];
 

@@ -34,7 +34,7 @@ export default function SolicitudesPage() {
   const [filtroEstado, setFiltroEstado] = useState<string>('');
   const [filtroProyecto, setFiltroProyecto] = useState<string>('');
 
-  const { solicitudes, isLoading, crear, actualizar, aprobar, procesar } = useSolicitudes({
+const { solicitudes, isLoading, crear, actualizar, aprobar, procesar } = useSolicitudes({
     estado: filtroEstado || undefined,
     proyectoId: filtroProyecto || undefined,
   });
@@ -42,7 +42,6 @@ export default function SolicitudesPage() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
-  const [cotizarModalOpen, setCotizarModalOpen] = useState(false);
   const [selected, setSelected] = useState<SolicitudCompra | null>(null);
   const [editForm, setEditForm] = useState<UpdateSolicitudDto>({});
 
@@ -52,51 +51,6 @@ export default function SolicitudesPage() {
     nivelPrioridad: 'MEDIA' as NivelPrioridad,
     detalles: [] as DetalleForm[],
   });
-
-  const [cotForm, setCotForm] = useState({
-    proveedorId: null as ComboboxOption | null,
-    cantidad: '',
-    precioUnitario: '',
-    tiempoEntrega: '',
-    marca: '',
-    observaciones: '',
-  });
-
-  const proveedorOptions: ComboboxOption[] = proveedores.map((p: any) => ({ id: p.id, nombre: p.razon_social }));
-
-  const { data: selectedDetail, isLoading: loadingDetail } = useQuery({
-    queryKey: ['solicitud-detail', selected?.id],
-    queryFn: async () => {
-      if (!selected) return null;
-      const { data } = await solicitudesApi.getById(selected.id);
-      return data;
-    },
-    enabled: !!selected && detailModalOpen,
-  });
-
-  const crearCotizacion = useMutation({
-    mutationFn: (dto: CreateCotizacionDto) => cotizacionesApi.create(dto),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['solicitudes'] });
-      queryClient.invalidateQueries({ queryKey: ['solicitud-detail'] });
-      toast.success('Cotización creada. Estado actualizado a COTIZANDO automáticamente.');
-      setCotizarModalOpen(false);
-      resetCotForm();
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Error al crear cotización');
-    },
-  });
-
-  const openCreate = () => {
-    setCreateForm({
-      proyectoId: '',
-      usuarioSolicitanteId: user?.id ?? '',
-      nivelPrioridad: 'MEDIA',
-      detalles: [{ materialId: 0, cantidadRequerida: 1 }],
-    });
-    setCreateModalOpen(true);
-  };
 
   const openEdit = (item: SolicitudCompra) => {
     setSelected(item);
@@ -156,7 +110,7 @@ export default function SolicitudesPage() {
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selected) return;
+if (!selected) return;
     await actualizar.mutateAsync({ id: selected.id, dto: editForm });
     setEditModalOpen(false);
     setSelected(null);
@@ -214,31 +168,6 @@ export default function SolicitudesPage() {
         </span>
       ),
     },
-    ...(!hasRole(['COMPRADOR']) ? [{
-      key: 'acciones', header: 'Acciones',
-      render: (item: SolicitudCompra) => (
-        <div className="flex gap-1.5 justify-end">
-          {hasRole(['ADMIN']) && item.estado === 'COTIZANDO' && (
-            <Button variant="primary" size="sm" onClick={() => aprobar.mutateAsync(item.id)}>
-              <CheckCircle size={14} /> Aprobar
-            </Button>
-          )}
-          {hasRole(['ADMIN']) && item.estado === 'APROBADA' && (
-            <Button variant="primary" size="sm" onClick={() => procesar.mutateAsync(item.id)}>
-              <CheckCircle size={14} /> Procesar
-            </Button>
-          )}
-          {hasRole(['SOLICITANTE']) && item.estado === 'PENDIENTE' && item.usuarioSolicitanteId === user?.id && (
-            <Button variant="secondary" size="sm" onClick={() => openEdit(item)}>
-              <Pencil size={14} className="text-warning" /> Editar
-            </Button>
-          )}
-          <Button variant="ghost" size="sm" onClick={() => openDetail(item)}>
-            <Eye size={14} className="text-info" /> Ver
-          </Button>
-        </div>
-      ),
-    }] : []),
   ];
 
   return (
@@ -290,7 +219,14 @@ export default function SolicitudesPage() {
       </div>
 
       <div className="bg-surface rounded-xl border border-border-subtle p-6">
-        <DataTable columns={columns} data={solicitudes} loading={isLoading} searchable searchKeys={["codigo", "estado"]} />
+        <DataTable
+          columns={columns}
+          data={solicitudes}
+          loading={isLoading}
+          searchable
+          searchKeys={["codigo", "estado"]}
+          onRowClick={item => { if (hasRole(['COMPRADOR', 'ADMIN'])) openDetail(item); }}
+        />
       </div>
 
       <Modal open={createModalOpen} onClose={() => setCreateModalOpen(false)} title="Nueva Solicitud de Compra">
@@ -489,98 +425,6 @@ export default function SolicitudesPage() {
             )}
           </div>
         )}
-      </Modal>
-
-      <Modal open={cotizarModalOpen} onClose={() => setCotizarModalOpen(false)} title={`Subir Cotización — ${selected?.codigo ?? ''}`} size="md">
-        <div className="space-y-4">
-          <div className="bg-base rounded-xl border border-border-subtle p-3">
-            <p className="text-xs text-text-muted mb-1">Materiales de la solicitud</p>
-            {selected?.detalles?.map((d: any, i: number) => (
-              <p key={i} className="text-sm text-text-primary font-medium">{d.material?.nombre ?? `Material #${d.materialId}`} — {d.cantidadRequerida} uds</p>
-            ))}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-text-primary mb-1.5">Proveedor *</label>
-            <SmartCombobox
-              options={proveedorOptions}
-              value={cotForm.proveedorId}
-              onChange={(opt) => setCotForm(f => ({ ...f, proveedorId: opt }))}
-              placeholder="Seleccionar proveedor..."
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-1.5">Cantidad *</label>
-              <input
-                type="number"
-                min="1"
-                value={cotForm.cantidad}
-                onChange={(e) => setCotForm(f => ({ ...f, cantidad: e.target.value }))}
-                className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-1.5">Precio Unitario *</label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={cotForm.precioUnitario}
-                onChange={(e) => setCotForm(f => ({ ...f, precioUnitario: e.target.value }))}
-                className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent transition-all"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-1.5">Tiempo Entrega (días)</label>
-              <input
-                type="number"
-                min="0"
-                value={cotForm.tiempoEntrega}
-                onChange={(e) => setCotForm(f => ({ ...f, tiempoEntrega: e.target.value }))}
-                className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-1.5">Marca</label>
-              <input
-                type="text"
-                value={cotForm.marca}
-                onChange={(e) => setCotForm(f => ({ ...f, marca: e.target.value }))}
-                placeholder="Marca del material"
-                className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent transition-all"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-text-primary mb-1.5">Observaciones</label>
-            <textarea
-              value={cotForm.observaciones}
-              onChange={(e) => setCotForm(f => ({ ...f, observaciones: e.target.value }))}
-              rows={2}
-              placeholder="Notas adicionales..."
-              className="w-full px-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent transition-all resize-none"
-            />
-          </div>
-
-          {cotForm.cantidad && cotForm.precioUnitario && (
-            <div className="bg-base rounded-xl border border-border-subtle p-3 text-sm">
-              <p className="text-text-secondary">Subtotal: <span className="font-semibold text-text-primary">${(Number(cotForm.cantidad) * Number(cotForm.precioUnitario)).toFixed(2)}</span></p>
-            </div>
-          )}
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-border-subtle">
-            <Button variant="secondary" onClick={() => setCotizarModalOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSubmitCotizacion} loading={crearCotizacion.isPending}>
-              Crear Cotización
-            </Button>
-          </div>
-        </div>
       </Modal>
     </div>
   );

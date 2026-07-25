@@ -9,7 +9,7 @@ import { Button } from '../../components/ui/Button';
 import { SmartCombobox } from '../../components/ui/SmartCombobox';
 import type { ComboboxOption } from '../../components/ui/SmartCombobox';
 import {
-  ShoppingCart, Eye, XCircle, Plus, Trash2, Check, ArrowLeft,
+  ShoppingCart, Eye, XCircle, Plus, Trash2, Check, ArrowLeft, Filter,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -19,6 +19,13 @@ const cotizacionEstadoStyle: Record<string, string> = {
   DESCARTADA: 'bg-danger/10 text-danger border-danger/20',
 };
 
+const estadosFiltro: { value: string; label: string }[] = [
+  { value: '', label: 'Todos' },
+  { value: 'EN_EVALUACION', label: 'En Evaluación' },
+  { value: 'ELEGIDA', label: 'Elegida' },
+  { value: 'DESCARTADA', label: 'Descartada' },
+];
+
 export default function CotizacionesPage() {
   const { hasRole } = useAuth();
   const queryClient = useQueryClient();
@@ -26,6 +33,7 @@ export default function CotizacionesPage() {
   const [selectedReqId, setSelectedReqId] = useState<number | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDetalleId, setSelectedDetalleId] = useState<number | null>(null);
+  const [filtroEstado, setFiltroEstado] = useState<string>('');
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState<ComboboxOption | null>(null);
   const [cantidad, setCantidad] = useState('');
   const [precioUnitario, setPrecioUnitario] = useState('');
@@ -156,7 +164,7 @@ export default function CotizacionesPage() {
 
   const reqSeleccionado = reqDetail?.detalles?.[0];
 
-  return (
+return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -167,10 +175,41 @@ export default function CotizacionesPage() {
               : 'Requerimientos con materiales pendientes de compra'}
           </p>
         </div>
+        <div className="flex items-center gap-3">
+          {selectedReqId && (
+            <select
+              value={filtroEstado}
+              onChange={e => setFiltroEstado(e.target.value)}
+              className="px-3 py-2 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent transition-all"
+            >
+              {estadosFiltro.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          )}
+          {selectedReqId && (
+            <Button variant="secondary" onClick={() => setSelectedReqId(null)} className="gap-1.5">
+              <ArrowLeft size={16} /> Volver
+            </Button>
+          )}
+        </div>
+      </div>
         {selectedReqId && (
-          <Button variant="secondary" onClick={() => setSelectedReqId(null)} className="gap-1.5">
-            <ArrowLeft size={16} /> Volver
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <select
+              value={filtroEstado}
+              onChange={e => setFiltroEstado(e.target.value)}
+              className="px-3 py-2 bg-base text-text-primary border border-border-subtle rounded-xl text-sm focus:outline-none focus:border-accent transition-all"
+            >
+              <option value="">Todos los estados</option>
+              <option value="EN_EVALUACION">En Evaluación</option>
+              <option value="ELEGIDA">Elegida</option>
+              <option value="DESCARTADA">Descartada</option>
+            </select>
+            <Button variant="secondary" onClick={() => setSelectedReqId(null)} className="gap-1.5">
+              <ArrowLeft size={16} /> Volver
+            </Button>
+          </div>
         )}
       </div>
 
@@ -245,41 +284,55 @@ export default function CotizacionesPage() {
               <p className="text-text-muted text-sm text-center py-8">No hay detalles de requerimiento</p>
             ) : (
               <div className="space-y-4">
-                {reqDetail?.detalles?.map((det: any) => {
-                  const cotizacionesDelDetalle = reqDetail.cotizaciones?.filter(
-                    (c: Cotizacion) => c.requerimientoDetalleId === det.id,
-                  ) || [];
-                  const totalCotizado = cotizacionesDelDetalle
-                    .filter((c: Cotizacion) => c.estado !== 'DESCARTADA')
-                    .reduce((sum: number, c: Cotizacion) => sum + Number(c.cantidad), 0);
-                  const cantidadRestante = Number(det.cantidadSolicitada) - totalCotizado;
+{reqDetail?.detalles?.map((det: any) => {
+                    const cotizacionesDelDetalle = reqDetail.cotizaciones?.filter(
+                      (c: Cotizacion) => c.requerimientoDetalleId === det.id,
+                    ) || [];
+                    const cotizacionesFiltradas = filtroEstado
+                      ? cotizacionesDelDetalle.filter((c: Cotizacion) => c.estado === filtroEstado)
+                      : cotizacionesDelDetalle;
 
-                  return (
-                    <div key={det.id} className="bg-base rounded-xl border border-border-subtle p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div>
-                            <p className="text-sm font-semibold text-text-primary">{det.material?.nombre ?? `Material #${det.materialId}`}</p>
-                            <p className="text-xs text-text-muted font-mono">{det.material?.sku ?? '-'}</p>
+                    const totalCotizado = cotizacionesDelDetalle
+                      .filter((c: Cotizacion) => c.estado !== 'DESCARTADA')
+                      .reduce((sum: number, c: Cotizacion) => sum + Number(c.cantidad), 0);
+                    const cantidadRestante = Number(det.cantidadSolicitada) - totalCotizado;
+
+                    // Check if there's already an active cotización for this detalle
+                    const tieneCotizacionActiva = cotizacionesDelDetalle.some(
+                      (c: Cotizacion) => c.estado === 'EN_EVALUACION' || c.estado === 'ELEGIDA',
+                    );
+
+                    return (
+                      <div key={det.id} className="bg-base rounded-xl border border-border-subtle p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div>
+                              <p className="text-sm font-semibold text-text-primary">{det.material?.nombre ?? `Material #${det.materialId}`}</p>
+                              <p className="text-xs text-text-muted font-mono">{det.material?.sku ?? '-'}</p>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="text-right">
-                            <p className="text-xs text-text-muted">Solicitado: <span className="font-semibold text-text-primary">{det.cantidadSolicitada}</span></p>
-                            <p className="text-xs text-text-muted">Cotizado: <span className="font-semibold text-info">{totalCotizado}</span></p>
-                            {cantidadRestante > 0 && (
-                              <p className="text-xs text-warning font-medium">Pendiente: {cantidadRestante}</p>
+                          <div className="flex items-center gap-3">
+                            <div className="text-right">
+                              <p className="text-xs text-text-muted">Solicitado: <span className="font-semibold text-text-primary">{det.cantidadSolicitada}</span></p>
+                              <p className="text-xs text-text-muted">Cotizado: <span className="font-semibold text-info">{totalCotizado}</span></p>
+                              {cantidadRestante > 0 && (
+                                <p className="text-xs text-warning font-medium">Pendiente: {cantidadRestante}</p>
+                              )}
+                            </div>
+                            {hasRole(['COMPRADOR', 'ADMIN']) && cantidadRestante > 0 && !tieneCotizacionActiva && (
+                              <Button size="sm" onClick={() => openCotizar(det.id, cantidadRestante)} className="gap-1">
+                                <Plus size={14} /> Cotizar
+                              </Button>
+                            )}
+                            {tieneCotizacionActiva && (
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-semibold border bg-info/10 text-info border-info/20">
+                                Ya cotizado
+                              </span>
                             )}
                           </div>
-                          {hasRole(['COMPRADOR', 'ADMIN']) && cantidadRestante > 0 && (
-                            <Button size="sm" onClick={() => openCotizar(det.id, cantidadRestante)} className="gap-1">
-                              <Plus size={14} /> Cotizar
-                            </Button>
-                          )}
                         </div>
-                      </div>
 
-                      {cotizacionesDelDetalle.length > 0 && (
+                      {cotizacionesFiltradas.length > 0 && (
                         <div className="overflow-x-auto">
                           <table className="w-full text-sm">
                             <thead>
@@ -293,7 +346,7 @@ export default function CotizacionesPage() {
                               </tr>
                             </thead>
                             <tbody>
-                              {cotizacionesDelDetalle.map((cot: Cotizacion) => (
+                              {cotizacionesFiltradas.map((cot: Cotizacion) => (
                                 <tr key={cot.id} className="border-b border-border-subtle/50 hover:bg-elevated/30">
                                   <td className="py-2 px-3 font-medium text-text-primary">{cot.proveedor?.razon_social ?? '-'}</td>
                                   <td className="py-2 px-3 text-center text-text-primary">{cot.cantidad}</td>
