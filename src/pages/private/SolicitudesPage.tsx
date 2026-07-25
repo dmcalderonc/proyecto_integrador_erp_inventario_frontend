@@ -1,22 +1,16 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSolicitudes } from '../../store/useSolicitudes';
 import { useProyectos } from '../../store/useProyectos';
 import { useMateriales } from '../../store/useMateriales';
-import { useProveedores } from '../../store/useProveedores';
 import { useAuth } from '../../contexts/AuthContext';
 import { solicitudesApi } from '../../api/solicitudes.api';
-import { cotizacionesApi } from '../../api/cotizaciones.api';
 import type { SolicitudCompra, UpdateSolicitudDto, NivelPrioridad } from '../../types';
-import type { Cotizacion, CreateCotizacionDto } from '../../types/cotizacion.types';
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
-import { SmartCombobox } from '../../components/ui/SmartCombobox';
-import type { ComboboxOption } from '../../components/ui/SmartCombobox';
-import { Eye, Pencil, Plus, Trash2, CheckCircle, FileText } from 'lucide-react';
+import { Eye, Pencil, Plus, Trash2, CheckCircle } from 'lucide-react';
 import { getBadgeStyle } from '../../lib/design-tokens';
-import toast from 'react-hot-toast';
 
 interface DetalleForm {
   materialId: number;
@@ -35,7 +29,6 @@ export default function SolicitudesPage() {
   const { hasRole, user } = useAuth();
   const { proyectos } = useProyectos();
   const { materiales } = useMateriales();
-  const { proveedores } = useProveedores();
   const queryClient = useQueryClient();
 
   const [filtroEstado, setFiltroEstado] = useState<string>('');
@@ -221,15 +214,10 @@ export default function SolicitudesPage() {
         </span>
       ),
     },
-    {
+    ...(!hasRole(['COMPRADOR']) ? [{
       key: 'acciones', header: 'Acciones',
       render: (item: SolicitudCompra) => (
         <div className="flex gap-1.5 justify-end">
-          {hasRole(['COMPRADOR']) && (item.estado === 'PENDIENTE' || item.estado === 'COTIZANDO') && (
-            <Button variant="primary" size="sm" onClick={() => openCotizar(item)} className="gap-1">
-              <FileText size={14} /> Subir Cotización
-            </Button>
-          )}
           {hasRole(['ADMIN']) && item.estado === 'COTIZANDO' && (
             <Button variant="primary" size="sm" onClick={() => aprobar.mutateAsync(item.id)}>
               <CheckCircle size={14} /> Aprobar
@@ -250,7 +238,7 @@ export default function SolicitudesPage() {
           </Button>
         </div>
       ),
-    },
+    }] : []),
   ];
 
   return (
