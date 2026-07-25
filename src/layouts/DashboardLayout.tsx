@@ -27,7 +27,7 @@ const navLinks: NavItem[] = [
     { to: '/categorias', label: 'Categorías', icon: Tags, roles: ['ADMIN'] },
     { to: '/unidades-medida', label: 'Unidades', icon: Tags, roles: ['ADMIN'] },
     { to: '/proveedores', label: 'Proveedores', icon: Truck, roles: ['ADMIN', 'COMPRADOR'] },
-    { to: '/materiales', label: 'Materiales', icon: Package, roles: ['ADMIN', 'BODEGUERO', 'COMPRADOR'] },
+    { to: '/materiales', label: 'Materiales', icon: Package, roles: ['ADMIN', 'BODEGUERO', 'COMPRADOR', 'SOLICITANTE'] },
     { to: '/requirements', label: 'Requerimientos', icon: ClipboardList, roles: ['ADMIN', 'SOLICITANTE', 'BODEGUERO', 'COMPRADOR'] },
     { to: '/compras', label: 'Compras', icon: ShoppingCart, roles: ['ADMIN', 'COMPRADOR'] },
     { to: '/cotizaciones', label: 'Cotizaciones', icon: FileText, roles: ['ADMIN', 'COMPRADOR'] },
