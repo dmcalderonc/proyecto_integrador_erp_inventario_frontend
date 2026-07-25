@@ -1,17 +1,15 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCompras } from '../../store/useCompras';
 import { useMateriales } from '../../store/useMateriales';
 import { useAuth } from '../../contexts/AuthContext';
 import type { OrdenCompra, CrearCompraDto, DetalleCompra, DetalleOrdenCompra } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
-import { Plus, Trash2, FileDown, Edit, CheckCircle, Eye, XCircle, Package } from 'lucide-react';
+import { Plus, Trash2, FileDown, CheckCircle, Eye, Package } from 'lucide-react';
 import { useProveedores } from '../../store/useProveedores';
 import { comprasApi } from '../../api/compras.api';
 import { triggerDownload } from '../../lib/download';
-import { getBadgeStyle } from '../../lib/design-tokens';
 import toast from 'react-hot-toast';
 
 const emptyForm: CrearCompraDto = {

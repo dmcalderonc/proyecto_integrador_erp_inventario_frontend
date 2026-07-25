@@ -14,9 +14,8 @@ import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { SmartCombobox } from '../../components/ui/SmartCombobox';
 import type { ComboboxOption } from '../../components/ui/SmartCombobox';
-import { getBadgeStyle } from '../../lib/design-tokens';
 import {
-  Plus, Trash2, Eye, CheckCircle, XCircle, Truck, ShoppingCart, Package, AlertTriangle, FileText,
+  Plus, Trash2, Eye, CheckCircle, XCircle, Truck, ShoppingCart, Package, FileText,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 

@@ -9,7 +9,7 @@ import { Button } from '../../components/ui/Button';
 import { SmartCombobox } from '../../components/ui/SmartCombobox';
 import type { ComboboxOption } from '../../components/ui/SmartCombobox';
 import {
-  ShoppingCart, Eye, CheckCircle, XCircle, Plus, Trash2, Check, ArrowLeft, FileText,
+  ShoppingCart, Eye, XCircle, Plus, Trash2, Check, ArrowLeft,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -154,12 +154,7 @@ export default function CotizacionesPage() {
     });
   };
 
-  const getElegidasCount = (reqId: number) => {
-    if (!reqDetail || reqDetail.requirement?.id !== reqId) return 0;
-    return reqDetail.cotizaciones.filter((c: Cotizacion) => c.estado === 'ELEGIDA').length;
-  };
-
-  const reqSeleccionado = reqDetail?.requirement;
+  const reqSeleccionado = reqDetail?.detalles?.[0];
 
   return (
     <div className="space-y-6">
@@ -357,7 +352,6 @@ export default function CotizacionesPage() {
 
           {selectedReqId && (() => {
             const totalElegidas = reqDetail?.cotizaciones?.filter((c: Cotizacion) => c.estado === 'ELEGIDA').length || 0;
-            const totalDetalles = reqDetail?.detalles?.length || 0;
             return totalElegidas > 0 && (
               <div className="flex justify-end">
                 <Button

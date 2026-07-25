@@ -404,7 +404,7 @@ export default function SolicitudesPage() {
                       {selected.cotizaciones.map((c, i) => (
                         <tr key={i} className="hover:bg-elevated/50 transition-colors">
                           <td className="px-4 py-3 text-text-primary font-medium">{c.proveedor?.razon_social ?? `Proveedor #${c.proveedorId}`}</td>
-                          <td className="text-right px-4 py-3 font-bold text-success">${Number(c.precioOfertadoTotal).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                          <td className="text-right px-4 py-3 font-bold text-success">${Number(c.precioUnitario * c.cantidad).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
                           <td className="text-center px-4 py-3">
                             <span className={`inline-block px-2.5 py-0.5 rounded-xl text-xs font-semibold border ${getBadgeStyle(c.estado)}`}>
                               {c.estado}

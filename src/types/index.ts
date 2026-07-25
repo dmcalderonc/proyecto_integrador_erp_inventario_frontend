@@ -8,7 +8,7 @@ export type { Inventario } from './inventario.types';
 export type { Proyecto, CreateProyectoDto, EstadoProyecto } from './proyecto.types';
 export type { Movimiento, CreateMovimientoDto, CrearMovimientoDto, MovimientoDetalle, TipoMovimiento } from './movimiento.types';
 export type { Requirement, CreateRequirementDto, RequirementDetalle, RequirementStatus, ItemStatus } from './requirement.types';
-export type { OrdenCompra, CreateCompraDto, CrearCompraDto, DetalleCompra, EstadoOrden } from './compra.types';
+export type { OrdenCompra, CreateCompraDto, CrearCompraDto, DetalleCompra, DetalleOrdenCompra, EstadoOrden } from './compra.types';
 export type { DetalleAjuste, CreateAjusteDto } from './ajuste.types';
 export type { SolicitudCompra, DetalleSolicitud, UpdateSolicitudDto, EstadoSolicitud, NivelPrioridad } from './solicitud.types';
 export type { Cotizacion, CreateCotizacionDto, EstadoCotizacion } from './cotizacion.types';
