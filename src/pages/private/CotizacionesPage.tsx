@@ -206,10 +206,11 @@ return (
               <option value="ELEGIDA">Elegida</option>
               <option value="DESCARTADA">Descartada</option>
             </select>
-            <Button variant="secondary" onClick={() => setSelectedReqId(null)} className="gap-1.5">
+<Button variant="secondary" onClick={() => setSelectedReqId(null)} className="gap-1.5">
               <ArrowLeft size={16} /> Volver
             </Button>
           </div>
+        </div>
         )}
       </div>
 
