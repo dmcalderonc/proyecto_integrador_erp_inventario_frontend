@@ -1,12 +1,25 @@
 import type { Proveedor } from './proveedor.types';
 
-export type EstadoOrden = 'BORRADOR' | 'EMITIDA' | 'RECIBIDA' | 'CANCELADA' | 'PENDIENTE';
+export type EstadoOrden = 'BORRADOR' | 'EMITIDA' | 'RECIBIDA' | 'RECIBIDA_PARCIAL' | 'CANCELADA' | 'PENDIENTE';
 
 export interface DetalleCompra {
   materialId: number;
   cantidad: number;
   precioUnitario: number;
   requerimientoDetalleId?: number;
+}
+
+export interface DetalleOrdenCompra {
+  id: number;
+  cantidad: number;
+  precioUnitario: number;
+  materialId: number;
+  material?: { id: number; nombre: string; sku: string };
+  requerimientoDetalleId?: number | null;
+  cantidadRecibida?: number;
+  tiempoEntregaDias?: number | null;
+  marca?: string | null;
+  observaciones?: string | null;
 }
 
 export interface CreateCompraDto {
@@ -29,4 +42,6 @@ export interface OrdenCompra {
   impuestos: number;
   total: number;
   proveedor?: Proveedor;
+  detalles?: DetalleOrdenCompra[];
+  bodegaDestinoId?: number;
 }

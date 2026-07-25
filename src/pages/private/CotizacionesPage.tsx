@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProveedores } from '../../store/useProveedores';
 import { cotizacionesApi } from '../../api/cotizaciones.api';
-import { comprasApi } from '../../api/compras.api';
 import type { Cotizacion, CreateCotizacionDto } from '../../types/cotizacion.types';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
@@ -102,12 +101,14 @@ export default function CotizacionesPage() {
   });
 
   const generarOC = useMutation({
-    mutationFn: (requirementId: number) => comprasApi.createFromRequirement(requirementId, {}),
-    onSuccess: () => {
+    mutationFn: (requirementId: number) => cotizacionesApi.generarOC(requirementId),
+    onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ['cotizaciones-by-req'] });
       queryClient.invalidateQueries({ queryKey: ['cotizaciones-en-compras'] });
       queryClient.invalidateQueries({ queryKey: ['compras'] });
-      toast.success('Orden de compra generada. Pendiente de aprobación por el administrador.');
+      const oc = res?.data || res;
+      const total = oc?.total ? `$${Number(oc.total).toFixed(2)}` : '';
+      toast.success(`OC generada${total ? ` (${total})` : ''}. Pendiente de aprobación por el administrador.`);
       setSelectedReqId(null);
     },
     onError: (error: any) => {

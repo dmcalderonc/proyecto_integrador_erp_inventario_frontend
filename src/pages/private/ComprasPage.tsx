@@ -3,11 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCompras } from '../../store/useCompras';
 import { useMateriales } from '../../store/useMateriales';
 import { useAuth } from '../../contexts/AuthContext';
-import type { OrdenCompra, CrearCompraDto, DetalleCompra } from '../../types';
+import type { OrdenCompra, CrearCompraDto, DetalleCompra, DetalleOrdenCompra } from '../../types';
 import { DataTable } from '../../components/ui/DataTable';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
-import { Plus, Trash2, FileDown, Edit, CheckCircle, Eye, XCircle } from 'lucide-react';
+import { Plus, Trash2, FileDown, Edit, CheckCircle, Eye, XCircle, Package } from 'lucide-react';
 import { useProveedores } from '../../store/useProveedores';
 import { comprasApi } from '../../api/compras.api';
 import { triggerDownload } from '../../lib/download';
@@ -64,10 +64,11 @@ export default function ComprasPage() {
     },
   });
 
-  const recibir = useMutation({
+  const recibirTodo = useMutation({
     mutationFn: (id: number) => comprasApi.recibir(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['compras'] });
+      queryClient.invalidateQueries({ queryKey: ['compras-detail'] });
       toast.success('Orden de compra recibida y stock actualizado');
     },
     onError: (error: any) => {
@@ -75,9 +76,25 @@ export default function ComprasPage() {
     },
   });
 
+  const recibirItem = useMutation({
+    mutationFn: ({ ocId, detalleId, cantidadRecibida }: { ocId: number; detalleId: number; cantidadRecibida: number }) =>
+      comprasApi.recibirItem(ocId, detalleId, cantidadRecibida),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['compras'] });
+      queryClient.invalidateQueries({ queryKey: ['compras-detail'] });
+      toast.success('Ítem recibido exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al recibir ítem');
+    },
+  });
+
   const [modalOpen, setModalOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [receiveOpen, setReceiveOpen] = useState(false);
   const [selectedOC, setSelectedOC] = useState<OrdenCompra | null>(null);
+  const [receiveOC, setReceiveOC] = useState<OrdenCompra | null>(null);
+  const [receiveCantidades, setReceiveCantidades] = useState<Record<number, number>>({});
   const [form, setForm] = useState<CrearCompraDto>(emptyForm);
   const [impuestoRate, setImpuestoRate] = useState(15);
 
@@ -91,6 +108,18 @@ export default function ComprasPage() {
     const { data } = await comprasApi.getById(item.id);
     setSelectedOC(data);
     setDetailOpen(true);
+  };
+
+  const openReceive = async (item: OrdenCompra) => {
+    const { data } = await comprasApi.getById(item.id);
+    setReceiveOC(data);
+    const cantidades: Record<number, number> = {};
+    (data.detalles || []).forEach((det: DetalleOrdenCompra) => {
+      const pendiente = Number(det.cantidad) - Number(det.cantidadRecibida || 0);
+      cantidades[det.id] = pendiente > 0 ? pendiente : 0;
+    });
+    setReceiveCantidades(cantidades);
+    setReceiveOpen(true);
   };
 
   const addDetalle = () => {
@@ -145,6 +174,31 @@ export default function ComprasPage() {
     } catch {
       toast.error('Error al descargar el PDF');
     }
+  };
+
+  const handleReceiveItem = async (detalleId: number) => {
+    if (!receiveOC) return;
+    const cantidad = receiveCantidades[detalleId] || 0;
+    if (cantidad <= 0) {
+      toast.error('Ingrese una cantidad válida');
+      return;
+    }
+    await recibirItem.mutateAsync({ ocId: receiveOC.id, detalleId, cantidadRecibida: cantidad });
+    const { data: refreshed } = await comprasApi.getById(receiveOC.id);
+    setReceiveOC(refreshed);
+    const newCantidades: Record<number, number> = {};
+    (refreshed.detalles || []).forEach((det: DetalleOrdenCompra) => {
+      const pendiente = Number(det.cantidad) - Number(det.cantidadRecibida || 0);
+      newCantidades[det.id] = pendiente > 0 ? pendiente : 0;
+    });
+    setReceiveCantidades(newCantidades);
+  };
+
+  const handleReceiveAll = async () => {
+    if (!receiveOC) return;
+    await recibirTodo.mutateAsync(receiveOC.id);
+    setReceiveOpen(false);
+    setReceiveOC(null);
   };
 
   const columns = [
@@ -203,9 +257,9 @@ export default function ComprasPage() {
               <CheckCircle size={14} /> Aprobar
             </Button>
           )}
-          {item.estado === 'EMITIDA' && hasRole(['ADMIN', 'BODEGUERO']) && (
-            <Button variant="primary" size="sm" onClick={() => recibir.mutateAsync(item.id)} loading={recibir.isPending}>
-              <CheckCircle size={14} /> Recibir
+          {(item.estado === 'EMITIDA' || item.estado === 'RECIBIDA_PARCIAL') && hasRole(['ADMIN', 'BODEGUERO']) && (
+            <Button variant="primary" size="sm" onClick={() => openReceive(item)}>
+              <Package size={14} /> Recibir
             </Button>
           )}
         </div>
@@ -299,12 +353,117 @@ export default function ComprasPage() {
                   <CheckCircle size={14} /> Aprobar Orden
                 </Button>
               )}
-              {selectedOC.estado === 'EMITIDA' && hasRole(['ADMIN', 'BODEGUERO']) && (
-                <Button variant="primary" onClick={() => { recibir.mutateAsync(selectedOC.id); setDetailOpen(false); }} loading={recibir.isPending}>
-                  <CheckCircle size={14} /> Recibir Orden
-                </Button>
-              )}
               <Button variant="secondary" onClick={() => setDetailOpen(false)}>Cerrar</Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal open={receiveOpen} onClose={() => setReceiveOpen(false)} title={`Recibir OC — ${receiveOC?.codigo ?? ''}`} size="lg">
+        {receiveOC && (
+          <div className="space-y-5">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-base rounded-xl border border-border-subtle p-3">
+                <p className="text-xs text-text-muted mb-1">Código</p>
+                <p className="text-sm font-semibold text-text-primary font-mono">{receiveOC.codigo}</p>
+              </div>
+              <div className="bg-base rounded-xl border border-border-subtle p-3">
+                <p className="text-xs text-text-muted mb-1">Estado</p>
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${ocStatusStyle[receiveOC.estado] || ocStatusStyle.BORRADOR}`}>
+                  {receiveOC.estado?.replace(/_/g, ' ')}
+                </span>
+              </div>
+              <div className="bg-base rounded-xl border border-border-subtle p-3">
+                <p className="text-xs text-text-muted mb-1">Total</p>
+                <p className="text-sm font-bold text-success">${Number(receiveOC.total).toFixed(2)}</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-text-secondary">
+              Ingresa la cantidad a recibir por cada ítem. Los ítems con cantidad pendiente en 0 ya fueron recibidos.
+            </p>
+
+            <div className="bg-base rounded-xl border border-border-subtle overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border-subtle bg-elevated/50">
+                    <th className="text-left py-3 px-3 text-text-muted font-medium">Material</th>
+                    <th className="text-center py-3 px-3 text-text-muted font-medium">Solicitado</th>
+                    <th className="text-center py-3 px-3 text-text-muted font-medium">Recibido</th>
+                    <th className="text-center py-3 px-3 text-text-muted font-medium">Pendiente</th>
+                    <th className="text-center py-3 px-3 text-text-muted font-medium">Recibir</th>
+                    <th className="text-center py-3 px-3 text-text-muted font-medium">Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {receiveOC.detalles?.map((det: DetalleOrdenCompra) => {
+                    const recibido = Number(det.cantidadRecibida || 0);
+                    const pendiente = Number(det.cantidad) - recibido;
+                    const inputCant = receiveCantidades[det.id] || 0;
+                    return (
+                      <tr key={det.id} className="border-b border-border-subtle/50 hover:bg-elevated/30">
+                        <td className="py-3 px-3">
+                          <div className="flex flex-col">
+                            <span className="text-text-primary font-medium">{det.material?.nombre ?? `Material #${det.materialId}`}</span>
+                            <span className="text-text-muted font-mono text-xs">{det.material?.sku ?? '-'}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 text-center text-text-primary font-semibold">{det.cantidad}</td>
+                        <td className="py-3 px-3 text-center">
+                          <span className={`font-semibold ${recibido >= Number(det.cantidad) ? 'text-success' : 'text-text-primary'}`}>
+                            {recibido}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <span className={`font-semibold ${pendiente === 0 ? 'text-success' : 'text-warning'}`}>
+                            {pendiente}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          {pendiente > 0 ? (
+                            <input
+                              type="number"
+                              min="1"
+                              max={pendiente}
+                              value={inputCant}
+                              onChange={e => {
+                                const val = Math.min(Number(e.target.value), pendiente);
+                                setReceiveCantidades(prev => ({ ...prev, [det.id]: val > 0 ? val : 0 }));
+                              }}
+                              className="w-20 px-2 py-1 bg-base text-text-primary border border-border-subtle rounded-lg text-sm text-center focus:outline-none focus:border-accent"
+                            />
+                          ) : (
+                            <span className="text-success text-xs font-medium">Completo</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          {pendiente > 0 && inputCant > 0 && (
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              onClick={() => handleReceiveItem(det.id)}
+                              loading={recibirItem.isPending}
+                            >
+                              Recibir
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <Button
+                variant="primary"
+                onClick={handleReceiveAll}
+                loading={recibirTodo.isPending}
+              >
+                <Package size={14} /> Recibir Todo
+              </Button>
+              <Button variant="secondary" onClick={() => setReceiveOpen(false)}>Cerrar</Button>
             </div>
           </div>
         )}
