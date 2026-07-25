@@ -48,12 +48,7 @@ export default function ComprasPage() {
     },
   });
 
-  const materialesDisponibles = (() => {
-    const materialIds = new Set(
-      (itemsEnCompras as any[]).map((item: any) => item.materialId).filter(Boolean),
-    );
-    return materiales.filter(m => materialIds.has(m.id));
-  })();
+  const materialesDisponibles = materiales;
 
   const crear = useMutation({
     mutationFn: (dto: CrearCompraDto) => comprasApi.create(dto),
