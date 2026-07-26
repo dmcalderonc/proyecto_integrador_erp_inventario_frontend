@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -29,5 +30,21 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: createProxy(),
+  },
+  test: {
+    globals: true,
+    environment: 'happy-dom',
+    setupFiles: ['./src/test/setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: ['src/api/http.ts', 'src/test/**'],
+      thresholds: {
+        statements: 75,
+        branches: 75,
+        functions: 75,
+        lines: 75
+      }
+    }
   }
 })
