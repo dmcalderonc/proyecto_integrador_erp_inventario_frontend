@@ -1,17 +1,15 @@
-const API_URL = 'https://calderon-erp.uaeftt-ute.site';
+const API_URL = 'http://localhost:3000'; // o el puerto que uses
 
 Cypress.Commands.add('login', (email: string, password: string) => {
-  cy.session([email, password], () => {
-    cy.request({
-      method: 'POST',
-      url: `${API_URL}/auth/login`,
-      body: { email, password },
-    }).then((resp) => {
-      expect(resp.status).to.eq(201);
-      const { access_token, user } = resp.body.data;
-      localStorage.setItem('token', access_token);
-      localStorage.setItem('user', JSON.stringify(user));
-    });
+  cy.request({
+    method: 'POST',
+    url: `${API_URL}/auth/login`,
+    body: { email, password },
+  }).then((resp) => {
+    expect(resp.status).to.eq(201);
+    const { access_token, user } = resp.body.data;
+    window.localStorage.setItem('token', access_token);
+    window.localStorage.setItem('user', JSON.stringify(user));
   });
   cy.visit('/dashboard');
 });
