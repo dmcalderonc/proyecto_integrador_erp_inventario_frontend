@@ -9,7 +9,8 @@ vi.mock('@tanstack/react-query', () => ({
     invalidateQueries: vi.fn(),
     setQueryData: vi.fn(),
     getQueryData: vi.fn()
-  }))
+  })),
+  keepPreviousData: 'KEEP_PREVIOUS_DATA',
 }));
 
 // Mock de AuthContext
