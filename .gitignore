@@ -25,3 +25,8 @@ dist-ssr
 
 
 .env
+
+# Test artifacts
+coverage/
+cypress/screenshots/
+cypress/videos/
