@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import { useState, useMemo } from 'react';
-import { ArrowUpDown, Search, Inbox } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { ArrowUpDown, Search, Inbox, ChevronLeft, ChevronRight } from 'lucide-react';
+import { cn } from '../../lib/utils';
 
 export interface Column<T> {
   key: string;
@@ -20,10 +21,26 @@ interface DataTableProps<T> {
   emptyMessage?: string;
   children?: ReactNode;
   onRowClick?: (item: T) => void;
+  pageSize?: number;
+  pagination?: boolean;
 }
 
 function getNestedValue(obj: any, path: string): string {
   return path.split('.').reduce((acc, part) => acc?.[part] ?? '', obj) ?? '';
+}
+
+function getPageList(page: number, totalPages: number): (number | '...')[] {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+  const pages: (number | '...')[] = [1];
+  if (page > 3) pages.push('...');
+  for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
+    pages.push(i);
+  }
+  if (page < totalPages - 2) pages.push('...');
+  pages.push(totalPages);
+  return pages;
 }
 
 export function DataTable<T extends { id?: any }>({
@@ -36,8 +53,11 @@ export function DataTable<T extends { id?: any }>({
   onSearch,
   emptyMessage = 'No se encontraron registros',
   onRowClick,
+  pageSize = 40,
+  pagination = true,
 }: DataTableProps<T>) {
   const [localSearch, setLocalSearch] = useState('');
+  const [page, setPage] = useState(1);
 
   const searchTerm = onSearch ? undefined : localSearch;
 
@@ -53,6 +73,23 @@ export function DataTable<T extends { id?: any }>({
   }, [data, searchTerm, searchKeys, searchable]);
 
   const displayData = onSearch ? data : filteredData;
+
+  const totalPages = pagination && displayData.length > 0
+    ? Math.ceil(displayData.length / pageSize)
+    : 1;
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, searchKeys, searchable]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+  const startIndex = (page - 1) * pageSize;
+  const pagedData = pagination && displayData.length > pageSize
+    ? displayData.slice(startIndex, startIndex + pageSize)
+    : displayData;
 
   const handleSearch = (value: string) => {
     if (onSearch) {
@@ -97,7 +134,7 @@ export function DataTable<T extends { id?: any }>({
         {displayData.length === 0 ? (
           <EmptyState message={emptyMessage} />
         ) : (
-          displayData.map((item, i) => (
+          pagedData.map((item, i) => (
             <div key={item.id ?? i} className={`bg-elevated rounded-xl border border-border-subtle p-4 space-y-2.5 ${onRowClick ? 'cursor-pointer hover:border-accent/30 transition-colors' : ''}`} onClick={() => onRowClick?.(item)}>
               {columns.map((col, colIndex) => (
                 <div key={col.key} className={`flex justify-between items-center ${colIndex !== columns.length - 1 ? 'border-b border-border-subtle/50 pb-2' : ''}`}>
@@ -135,7 +172,7 @@ export function DataTable<T extends { id?: any }>({
                 </td>
               </tr>
             ) : (
-              displayData.map((item, i) => (
+              pagedData.map((item, i) => (
                 <tr key={item.id ?? i} className={`hover:bg-white/[0.02] transition-colors ${onRowClick ? 'cursor-pointer' : ''}`} onClick={() => onRowClick?.(item)}>
                   {columns.map(col => (
                     <td key={col.key} className="px-5 py-3.5 text-text-primary">
@@ -149,11 +186,94 @@ export function DataTable<T extends { id?: any }>({
         </table>
       </div>
 
+      {pagination && displayData.length > 0 && (
+        <PaginationFooter
+          page={page}
+          totalPages={totalPages}
+          total={displayData.length}
+          pageSize={pageSize}
+          startIndex={startIndex}
+          onPageChange={setPage}
+        />
+      )}
+
       {loading && data.length > 0 && (
         <div className="fixed inset-0 bg-base/30 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-xl pointer-events-none">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent border-r-transparent" />
         </div>
       )}
+    </div>
+  );
+}
+
+interface PaginationFooterProps {
+  page: number;
+  totalPages: number;
+  total: number;
+  pageSize: number;
+  startIndex: number;
+  onPageChange: (page: number) => void;
+}
+
+export function PaginationFooter({
+  page,
+  totalPages,
+  total,
+  pageSize,
+  startIndex,
+  onPageChange,
+}: PaginationFooterProps) {
+  if (totalPages <= 1) return null;
+
+  const end = Math.min(startIndex + pageSize, total);
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-1">
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => onPageChange(Math.max(1, page - 1))}
+          disabled={page === 1}
+          className="p-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-elevated disabled:opacity-40 disabled:pointer-events-none transition-colors"
+          aria-label="Página anterior"
+        >
+          <ChevronLeft size={16} />
+        </button>
+
+        {getPageList(page, totalPages).map((item, idx) =>
+          typeof item === 'number' ? (
+            <button
+              key={item}
+              type="button"
+              onClick={() => onPageChange(item)}
+              className={cn(
+                'min-w-9 h-9 px-2.5 rounded-xl text-sm font-medium transition-colors',
+                item === page
+                  ? 'bg-accent text-white'
+                  : 'text-text-secondary hover:bg-elevated hover:text-text-primary',
+              )}
+            >
+              {item}
+            </button>
+          ) : (
+            <span key={`ellipsis-${idx}`} className="px-1 text-text-muted">…</span>
+          ),
+        )}
+
+        <button
+          type="button"
+          onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+          disabled={page === totalPages}
+          className="p-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-elevated disabled:opacity-40 disabled:pointer-events-none transition-colors"
+          aria-label="Página siguiente"
+        >
+          <ChevronRight size={16} />
+        </button>
+      </div>
+
+      <p className="text-xs text-text-muted">
+        Mostrando <span className="font-semibold text-text-secondary">{startIndex + 1}–{end}</span> de <span className="font-semibold text-text-secondary">{total}</span> registros
+      </p>
     </div>
   );
 }

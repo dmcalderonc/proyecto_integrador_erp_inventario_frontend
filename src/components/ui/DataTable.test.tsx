@@ -37,4 +37,58 @@ describe('DataTable', () => {
     fireEvent.click(screen.getAllByText('Laptop')[0]);
     expect(handleRowClick).toHaveBeenCalledWith(data[0]);
   });
+
+  test('muestra paginación cuando hay más registros que pageSize', () => {
+    const bigData = Array.from({ length: 45 }, (_, i) => ({
+      id: i + 1,
+      nombre: `Item ${i + 1}`,
+      categoria: 'General',
+    }));
+
+    render(<DataTable columns={columns} data={bigData} searchable searchKeys={['nombre']} />);
+
+    expect(screen.getAllByText('Item 1').length).toBeGreaterThan(0);
+    expect(screen.queryAllByText('Item 41').length).toBe(0);
+    expect(screen.getByText((_, el) => el?.textContent === 'Mostrando 1–40 de 45 registros')).toBeInTheDocument();
+    expect(screen.getByText('2')).toBeInTheDocument();
+  });
+
+  test('navega entre páginas con los controles de paginación', () => {
+    const bigData = Array.from({ length: 45 }, (_, i) => ({
+      id: i + 1,
+      nombre: `Item ${i + 1}`,
+      categoria: 'General',
+    }));
+
+    render(<DataTable columns={columns} data={bigData} searchable searchKeys={['nombre']} />);
+
+    fireEvent.click(screen.getByLabelText('Página siguiente'));
+
+    expect(screen.queryAllByText('Item 1').length).toBe(0);
+    expect(screen.getAllByText('Item 41').length).toBeGreaterThan(0);
+    expect(screen.getByText((_, el) => el?.textContent === 'Mostrando 41–45 de 45 registros')).toBeInTheDocument();
+  });
+
+  test('reinicia a la primera página al buscar', () => {
+    const bigData = Array.from({ length: 45 }, (_, i) => ({
+      id: i + 1,
+      nombre: `Item ${i + 1}`,
+      categoria: 'General',
+    }));
+
+    render(<DataTable columns={columns} data={bigData} searchable searchKeys={['nombre']} />);
+
+    fireEvent.click(screen.getByLabelText('Página siguiente'));
+    const input = screen.getByPlaceholderText('Buscar...');
+    fireEvent.change(input, { target: { value: 'Item' } });
+
+    expect(screen.getAllByText('Item 1').length).toBeGreaterThan(0);
+  });
+
+  test('no muestra paginación cuando hay pocos registros', () => {
+    render(<DataTable columns={columns} data={data} />);
+
+    expect(screen.queryByLabelText('Página siguiente')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Mostrando/)).not.toBeInTheDocument();
+  });
 });

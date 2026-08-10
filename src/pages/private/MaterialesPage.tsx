@@ -25,7 +25,7 @@ const emptyForm: CreateMaterialDto = {
 
 export default function MaterialesPage() {
   const [page, setPage] = useState(1);
-  const [limit] = useState(20);
+  const [limit] = useState(40);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [filterCategory, setFilterCategory] = useState<number | null>(null);
@@ -337,6 +337,7 @@ export default function MaterialesPage() {
           loading={isLoading}
           searchable={false}
           onRowClick={handleRowClick}
+          pagination={false}
         />
       </div>
 
