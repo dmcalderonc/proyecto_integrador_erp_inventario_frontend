@@ -3,6 +3,11 @@ import { FolderOpen, ClipboardList, DollarSign, Activity, AlertTriangle, Trendin
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import api from '../../api/http';
 import { useAuth } from '../../contexts/AuthContext';
+import { Link } from 'react-router-dom';
+import { usePrevision } from '../../store/usePrevision';
+import { topUrgentes, chipDeNivel, textoDiasRestantes } from './PrevisionPage.logic';
+import { badgeStyles } from '../../lib/design-tokens';
+import { cn } from '../../lib/utils';
 
 interface DashboardKpis {
   proyectosActivos: number;
@@ -82,6 +87,14 @@ export default function DashboardPage() {
     return new Date(d).toLocaleString('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
   };
 
+  // Debe ir antes de los `return` tempranos por isLoading/isError.
+  const showPrevision = hasRole(['ADMIN', 'BODEGUERO', 'COMPRADOR']);
+  const { materiales: materialesPrevision, isLoading: cargandoPrevision } = usePrevision(
+    { limite: 50 },
+    showPrevision,
+  );
+  const quiebresPorVenir = topUrgentes(materialesPrevision, 3);
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -154,6 +167,67 @@ export default function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Quiebres por venir */}
+      {showPrevision && (
+      <div className="bg-surface rounded-xl border border-border-subtle p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-danger-bg border border-danger/20 flex items-center justify-center text-danger">
+              <AlertTriangle size={16} />
+            </div>
+            <h2 className="font-semibold text-text-primary">Quiebres por venir</h2>
+          </div>
+          <Link
+            to="/prevision"
+            className="text-xs font-medium text-accent hover:underline transition-colors"
+          >
+            Ver más →
+          </Link>
+        </div>
+
+        {cargandoPrevision ? (
+          <div className="space-y-2">
+            {[0, 1, 2].map(i => <div key={i} className="h-14 animate-pulse rounded-xl bg-base" />)}
+          </div>
+        ) : quiebresPorVenir.length > 0 ? (
+          <div className="space-y-2">
+            {quiebresPorVenir.map(m => {
+              const estilo = badgeStyles[chipDeNivel(m.nivel)] ?? badgeStyles.PENDIENTE;
+              return (
+                <Link
+                  key={m.materialId}
+                  to="/prevision"
+                  className="flex items-center justify-between gap-3 p-3 bg-base rounded-xl border border-border-subtle hover:border-border-default transition-colors"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-text-primary truncate">{m.nombre}</p>
+                    <p className="text-xs text-text-muted truncate">
+                      {m.sku}{m.bodegaNombre ? ` · ${m.bodegaNombre}` : ''}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={cn(
+                      'text-[11px] font-semibold px-2 py-0.5 rounded-full border',
+                      estilo.bg, estilo.text, estilo.border,
+                    )}>
+                      {m.nivel}
+                    </span>
+                    <span className="text-xs font-semibold text-text-secondary">
+                      {textoDiasRestantes(m.diasHastaAgotar)}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="h-40 flex items-center justify-center text-sm text-text-muted">
+            Sin materiales en riesgo con la ventana actual.
+          </div>
+        )}
+      </div>
+      )}
 
       {/* Charts */}
       {showCharts && (

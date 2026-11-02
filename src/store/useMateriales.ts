@@ -8,7 +8,7 @@ export function useMateriales(params: MaterialesParams = {}) {
   const queryClient = useQueryClient();
 
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['materiales', params.page, params.limit, params.search, params.sort, params.order, params.categoriaId, params.bodegaId],
+    queryKey: ['materiales', params.page, params.limit, params.search, params.sort, params.order, params.categoriaId, params.bodegaId, params.stock],
     queryFn: async () => {
       const res = await materialesApi.getAll(params);
       return res; 

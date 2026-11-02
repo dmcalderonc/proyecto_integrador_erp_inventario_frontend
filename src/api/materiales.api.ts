@@ -5,6 +5,7 @@ import type { PaginationParams, PaginatedResponse } from '../types/common.types'
 export interface MaterialesParams extends PaginationParams {
   categoriaId?: number;
   bodegaId?: number;
+  stock?: 'agotado' | 'bajo' | 'normal';
 }
 
 export const materialesApi = {

@@ -78,9 +78,10 @@ export function DataTable<T extends { id?: any }>({
     ? Math.ceil(displayData.length / pageSize)
     : 1;
 
+  // Solo el término de búsqueda reinicia la paginación (searchKeys llega como array inline).
   useEffect(() => {
     setPage(1);
-  }, [searchTerm, searchKeys, searchable]);
+  }, [searchTerm]);
 
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
@@ -135,7 +136,7 @@ export function DataTable<T extends { id?: any }>({
           <EmptyState message={emptyMessage} />
         ) : (
           pagedData.map((item, i) => (
-            <div key={item.id ?? i} className={`bg-elevated rounded-xl border border-border-subtle p-4 space-y-2.5 ${onRowClick ? 'cursor-pointer hover:border-accent/30 transition-colors' : ''}`} onClick={() => onRowClick?.(item)}>
+            <div key={item.id ?? `row-${startIndex + i}`} className={`bg-elevated rounded-xl border border-border-subtle p-4 space-y-2.5 ${onRowClick ? 'cursor-pointer hover:border-accent/30 transition-colors' : ''}`} onClick={() => onRowClick?.(item)}>
               {columns.map((col, colIndex) => (
                 <div key={col.key} className={`flex justify-between items-center ${colIndex !== columns.length - 1 ? 'border-b border-border-subtle/50 pb-2' : ''}`}>
                   <span className="text-xs font-medium text-text-muted">{col.header}</span>
@@ -173,7 +174,7 @@ export function DataTable<T extends { id?: any }>({
               </tr>
             ) : (
               pagedData.map((item, i) => (
-                <tr key={item.id ?? i} className={`hover:bg-white/[0.02] transition-colors ${onRowClick ? 'cursor-pointer' : ''}`} onClick={() => onRowClick?.(item)}>
+                <tr key={item.id ?? `row-${startIndex + i}`} className={`hover:bg-white/[0.02] transition-colors ${onRowClick ? 'cursor-pointer' : ''}`} onClick={() => onRowClick?.(item)}>
                   {columns.map(col => (
                     <td key={col.key} className="px-5 py-3.5 text-text-primary">
                       {col.render ? col.render(item) : String((item as any)[col.key] ?? '')}

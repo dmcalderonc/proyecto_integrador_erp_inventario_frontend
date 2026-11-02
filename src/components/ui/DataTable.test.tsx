@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { useState } from 'react';
 import { DataTable } from './DataTable';
 import { vi } from 'vitest';
 
@@ -90,5 +91,55 @@ describe('DataTable', () => {
 
     expect(screen.queryByLabelText('Página siguiente')).not.toBeInTheDocument();
     expect(screen.queryByText(/Mostrando/)).not.toBeInTheDocument();
+  });
+
+  test('un re-render del padre con searchKeys inline no resetea la página actual', () => {
+    const bigData = Array.from({ length: 45 }, (_, i) => ({
+      id: i + 1,
+      nombre: `Item ${i + 1}`,
+      categoria: 'General',
+    }));
+
+    // `searchKeys` es un array literal: cambia de referencia en cada render del padre.
+    function TableWrapper() {
+      const [, setTick] = useState(0);
+      return (
+        <div>
+          <button onClick={() => setTick(t => t + 1)}>re-render</button>
+          <DataTable columns={columns} data={bigData} searchable searchKeys={['nombre']} />
+        </div>
+      );
+    }
+
+    render(<TableWrapper />);
+
+    fireEvent.click(screen.getByLabelText('Página siguiente'));
+    expect(screen.getAllByText('Item 41').length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByText('re-render'));
+
+    expect(screen.getByText((_, el) => el?.textContent === 'Mostrando 41–45 de 45 registros')).toBeInTheDocument();
+    expect(screen.getAllByText('Item 41').length).toBeGreaterThan(0);
+    expect(screen.queryAllByText('Item 1').length).toBe(0);
+  });
+
+  test('mantiene la página del padre cuando la búsqueda es externa (onSearch)', () => {
+    const bigData = Array.from({ length: 45 }, (_, i) => ({
+      id: i + 1,
+      nombre: `Item ${i + 1}`,
+      categoria: 'General',
+    }));
+    const onSearch = vi.fn();
+
+    render(<DataTable columns={columns} data={bigData} searchable onSearch={onSearch} />);
+
+    fireEvent.click(screen.getByLabelText('Página siguiente'));
+    expect(screen.getAllByText('Item 41').length).toBeGreaterThan(0);
+
+    fireEvent.change(screen.getByPlaceholderText('Buscar...'), { target: { value: 'Item 4' } });
+
+    // Con búsqueda externa la paginación la controla el padre.
+    expect(screen.getAllByText('Item 41').length).toBeGreaterThan(0);
+    expect(onSearch).toHaveBeenCalledWith('Item 4');
   });
 });

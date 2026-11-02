@@ -19,6 +19,7 @@ const routeNames: Record<string, string> = {
   proyectos: 'Proyectos',
   despachos: 'Despachos',
   profile: 'Mi Perfil',
+  prevision: 'Previsión de Stock',
 };
 
 export function Breadcrumbs() {

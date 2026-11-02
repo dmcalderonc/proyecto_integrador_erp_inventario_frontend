@@ -8,6 +8,7 @@ const apiRoutes = [
   '/inventario', '/movimientos', '/proveedores', '/proyectos',
   '/requirements', '/compras', '/ajustes-inventario',
   '/cotizaciones', '/solicitudes-compra', '/despachos', '/dashboard',
+  '/notifications', '/public', '/traspasos', '/unidades-medida',
 ]
 
 function createProxy() {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMateriales } from '../../store/useMateriales';
 import { useCategorias } from '../../store/useCategorias';
@@ -36,6 +36,7 @@ export default function MaterialesPage() {
     page, limit, search,
     categoriaId: filterCategory ?? undefined,
     bodegaId: filterBodega ?? undefined,
+    stock: (filterStock || undefined) as 'agotado' | 'bajo' | 'normal' | undefined,
   });
   const { categorias } = useCategorias();
   const { unidades: unidadesMedida } = useUnidadesMedida();
@@ -53,20 +54,34 @@ export default function MaterialesPage() {
 
   const hasActiveFilters = filterCategory !== null || filterBodega !== null || search !== '' || filterStock !== '';
 
-  const filteredMateriales = filterStock
-    ? materiales.filter((m: Material) => {
-        const d = m.stockDisponible ?? 0;
-        if (filterStock === 'agotado') return d === 0;
-        if (filterStock === 'bajo') return d > 0 && d <= 5;
-        if (filterStock === 'normal') return d > 5;
-        return true;
-      })
-    : materiales;
+  // Debounce de la búsqueda para no lanzar una petición por tecla.
+  const committedSearch = useRef(search);
+  useEffect(() => {
+    const term = searchInput.trim();
+    if (term === committedSearch.current) return;
+    const timer = window.setTimeout(() => {
+      // El término pudo confirmarse con Enter mientras corría el temporizador.
+      if (committedSearch.current === term) return;
+      committedSearch.current = term;
+      setSearch(term);
+      setPage(1);
+    }, 350);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchInput]);
+
+  const commitSearch = (value: string) => {
+    const term = value.trim();
+    committedSearch.current = term;
+    setSearch(term);
+    setPage(1);
+  };
 
   const clearFilters = () => {
     setFilterCategory(null);
     setFilterBodega(null);
     setFilterStock('');
+    committedSearch.current = '';
     setSearch('');
     setSearchInput('');
     setPage(1);
@@ -281,13 +296,12 @@ export default function MaterialesPage() {
           <p className="text-sm text-text-secondary mt-1">Catálogo de materiales con disponibilidad de stock por bodega.</p>
         </div>
         <div className="flex flex-wrap gap-3 self-start sm:self-auto items-center">
-          <form onSubmit={e => { e.preventDefault(); setSearch(searchInput); setPage(1); }} className="relative">
+          <form onSubmit={e => { e.preventDefault(); commitSearch(searchInput); }} className="relative">
             <input
               type="text"
               placeholder="Buscar por nombre o SKU..."
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
-              onBlur={() => { setSearch(searchInput); setPage(1); }}
               className="pl-4 pr-4 py-2.5 bg-base text-text-primary border border-border-subtle rounded-xl text-sm placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all w-full sm:w-64"
             />
           </form>
@@ -333,7 +347,7 @@ export default function MaterialesPage() {
       <div className="bg-surface rounded-xl border border-border-subtle">
         <DataTable
           columns={columns}
-          data={filteredMateriales}
+          data={materiales}
           loading={isLoading}
           searchable={false}
           onRowClick={handleRowClick}

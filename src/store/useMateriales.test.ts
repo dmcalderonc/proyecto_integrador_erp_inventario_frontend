@@ -50,7 +50,7 @@ describe('useMateriales', () => {
 
     expect(mockUseQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        queryKey: ['materiales', 1, 20, undefined, undefined, undefined, undefined, undefined],
+        queryKey: ['materiales', 1, 20, undefined, undefined, undefined, undefined, undefined, undefined],
       }),
     );
   });
@@ -68,9 +68,24 @@ describe('useMateriales', () => {
 
     expect(mockUseQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        queryKey: ['materiales', 2, 5, 'disco', 'nombre', 'asc', 3, 7],
+        queryKey: ['materiales', 2, 5, 'disco', 'nombre', 'asc', 3, 7, undefined],
       }),
     );
+  });
+
+  test('el filtro de stock entra en la queryKey y se envía al backend', async () => {
+    useMateriales({ page: 1, limit: 10, stock: 'agotado' });
+
+    expect(mockUseQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: ['materiales', 1, 10, undefined, undefined, undefined, undefined, undefined, 'agotado'],
+      }),
+    );
+
+    (materialesApi.getAll as vi.Mock).mockResolvedValue(mockResponse);
+    await mockUseQuery.mock.calls[0][0].queryFn();
+
+    expect(materialesApi.getAll).toHaveBeenCalledWith({ page: 1, limit: 10, stock: 'agotado' });
   });
 
   test('queryFn llama a materialesApi.getAll', async () => {
